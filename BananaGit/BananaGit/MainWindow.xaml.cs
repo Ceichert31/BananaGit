@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using BananaGit.ViewModels;
+using Octokit;
 
 namespace BananaGit
 {
@@ -16,9 +18,14 @@ namespace BananaGit
     /// </summary>
     public partial class MainWindow : Window
     {
+       
+        private GitInfoViewModel gitInfoVM = new();
+
         public MainWindow()
         {
             InitializeComponent();
+
+            DataContext = gitInfoVM;
         }
     }
 }
