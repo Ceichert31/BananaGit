@@ -1,15 +1,7 @@
-﻿using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
+﻿using System.Windows;
 using BananaGit.ViewModels;
-using Octokit;
+using BananaGit.Utilities;
+using BananaGit.Views;
 
 namespace BananaGit
 {
@@ -18,14 +10,23 @@ namespace BananaGit
     /// </summary>
     public partial class MainWindow : Window
     {
-       
         private GitInfoViewModel gitInfoVM = new();
+        private EnterCredentialsView enterCredentialsView = new();
 
         public MainWindow()
         {
             InitializeComponent();
 
             DataContext = gitInfoVM;
+
+            string token = JsonDataManager.GetGithubToken();
+
+            //Display prompt to enter personal token
+            if (token == "")
+            {
+                enterCredentialsView.ShowDialog();
+                enterCredentialsView.Owner = this;
+            }
         }
     }
 }

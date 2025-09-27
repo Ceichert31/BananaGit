@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Octokit;
@@ -24,12 +25,17 @@ namespace BananaGit.ViewModels
 
         private GitHubClient client;
 
-        private const string GITHUB_TOKEN = "";
 
         public GitInfoViewModel() 
         {
             client = new GitHubClient(new ProductHeaderValue("BananaGit"));
-            client.Credentials = new Credentials(GITHUB_TOKEN);
+
+            //If we have credentials store, use them
+            if (JsonDataManager.HasPersonalToken)
+            {
+                string credentials = JsonDataManager.GetGithubToken();
+                client.Credentials = new Credentials(credentials);
+            }
         }
 
         [RelayCommand]
