@@ -10,6 +10,7 @@
     Width="800"
     Height="450"
     d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
+    Background="#FFEA78"
     mc:Ignorable="d"
     >
 
@@ -46,6 +47,6 @@
             Content="{Binding RepoInfo}"
             Foreground="Black"
             />
-
+        <Image Source="/Assets/Banana.png" Stretch="Fill" />
     </Grid>
 </Window>
