@@ -30,7 +30,7 @@ namespace BananaGit.ViewModels
         public async Task UpdateCredentials()
         {
             var repo = await client.Repository.Get(UsernameInput, RepoName);
-            RepoInfo = repo.CloneUrl;
+            RepoInfo = repo.PushedAt.ToString() ?? "No Commits";
         }
     }
 }

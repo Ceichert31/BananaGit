@@ -15,13 +15,37 @@
 
     <Grid>
 
-        <StackPanel Width="100" HorizontalAlignment="Center">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel
+            Grid.Column="1"
+            Width="100"
+            HorizontalAlignment="Center"
+            >
             <TextBox Foreground="Black" Text="{Binding UsernameInput}" />
             <TextBox Foreground="Black" Text="{Binding RepoName}" />
 
-            <Button Command="{Binding UpdateCredentials}" Content="Get Info" />
+            <Button Command="{Binding UpdateCredentialsCommand}" Content="Get Info" />
         </StackPanel>
 
+        <Label
+            Grid.Row="1"
+            Grid.Column="1"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Content="{Binding RepoInfo}"
+            Foreground="Black"
+            />
 
     </Grid>
 </Window>
