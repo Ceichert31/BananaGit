@@ -28,13 +28,33 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel
-            Grid.Column="1"
-            Width="100"
-            HorizontalAlignment="Center"
-            >
-            <TextBox Foreground="Black" Text="{Binding UsernameInput}" />
-            <TextBox Foreground="Black" Text="{Binding RepoName}" />
+        <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Username" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding UsernameInput}"
+                    />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Repo Name" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding RepoName}"
+                    />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Message" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding CommitMessage}"
+                    />
+            </StackPanel>
 
             <Button Command="{Binding UpdateCredentialsCommand}" Content="Get Info" />
         </StackPanel>
