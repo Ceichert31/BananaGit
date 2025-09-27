@@ -9,10 +9,9 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace BananaGit.ViewModels
 {
-    partial class EnterCredentialsViewModel : ObservableObject
+    partial class EnterCredentialsViewModel(EventHandler eventHandler) : ObservableObject
     {
-
-        public EnterCredentialsViewModel() { }
+        private EventHandler onEnterCredentials = eventHandler;
 
         [ObservableProperty]
         private string _userToken = "";
@@ -21,6 +20,7 @@ namespace BananaGit.ViewModels
         public void UpdateCredentials()
         {
             JsonDataManager.SaveGithubToken(UserToken);
+            onEnterCredentials?.Invoke(this, new EventArgs());
         }
     }
 }

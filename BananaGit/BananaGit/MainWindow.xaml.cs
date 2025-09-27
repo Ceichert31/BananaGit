@@ -25,7 +25,7 @@ namespace BananaGit
             if (token == "")
             {
                 enterCredentialsView.ShowDialog();
-                enterCredentialsView.Owner = this;
+                //enterCredentialsView.Owner = this;
             }
         }
     }

@@ -48,7 +48,6 @@ namespace BananaGit.Utilities
                 if (result == "")
                 {
                     HasPersonalToken = false;
-                    throw new NullReferenceException("Missing Github Token");
                 }
                 else
                 {
