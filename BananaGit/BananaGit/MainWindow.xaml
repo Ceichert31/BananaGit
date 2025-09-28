@@ -28,6 +28,19 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
+        <!--<ContentControl
+            Grid.Row="1"
+            Grid.Column="1"
+            Content="{Binding}"
+            >
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="ContentTemplate" Value="{DynamicResource CloneRepoTemplate}" />
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>-->
+
+        <!--  Push Section  -->
         <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
             <StackPanel Orientation="Horizontal">
                 <Label Content="Username" />
@@ -55,18 +68,8 @@
                     Text="{Binding CommitMessage}"
                     />
             </StackPanel>
-
-            <Button Command="{Binding UpdateCredentialsCommand}" Content="Get Info" />
+            <Button Command="{Binding UpdateCredentialsCommand}" Content="Push" />
         </StackPanel>
-
-        <Label
-            Grid.Row="1"
-            Grid.Column="1"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Content="{Binding RepoInfo}"
-            Foreground="Black"
-            />
 
         <!--  Clone Section  -->
         <StackPanel Grid.Row="2" Grid.Column="1">
@@ -85,19 +88,19 @@
                     Foreground="Black"
                     Text="{Binding RepoURL}"
                     />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Location" />
+                <TextBox
+                    Width="100"
+                    Foreground="Black"
+                    Text="{Binding LocalRepoFilePath}"
+                    />
                 <Button
                     Padding="3"
                     HorizontalAlignment="Center"
                     Command="{Binding ChooseCloneDirectoryCommand}"
                     Content="Directory"
-                    />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Location" />
-                <TextBox
-                    Width="150"
-                    Foreground="Black"
-                    Text="{Binding CloneLocation}"
                     />
             </StackPanel>
 
@@ -110,6 +113,26 @@
                 />
         </StackPanel>
 
-        <Image Source="/Assets/Banana.png" Stretch="Fill" />
+        <!--  Repo Status  -->
+        <StackPanel Grid.Row="0" Grid.Column="2">
+
+            <ItemsControl
+                Height="100"
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                Background="Black"
+                Foreground="White"
+                ItemsSource="{Binding CurrentChanges}"
+                />
+            <Button
+                Padding="3"
+                HorizontalAlignment="Center"
+                Command="{Binding UpdateRepoStatusCommand}"
+                Content="Clone"
+                IsEnabled="{Binding CanClone}"
+                />
+        </StackPanel>
+
+
     </Grid>
 </Window>

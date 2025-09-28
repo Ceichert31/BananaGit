@@ -1,9 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Threading;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -17,101 +20,96 @@ namespace BananaGit.ViewModels
     {
         #region Properties
         [ObservableProperty]
-        private string _usernameInput;
+        private string _usernameInput = string.Empty;
         [ObservableProperty]
-        private string _repoName;
+        private string _repoName = string.Empty;
         [ObservableProperty]
-        private string _commitMessage;
+        private string _commitMessage = string.Empty;
 
         [ObservableProperty]
-        private string _repoInfo;
+        private string _repoInfo = string.Empty;
 
 
         //Clone properties
         [ObservableProperty]
-        private string _cloneLocation;
+        private string _localRepoFilePath = string.Empty;
         [ObservableProperty]
-        private string _repoURL;
+        private string _repoURL = string.Empty;
+
+        [ObservableProperty]
+        private ObservableCollection<string> _currentChanges = new();
 
 
         //Flags
         [ObservableProperty]
-        private bool _canClone;
+        private bool _canClone = false;
         #endregion
 
-
-        //private GitHubClient client;
-
+        private DispatcherTimer _updateGitInfoTimer = new();
 
         public GitInfoViewModel() 
         {
-            /*client = new GitHubClient(new ProductHeaderValue("BananaGit"));
-
-            //If we have credentials store, use them
-            if (JsonDataManager.HasPersonalToken)
-            {
-                string credentials = JsonDataManager.GetGithubToken();
-                client.Credentials = new Credentials(credentials);
-            }*/
+          /*  _updateGitInfoTimer.Tick += UpdateRepoStatus;
+            _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);*/
+            //_updateGitInfoTimer.Start();
         }
 
-        /*  [RelayCommand]
-          public async Task UpdateCredentials()
-          {
-              var repo = await client.Repository.Get(UsernameInput, RepoName);
+        /// <summary>
+        /// Update the current unstaged changes
+        /// </summary>
+        [RelayCommand]
+        public void UpdateRepoStatus()
+        {
+            try
+            {
+                if (LocalRepoFilePath == string.Empty) return;
 
-              RepoInfo = repo.PushedAt.ToString() ?? "No Commits";
-
-              //Get latest commit from main
-              var branchRef = await client.Git.Reference.Get(repo.Id, "heads/main");
-              var lastCommit = await client.Git.Commit.Get(repo.Id, branchRef.Object.Sha);
-
-              //Create new image to commit
-              var imgBase64 = Convert.ToBase64String(File.ReadAllBytes(Environment.CurrentDirectory + "/Assets/Banana.png"));
-              var blob = new NewBlob {  Encoding = EncodingType.Base64, Content = imgBase64 };
-              var blobRef = await client.Git.Blob.Create(UsernameInput, RepoName, blob);
-
-              //Add to new tree
-              var tempTree = new NewTree { BaseTree = lastCommit.Tree.Sha };
-              tempTree.Tree.Add(new NewTreeItem { Path = Environment.CurrentDirectory + "/Assets/Banana.png", Mode = "100644", Type = TreeType.Blob, Sha = blobRef.Sha});
-
-              //Create new commit
-              var newTree = await client.Git.Tree.Create(UsernameInput, RepoName, tempTree);
-
-              var newCommit = new NewCommit(CommitMessage,  newTree.Sha, branchRef.Object.Sha);
-              var commit = await client.Git.Commit.Create(UsernameInput, RepoName, newCommit);
-
-              var headMasterRef = "heads/main";
-              await client.Git.Reference.Update(UsernameInput, RepoName, headMasterRef, new ReferenceUpdate(commit.Sha));
-          }*/
+                using var repo = new Repository(LocalRepoFilePath);
+                var stats = repo.RetrieveStatus(new StatusOptions());
+                var untracked = stats.Untracked;
+                foreach (var file in untracked)
+                {
+                    CurrentChanges.Add($"+{file.FilePath}" ?? "N/A");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                throw;
+            }
+        }
 
         [RelayCommand]
         public void CloneRepo()
         {
-            CloneRepo(RepoURL, CloneLocation, UsernameInput, JsonDataManager.GetGithubToken());
+            CloneRepo(RepoURL, LocalRepoFilePath, UsernameInput, JsonDataManager.GetGithubToken());
         }
 
         [RelayCommand]
         public void ChooseCloneDirectory()
         {
-            OpenFileDialog dialog = new OpenFileDialog();
+            OpenFolderDialog dialog = new OpenFolderDialog();
             dialog.Multiselect = false;
 
             dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
 
             if (dialog.ShowDialog() == true)
             {
-                string selectedFilePath = dialog.FileName;
+                string selectedFilePath = dialog.FolderName;
+
+                CanClone = true;
+                LocalRepoFilePath = dialog.FolderName;
 
                 //Check if directory is empty
-                if (!Directory.EnumerateFiles(selectedFilePath).Any()) 
-                {
-                    CanClone = true;
-                }
-                else
-                {
-                    CanClone = false;
-                }
+                /* if (!Directory.EnumerateFiles(selectedFilePath).Any()) 
+                 {
+                     CanClone = true;
+                     LocalRepoFilePath = dialog.FolderName;
+                 }
+                 else
+                 {
+                     CanClone = false;
+                 }*/
             }
         }
 
@@ -123,7 +121,7 @@ namespace BananaGit.ViewModels
         /// <param name="username">The username of the user</param>
         /// <param name="token">The personal access token</param>
         /// <returns></returns>
-        private static void CloneRepo(string repoURL, string repoPath, string username, string token)
+        private void CloneRepo(string repoURL, string repoPath, string username, string token)
         {
             try
             {

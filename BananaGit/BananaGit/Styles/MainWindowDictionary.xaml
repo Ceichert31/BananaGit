@@ -1,0 +1,81 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+
+    <DataTemplate x:Key="CloneRepoTemplate">
+        <!--  Clone Section  -->
+        <StackPanel Grid.Row="2" Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Username" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding UsernameInput}"
+                    />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Repo URL" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding RepoURL}"
+                    />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Location" />
+                <TextBox
+                    Width="100"
+                    Foreground="Black"
+                    Text="{Binding CloneLocation}"
+                    />
+                <Button
+                    Padding="3"
+                    HorizontalAlignment="Center"
+                    Command="{Binding ChooseCloneDirectoryCommand}"
+                    Content="Directory"
+                    />
+            </StackPanel>
+
+            <Button
+                Padding="3"
+                HorizontalAlignment="Center"
+                Command="{Binding CloneRepoCommand}"
+                Content="Clone"
+                IsEnabled="{Binding CanClone}"
+                />
+        </StackPanel>
+    </DataTemplate>
+
+    <DataTemplate x:Key="CommitRepoTemplate">
+        <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Username" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding UsernameInput}"
+                    />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Repo Name" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding RepoName}"
+                    />
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Message" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding CommitMessage}"
+                    />
+            </StackPanel>
+
+            <Button Command="{Binding UpdateCredentialsCommand}" Content="Push" />
+        </StackPanel>
+    </DataTemplate>
+
+</ResourceDictionary>
