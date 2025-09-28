@@ -1,17 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.IO;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Windows.Threading;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
 using Microsoft.Win32;
 
 namespace BananaGit.ViewModels
@@ -49,9 +42,23 @@ namespace BananaGit.ViewModels
 
         public GitInfoViewModel() 
         {
-          /*  _updateGitInfoTimer.Tick += UpdateRepoStatus;
-            _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);*/
+            /*  _updateGitInfoTimer.Tick += UpdateRepoStatus;
+              _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);*/
             //_updateGitInfoTimer.Start();
+
+            PropertyChanged += UpdateCurrentRepository;
+        }
+
+        private void UpdateCurrentRepository(object? sender, PropertyChangedEventArgs e)
+        {
+            if (e.PropertyName == nameof(RepoURL))
+            {
+                JsonDataManager.SetCurrentRepoURL(RepoURL);
+            }
+            else if (e.PropertyName == nameof(LocalRepoFilePath))
+            {
+                JsonDataManager.SetCurrentRepoFilePath(LocalRepoFilePath);
+            }
         }
 
         /// <summary>
@@ -63,6 +70,8 @@ namespace BananaGit.ViewModels
             try
             {
                 if (LocalRepoFilePath == string.Empty) return;
+
+                CurrentChanges.Clear();
 
                 using var repo = new Repository(LocalRepoFilePath);
                 var stats = repo.RetrieveStatus(new StatusOptions());
@@ -82,7 +91,9 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void CloneRepo()
         {
-            CloneRepo(RepoURL, LocalRepoFilePath, UsernameInput, JsonDataManager.GetGithubToken());
+            if (JsonDataManager.UserInfo == null) return;
+
+            CloneRepo(JsonDataManager.UserInfo);
         }
 
         [RelayCommand]
@@ -121,7 +132,7 @@ namespace BananaGit.ViewModels
         /// <param name="username">The username of the user</param>
         /// <param name="token">The personal access token</param>
         /// <returns></returns>
-        private void CloneRepo(string repoURL, string repoPath, string username, string token)
+        private void CloneRepo(GithubUserInfo userInfo)
         {
             try
             {
@@ -131,12 +142,12 @@ namespace BananaGit.ViewModels
                     {
                         CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
                             {
-                                Username = username,
-                                Password = token
+                                Username = userInfo.Username,
+                                Password = userInfo.PersonalToken
                             }
                     }
                 };
-                Repository.Clone(repoURL, repoPath, options);
+                Repository.Clone(userInfo.URL, userInfo.FilePath, options);
             }
             catch (Exception ex)
             {

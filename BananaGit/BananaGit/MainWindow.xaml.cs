@@ -20,10 +20,10 @@ namespace BananaGit
             DataContext = gitInfoVM;
 
             //Get token and check if it has been previously saved
-            string token = JsonDataManager.GetGithubToken();
+            JsonDataManager.LoadGithubCredentials();
 
             //Display prompt to enter personal token
-            if (token == "")
+            if (JsonDataManager.UserInfo == null)
             {
                 enterCredentialsView.ShowDialog();
                 //enterCredentialsView.Owner = this;

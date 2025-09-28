@@ -15,11 +15,13 @@ namespace BananaGit.ViewModels
 
         [ObservableProperty]
         private string _userToken = "";
+        [ObservableProperty]
+        private string _username = "";
 
         [RelayCommand]
         public void UpdateCredentials()
         {
-            JsonDataManager.SaveGithubToken(UserToken);
+            JsonDataManager.SaveGithubCredentials(UserToken, Username);
             onEnterCredentials?.Invoke(this, new EventArgs());
         }
     }
