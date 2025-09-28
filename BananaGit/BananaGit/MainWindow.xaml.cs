@@ -19,6 +19,7 @@ namespace BananaGit
 
             DataContext = gitInfoVM;
 
+            //Get token and check if it has been previously saved
             string token = JsonDataManager.GetGithubToken();
 
             //Display prompt to enter personal token

@@ -21,21 +21,23 @@ namespace BananaGit.Views
     /// </summary>
     public partial class EnterCredentialsView : Window
     {
-        private EnterCredentialsViewModel enterCredentialsVM;
+        private readonly EnterCredentialsViewModel enterCredentialsVM;
 
-        private EventHandler credentialsEnteredEvent;
+        private readonly EventHandler credentialsEnteredEvent;
 
         public EnterCredentialsView()
         {
             InitializeComponent();
 
+            //Event to close credential dialogue
             credentialsEnteredEvent += CloseCredentialDialogue;
+
             enterCredentialsVM = new EnterCredentialsViewModel(credentialsEnteredEvent);
 
             DataContext = enterCredentialsVM;
         }
 
-        private void CloseCredentialDialogue(object sender, EventArgs e)
+        private void CloseCredentialDialogue(object? sender, EventArgs e)
         {
             Close();
         }

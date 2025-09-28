@@ -11,7 +11,7 @@ namespace BananaGit.ViewModels
 {
     partial class EnterCredentialsViewModel(EventHandler eventHandler) : ObservableObject
     {
-        private EventHandler onEnterCredentials = eventHandler;
+        private readonly EventHandler onEnterCredentials = eventHandler;
 
         [ObservableProperty]
         private string _userToken = "";

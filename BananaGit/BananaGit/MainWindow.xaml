@@ -67,6 +67,49 @@
             Content="{Binding RepoInfo}"
             Foreground="Black"
             />
+
+        <!--  Clone Section  -->
+        <StackPanel Grid.Row="2" Grid.Column="1">
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Username" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding UsernameInput}"
+                    />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Repo URL" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding RepoURL}"
+                    />
+                <Button
+                    Padding="3"
+                    HorizontalAlignment="Center"
+                    Command="{Binding ChooseCloneDirectoryCommand}"
+                    Content="Directory"
+                    />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Location" />
+                <TextBox
+                    Width="150"
+                    Foreground="Black"
+                    Text="{Binding CloneLocation}"
+                    />
+            </StackPanel>
+
+            <Button
+                Padding="3"
+                HorizontalAlignment="Center"
+                Command="{Binding CloneRepoCommand}"
+                Content="Clone"
+                IsEnabled="{Binding CanClone}"
+                />
+        </StackPanel>
+
         <Image Source="/Assets/Banana.png" Stretch="Fill" />
     </Grid>
 </Window>

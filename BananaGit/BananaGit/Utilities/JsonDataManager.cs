@@ -12,6 +12,9 @@ namespace BananaGit.Utilities
     {
         public static bool HasPersonalToken = false;
 
+        private const string USER_DATA_LOCATION = "C:\\BananaGit/";
+        private const string USER_DATA_NAME = "UserInfo.txt";
+
         /// <summary>
         /// Saves the users personal github token to a local folder
         /// </summary>
@@ -21,8 +24,14 @@ namespace BananaGit.Utilities
             TextWriter? writer = null;
             try
             {
+                //Create directory before trying to write to file
+                if (!Directory.Exists(USER_DATA_LOCATION))
+                {
+                    Directory.CreateDirectory(USER_DATA_LOCATION);
+                }
+
                 var contentsToWrite = JsonConvert.SerializeObject(token);
-                writer = new StreamWriter("C:\\BananaGit/UserData.txt", false);
+                writer = new StreamWriter(USER_DATA_LOCATION + USER_DATA_NAME, false);
                 writer.Write(contentsToWrite);
             }
             finally
@@ -37,11 +46,13 @@ namespace BananaGit.Utilities
             string result = "";
             try
             {
-                if (!File.Exists("C:\\BananaGit/UserData.txt"))
+                //If directory hasn't been created yet, return nothing
+                if (!File.Exists(USER_DATA_LOCATION + USER_DATA_NAME))
                 {
-                    SaveGithubToken("");
+                    return string.Empty;
                 }
-                reader = new StreamReader("C:\\BananaGit/UserData.txt");
+
+                reader = new StreamReader(USER_DATA_LOCATION + USER_DATA_NAME);
                 var fileContents = reader.ReadToEnd();
                 result = JsonConvert.DeserializeObject<string>(fileContents) ?? "";
 
