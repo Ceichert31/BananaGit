@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      SOLUTION_PATH: BananaGit/BananaGit/BananaGit.sln
+      SOLUTION_PATH: BananaGit/BananaGit.sln
 
     steps:
     - uses: actions/checkout@v4
