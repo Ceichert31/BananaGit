@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Windows.Threading;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -121,6 +122,48 @@ namespace BananaGit.ViewModels
                  {
                      CanClone = false;
                  }*/
+            }
+        }
+
+        [RelayCommand]
+        public void CommitStagedFiles()
+        {
+            try
+            {
+                using (var repo = new Repository(LocalRepoFilePath))
+                {
+                    Signature author = new Signature(JsonDataManager.UserInfo.Username, "ceichert3114@gmail.com", DateTime.Now);
+                    Signature committer = author;
+
+                    Commit commit = repo.Commit("User input here", author, committer);
+                }
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        [RelayCommand]
+        public void StageFiles()
+        {
+            try
+            {
+                var files = Directory.EnumerateFiles(JsonDataManager.UserInfo.FilePath);
+
+               using (var repo = new Repository(LocalRepoFilePath))
+                {
+                    foreach (var file in files)
+                    {
+                        var fileName = Path.GetFileName(file);
+                        repo.Index.Add(fileName);
+                        repo.Index.Write();
+                    }
+                }
+            }
+            catch (Exception)
+            {
+                throw;
             }
         }
 
