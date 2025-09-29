@@ -117,9 +117,8 @@
         <StackPanel Grid.Row="0" Grid.Column="2">
 
             <ItemsControl
-                Height="100"
+                Height="81"
                 HorizontalAlignment="Stretch"
-                VerticalAlignment="Stretch"
                 Background="Black"
                 Foreground="White"
                 ItemsSource="{Binding CurrentChanges}"
@@ -148,6 +147,7 @@
             Content="Commit"
             IsEnabled="{Binding CanClone}"
             />
+        <Image Grid.ColumnSpan="2" Margin="-136,10,186,72" Grid.RowSpan="2" Source="/Assets/Banana.png" Stretch="Fill"/>
 
 
     </Grid>
