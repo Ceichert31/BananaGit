@@ -32,9 +32,9 @@
         <!--  Toolbar  -->
         <ToolBar Grid.ColumnSpan="3">
             <Image Source="Assets/Banana.png" />
-            <Button Command="" Content="Clone" />
-            <Button Command="" Content="Push" />
-            <Button Command="" Content="Pull" />
+            <Button Command="{Binding CloneRepoCommand}" Content="Clone" />
+            <Button Command="{Binding PushFilesCommand}" Content="Push" />
+            <Button Command="{Binding PullChangesCommand}" Content="Pull" />
         </ToolBar>
 
 

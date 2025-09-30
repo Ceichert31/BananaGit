@@ -6,6 +6,7 @@ using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LibGit2Sharp;
+using LibGit2Sharp.Handlers;
 using Microsoft.Win32;
 
 namespace BananaGit.ViewModels
@@ -157,6 +158,9 @@ namespace BananaGit.ViewModels
             CloneRepo(githubUserInfo);
         }
 
+        /// <summary>
+        /// Opens a windows prompt to select the desired file directory
+        /// </summary>
         [RelayCommand]
         public void ChooseCloneDirectory()
         {
@@ -185,6 +189,9 @@ namespace BananaGit.ViewModels
             }
         }
 
+        /// <summary>
+        /// Commits all staged files and makes them ready to push
+        /// </summary>
         [RelayCommand]
         public void CommitStagedFiles()
         {
@@ -195,7 +202,11 @@ namespace BananaGit.ViewModels
                     Signature author = new Signature(githubUserInfo?.Username, "ceichert3114@gmail.com", DateTime.Now);
                     Signature committer = author;
 
+                    //Author commit
                     Commit commit = repo.Commit(CommitMessage, author, committer);
+
+                    //Clear commit message
+                    CommitMessage = string.Empty;
                 }
             }
             catch (Exception)
@@ -286,6 +297,71 @@ namespace BananaGit.ViewModels
                 Console.WriteLine($"Failed to Push {ex.Message}");
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Pulls changes from the repo and merges them into the local repository
+        /// </summary>
+        [RelayCommand]
+        public void PullChanges()
+        {
+            try
+            {
+                var options = new PullOptions();
+                options.FetchOptions = new FetchOptions();
+                options.FetchOptions.CredentialsProvider = new CredentialsHandler((url, username, types) => new UsernamePasswordCredentials
+                {
+                    Username = githubUserInfo?.Username, 
+                    Password = githubUserInfo?.PersonalToken
+                });
+
+                options.MergeOptions = new MergeOptions();
+                options.MergeOptions.FastForwardStrategy = FastForwardStrategy.Default;
+                options.MergeOptions.OnCheckoutNotify = new CheckoutNotifyHandler(ShowConflict);
+                options.MergeOptions.CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict;
+                using (var repo = new Repository(LocalRepoFilePath))
+                {
+
+                    //Create signature and pull
+                    Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
+                    var result = Commands.Pull(repo, signature, options);
+
+                    //Check for merge conflicts
+                    if (result.Status == MergeStatus.Conflicts)
+                    {
+                        //Display in front end eventually
+                        Console.WriteLine("Conflict detected");
+                        return;
+                    }
+                    else if (result.Status == MergeStatus.UpToDate)
+                    {
+                        //Display in front end eventually
+                        Console.WriteLine("Up to date");
+                        return;
+                    }
+
+                    Console.WriteLine("Pulled Successfuly");
+                }
+            }
+            catch (LibGit2SharpException)
+            {
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// The callback for conflicts
+        /// </summary>
+        /// <param name="path">The file that conflicted</param>
+        /// <param name="notifyFlags">The checkout notify flag</param>
+        /// <returns></returns>
+        private bool ShowConflict(string path, CheckoutNotifyFlags notifyFlags)
+        {
+            if (notifyFlags == CheckoutNotifyFlags.Conflict)
+            {
+                Console.WriteLine($"Conflict found in file {path}");
+            }
+            return true;
         }
 
         /// <summary>
