@@ -68,7 +68,7 @@
                     Text="{Binding CommitMessage}"
                     />
             </StackPanel>
-            <Button Command="{Binding UpdateCredentialsCommand}" Content="Push" />
+            <Button Command="{Binding PushFilesCommand}" Content="Push" />
         </StackPanel>
 
         <!--  Clone Section  -->
@@ -147,8 +147,7 @@
             Content="Commit"
             IsEnabled="{Binding CanClone}"
             />
-        <Image Grid.ColumnSpan="2" Margin="-136,10,186,72" Grid.RowSpan="2" Source="/Assets/Banana.png" Stretch="Fill"/>
 
-
+        <Image Source="Assets/Banana.png" />
     </Grid>
 </Window>

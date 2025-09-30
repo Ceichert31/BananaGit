@@ -30,8 +30,15 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private string _repoURL = string.Empty;
 
+
+        //Branches
+        [ObservableProperty]
+        private string _branchName = string.Empty;
+
         [ObservableProperty]
         private ObservableCollection<string> _currentChanges = new();
+        [ObservableProperty]
+        private ObservableCollection<string> _stagedChanges = new();
 
 
         //Flags
@@ -43,11 +50,16 @@ namespace BananaGit.ViewModels
 
         public GitInfoViewModel() 
         {
-            /*  _updateGitInfoTimer.Tick += UpdateRepoStatus;
-              _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);*/
-            //_updateGitInfoTimer.Start();
+            _updateGitInfoTimer.Tick += UpdateRepoStatus;
+            _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);
+            _updateGitInfoTimer.Start();
 
             PropertyChanged += UpdateCurrentRepository;
+        }
+
+        private void UpdateRepoStatus(object? sender, EventArgs e)
+        {
+            UpdateRepoStatus();
         }
 
         private void UpdateCurrentRepository(object? sender, PropertyChangedEventArgs e)
@@ -77,15 +89,19 @@ namespace BananaGit.ViewModels
                 using var repo = new Repository(LocalRepoFilePath);
                 var stats = repo.RetrieveStatus(new StatusOptions());
                 var untracked = stats.Untracked;
+                var added = stats.Added;
                 foreach (var file in untracked)
                 {
                     CurrentChanges.Add($"+{file.FilePath}" ?? "N/A");
+                }
+                foreach (var file in added)
+                {
+                    StagedChanges.Add($"+{file.FilePath}" ?? "N/A");
                 }
             }
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
-                throw;
             }
         }
 
@@ -140,7 +156,7 @@ namespace BananaGit.ViewModels
             }
             catch (Exception)
             {
-                throw;
+                Console.WriteLine($"Failed to commit {LocalRepoFilePath}");
             }
         }
 
@@ -161,9 +177,67 @@ namespace BananaGit.ViewModels
                     }
                 }
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                Console.WriteLine($"Failed to stage {ex.Message}");
+            }
+        }
+
+        [RelayCommand]
+        public void PushFiles()
+        {
+            try
+            {
+                using (var repo = new Repository(LocalRepoFilePath))
+                {
+                    var remote = repo.Network.Remotes["origin"];
+                    if (remote != null)
+                    {
+                        repo.Network.Remotes.Remove("origin");
+                    }
+
+                    repo.Network.Remotes.Add("origin", RepoURL);
+                    remote = repo.Network.Remotes["origin"];
+                    if (remote == null) return;
+
+                    FetchOptions options = new FetchOptions
+                    {
+                        CredentialsProvider = (url, username, types) => 
+                        new UsernamePasswordCredentials
+                        {
+                            Username = JsonDataManager.UserInfo?.Username,
+                            Password = JsonDataManager.UserInfo?.PersonalToken
+                        }
+                    };
+
+                    var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
+                    Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
+
+                    var localBranchName = string.IsNullOrEmpty(BranchName) ? "main" : BranchName;
+                    var localBranch = repo.Branches[localBranchName];
+
+                    if (localBranch == null) return;
+
+                    repo.Branches.Update(localBranch, 
+                        b => b.Remote = remote.Name, 
+                        b => b.UpstreamBranch = localBranch.CanonicalName);
+
+                    var pushOptions = new PushOptions
+                    {
+                        CredentialsProvider = (url, username, types) => 
+                        new UsernamePasswordCredentials
+                        {
+                            Username = JsonDataManager.UserInfo?.Username,
+                            Password = JsonDataManager.UserInfo?.PersonalToken
+                        }
+                    };
+
+                    repo.Network.Push(localBranch, pushOptions);
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Failed to Push {ex.Message}");
             }
         }
 
@@ -194,8 +268,7 @@ namespace BananaGit.ViewModels
             }
             catch (Exception ex)
             {
-                Console.WriteLine(ex.Message);
-                throw;
+                Console.WriteLine($"Failed to Clone {ex.Message}");
             }
         }
     }
