@@ -70,6 +70,8 @@ namespace BananaGit.ViewModels
             {
                 currentRepo = githubUserInfo.SavedRepositories[0];
                 LocalRepoFilePath = currentRepo.FilePath;
+                RepoURL = currentRepo.URL;
+                hasCloned = true;
             }
               
             PropertyChanged += UpdateCurrentRepository;

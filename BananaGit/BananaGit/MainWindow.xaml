@@ -117,7 +117,10 @@
             >
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Button Content="+" />
+                    <StackPanel Orientation="Horizontal">
+                        <Button HorizontalAlignment="Left" Content="+" />
+                        <Label Content="Placeholder Name" />
+                    </StackPanel>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

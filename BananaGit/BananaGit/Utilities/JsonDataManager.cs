@@ -44,6 +44,10 @@ namespace BananaGit.Utilities
             }
         }
 
+        /// <summary>
+        /// Loads the github user info into the passed in user info variable
+        /// </summary>
+        /// <param name="userInfo">The variable where the user info is drawn into</param>
         public static void LoadUserInfo(ref GithubUserInfo? userInfo)
         {
             TextReader? reader = null;
