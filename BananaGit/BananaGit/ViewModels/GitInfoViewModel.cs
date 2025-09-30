@@ -113,6 +113,8 @@ namespace BananaGit.ViewModels
 
                 if (localRepo.FilePath == null || localRepo.FilePath == "") return;
 
+                if (!Directory.Exists(localRepo.FilePath)) return;
+
                 CurrentChanges.Clear();
                 StagedChanges.Clear();
 
@@ -144,14 +146,14 @@ namespace BananaGit.ViewModels
                 {
                     CurrentChanges.Add($"+{file.FilePath}" ?? "N/A");
                 }
-              /*  foreach (var file in staged)
+                foreach (var file in staged)
                 {
                     StagedChanges.Add($"+{file.FilePath}");
                 }
                 foreach (var file in added)
                 {
                     StagedChanges.Add($"+{file.FilePath}" ?? "N/A");
-                }*/
+                }
             }
             catch (LibGit2SharpException ex)
             {
@@ -233,47 +235,15 @@ namespace BananaGit.ViewModels
             {
                 var files = Directory.EnumerateFiles(currentRepo.FilePath);
 
-               using (var repo = new Repository(LocalRepoFilePath))
+                using (var repo = new Repository(LocalRepoFilePath))
                 {
-/*                    var stats = repo.RetrieveStatus(new StatusOptions());
-
-                    List<StatusEntry> changedFilesList = new();
-
-                    foreach (var file in stats.Modified)
-                    {
-                        changedFilesList.Add(file);
-                    }
-                    foreach (var file in stats.Added)
-                    {
-                        changedFilesList.Add(file);
-                    }*/
-
                     foreach (var file in files)
                     {
                         var fileName = Path.GetFileName(file);
                         repo.Index.Add(fileName);
-                        StagedChanges.Add(fileName);
+                        //StagedChanges.Add(fileName);
                         repo.Index.Write();
                     }
-
-                   /* //Add removed or missing files to staging 
-                    changedFilesList.Clear();
-                    foreach (var file in stats.Removed)
-                    {
-                        changedFilesList.Add(file);
-                    }
-                    foreach (var file in stats.Missing)
-                    {
-                        changedFilesList.Add(file);
-                    }
-
-                    foreach (var file in changedFilesList)
-                    {
-                        //var fileName = Path.GetFileName(file);
-                        repo.Index.Remove(file.FilePath);
-                        //StagedChanges.Add(file.FilePath);
-                        repo.Index.Write();
-                    }*/
                 }
             }
             catch (LibGit2SharpException ex)
