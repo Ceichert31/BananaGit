@@ -126,24 +126,34 @@ namespace BananaGit.ViewModels
                 var changed = stats.Modified;
                 var staged = stats.Staged;
                 var added = stats.Added;
+                var removed = stats.Removed;
+                var missing = stats.Missing;
                 foreach (var file in untracked)
                 {
                     CurrentChanges.Add($"+{file.FilePath}" ?? "N/A");
+                }
+                foreach (var file in removed)
+                {
+                    CurrentChanges.Add($"-{file.FilePath}" ?? "N/A");
+                }
+                foreach (var file in missing)
+                {
+                    CurrentChanges.Add($"-{file.FilePath}" ?? "N/A");
                 }
                 foreach (var file in changed)
                 {
                     CurrentChanges.Add($"+{file.FilePath}" ?? "N/A");
                 }
-                foreach (var file in staged)
+              /*  foreach (var file in staged)
                 {
                     StagedChanges.Add($"+{file.FilePath}");
                 }
                 foreach (var file in added)
                 {
                     StagedChanges.Add($"+{file.FilePath}" ?? "N/A");
-                }
+                }*/
             }
-            catch (Exception ex)
+            catch (LibGit2SharpException ex)
             {
                 Console.WriteLine(ex.Message);
                 throw;
@@ -199,7 +209,7 @@ namespace BananaGit.ViewModels
             {
                 using (var repo = new Repository(LocalRepoFilePath))
                 {
-                    Signature author = new Signature(githubUserInfo?.Username, "ceichert3114@gmail.com", DateTime.Now);
+                    Signature author = new(githubUserInfo?.Username, "ceichert3114@gmail.com", DateTime.Now);
                     Signature committer = author;
 
                     //Author commit
@@ -209,7 +219,7 @@ namespace BananaGit.ViewModels
                     CommitMessage = string.Empty;
                 }
             }
-            catch (Exception)
+            catch (LibGit2SharpException)
             {
                 Console.WriteLine($"Failed to commit {LocalRepoFilePath}");
                 throw;
@@ -225,15 +235,48 @@ namespace BananaGit.ViewModels
 
                using (var repo = new Repository(LocalRepoFilePath))
                 {
+/*                    var stats = repo.RetrieveStatus(new StatusOptions());
+
+                    List<StatusEntry> changedFilesList = new();
+
+                    foreach (var file in stats.Modified)
+                    {
+                        changedFilesList.Add(file);
+                    }
+                    foreach (var file in stats.Added)
+                    {
+                        changedFilesList.Add(file);
+                    }*/
+
                     foreach (var file in files)
                     {
                         var fileName = Path.GetFileName(file);
                         repo.Index.Add(fileName);
+                        StagedChanges.Add(fileName);
                         repo.Index.Write();
                     }
+
+                   /* //Add removed or missing files to staging 
+                    changedFilesList.Clear();
+                    foreach (var file in stats.Removed)
+                    {
+                        changedFilesList.Add(file);
+                    }
+                    foreach (var file in stats.Missing)
+                    {
+                        changedFilesList.Add(file);
+                    }
+
+                    foreach (var file in changedFilesList)
+                    {
+                        //var fileName = Path.GetFileName(file);
+                        repo.Index.Remove(file.FilePath);
+                        //StagedChanges.Add(file.FilePath);
+                        repo.Index.Write();
+                    }*/
                 }
             }
-            catch (Exception ex)
+            catch (LibGit2SharpException ex)
             {
                 Console.WriteLine($"Failed to stage {ex.Message}");
                 throw;
@@ -292,7 +335,7 @@ namespace BananaGit.ViewModels
                     repo.Network.Push(localBranch, pushOptions);
                 }
             }
-            catch (Exception ex)
+            catch (LibGit2SharpException ex)
             {
                 Console.WriteLine($"Failed to Push {ex.Message}");
                 throw;
@@ -394,7 +437,7 @@ namespace BananaGit.ViewModels
                 Repository.Clone(RepoURL, LocalRepoFilePath, options);
                 hasCloned = true;
             }
-            catch (Exception ex)
+            catch (LibGit2SharpException ex)
             {
                 Console.WriteLine($"Failed to Clone {ex.Message}");
                 throw;

@@ -31,5 +31,7 @@ namespace BananaGit
                 //enterCredentialsView.Owner = this;
             }
         }
+
+        
     }
 }

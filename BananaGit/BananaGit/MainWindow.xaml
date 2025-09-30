@@ -37,19 +37,6 @@
             <Button Command="{Binding PullChangesCommand}" Content="Pull" />
         </ToolBar>
 
-
-        <!--<ContentControl
-            Grid.Row="1"
-            Grid.Column="1"
-            Content="{Binding}"
-            >
-            <ContentControl.Style>
-                <Style TargetType="ContentControl">
-                    <Setter Property="ContentTemplate" Value="{DynamicResource CloneRepoTemplate}" />
-                </Style>
-            </ContentControl.Style>
-        </ContentControl>-->
-
         <!--  Push Section  -->
         <StackPanel
             Grid.Row="1"
@@ -114,16 +101,16 @@
             Background="Black"
             Foreground="White"
             ItemsSource="{Binding CurrentChanges}"
-            >
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <Button HorizontalAlignment="Left" Content="+" />
-                        <Label Content="Placeholder Name" Foreground="Black" />
-                    </StackPanel>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+            />
+
+        <!--  <ItemsControl.ItemTemplate>
+     <DataTemplate>
+         <StackPanel Orientation="Horizontal">
+             <Button HorizontalAlignment="Left" Content="+" />
+             <Label Content="Placeholder Name" Foreground="Black" />
+         </StackPanel>
+     </DataTemplate>
+ </ItemsControl.ItemTemplate>-->
 
         <Button
             Grid.Row="1"
