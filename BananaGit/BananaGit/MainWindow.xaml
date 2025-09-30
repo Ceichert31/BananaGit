@@ -128,14 +128,12 @@
                 HorizontalAlignment="Center"
                 Command="{Binding UpdateRepoStatusCommand}"
                 Content="Clone"
-                IsEnabled="{Binding CanClone}"
                 />
             <Button
                 Padding="3"
                 HorizontalAlignment="Center"
                 Command="{Binding StageFilesCommand}"
                 Content="Stage"
-                IsEnabled="{Binding CanClone}"
                 />
         </StackPanel>
         <Button
@@ -145,7 +143,6 @@
             Padding="3"
             Command="{Binding CommitStagedFilesCommand}"
             Content="Commit"
-            IsEnabled="{Binding CanClone}"
             />
 
         <Image Source="Assets/Banana.png" />

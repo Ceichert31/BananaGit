@@ -40,19 +40,28 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _stagedChanges = new();
 
+        private SaveableRepository currentRepo;
 
         //Flags
         [ObservableProperty]
         private bool _canClone = false;
+
+        private bool hasCloned = false;
         #endregion
 
-        private DispatcherTimer _updateGitInfoTimer = new();
+        private readonly DispatcherTimer _updateGitInfoTimer = new();
 
         public GitInfoViewModel() 
         {
             _updateGitInfoTimer.Tick += UpdateRepoStatus;
             _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);
             _updateGitInfoTimer.Start();
+
+            JsonDataManager.LoadUserInfo();
+
+            if (JsonDataManager.UserInfo?.SavedRepositories?[0] != null)
+                currentRepo = JsonDataManager.UserInfo.SavedRepositories[0];
+
 
             PropertyChanged += UpdateCurrentRepository;
         }
@@ -82,11 +91,17 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                if (LocalRepoFilePath == string.Empty) return;
+                if (!hasCloned) return;
+                if (JsonDataManager.UserInfo.SavedRepositories == null) return;
+                if (JsonDataManager.UserInfo.SavedRepositories[0] == null) return;
+
+                var localRepo = JsonDataManager.UserInfo.SavedRepositories[0];
+
+                if (localRepo.FilePath == null || localRepo.FilePath == "") return;
 
                 CurrentChanges.Clear();
 
-                using var repo = new Repository(LocalRepoFilePath);
+                using var repo = new Repository(localRepo.FilePath);
                 var stats = repo.RetrieveStatus(new StatusOptions());
                 var untracked = stats.Untracked;
                 var added = stats.Added;
@@ -102,6 +117,7 @@ namespace BananaGit.ViewModels
             catch (Exception ex)
             {
                 Console.WriteLine(ex.Message);
+                throw;
             }
         }
 
@@ -148,7 +164,7 @@ namespace BananaGit.ViewModels
             {
                 using (var repo = new Repository(LocalRepoFilePath))
                 {
-                    Signature author = new Signature(JsonDataManager.UserInfo.Username, "ceichert3114@gmail.com", DateTime.Now);
+                    Signature author = new Signature(JsonDataManager.UserInfo?.Username, "ceichert3114@gmail.com", DateTime.Now);
                     Signature committer = author;
 
                     Commit commit = repo.Commit("User input here", author, committer);
@@ -157,6 +173,7 @@ namespace BananaGit.ViewModels
             catch (Exception)
             {
                 Console.WriteLine($"Failed to commit {LocalRepoFilePath}");
+                throw;
             }
         }
 
@@ -165,7 +182,7 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                var files = Directory.EnumerateFiles(JsonDataManager.UserInfo.FilePath);
+                var files = Directory.EnumerateFiles(currentRepo.FilePath);
 
                using (var repo = new Repository(LocalRepoFilePath))
                 {
@@ -180,6 +197,7 @@ namespace BananaGit.ViewModels
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to stage {ex.Message}");
+                throw;
             }
         }
 
@@ -188,7 +206,7 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                using (var repo = new Repository(LocalRepoFilePath))
+                using (var repo = new Repository(currentRepo.FilePath))
                 {
                     var remote = repo.Network.Remotes["origin"];
                     if (remote != null)
@@ -238,6 +256,7 @@ namespace BananaGit.ViewModels
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to Push {ex.Message}");
+                throw;
             }
         }
 
@@ -264,11 +283,15 @@ namespace BananaGit.ViewModels
                             }
                     }
                 };
-                Repository.Clone(userInfo.URL, userInfo.FilePath, options);
+                JsonDataManager.SaveRepositoryInformation(LocalRepoFilePath, RepoURL);
+
+                Repository.Clone(RepoURL, LocalRepoFilePath, options);
+                hasCloned = true;
             }
             catch (Exception ex)
             {
                 Console.WriteLine($"Failed to Clone {ex.Message}");
+                throw;
             }
         }
     }

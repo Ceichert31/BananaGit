@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
@@ -21,30 +22,47 @@ namespace BananaGit.Utilities
         {
             if (UserInfo == null) return;
 
-            UserInfo.URL = url;
+            if (UserInfo?.SavedRepositories == null)
+            {
+                UserInfo.SavedRepositories = new();
+                UserInfo?.SavedRepositories?.Add(new("", url));
+                return;
+            }
+
+            UserInfo.SavedRepositories[0].URL = url;
         }
         public static void SetCurrentRepoFilePath(string filePath)
         {
             if (UserInfo == null) return;
 
-            UserInfo.FilePath = filePath;
+            if (UserInfo?.SavedRepositories == null)
+            {
+                UserInfo.SavedRepositories = new();
+                UserInfo?.SavedRepositories?.Add(new(filePath, ""));
+                return;
+            }
+
+            UserInfo.SavedRepositories[0].FilePath = filePath;
+        }
+
+        public static void SaveGithubCredentials(string username, string personalToken)
+        {
+            UserInfo.Username = username;
+            UserInfo.PersonalToken = personalToken;
+
+            SaveUserInfo();
         }
 
         /// <summary>
         /// Saves the users personal github token to a local folder
         /// </summary>
         /// <param name="token">The users github token</param>
-        public static void SaveGithubCredentials(string token, string username)
+        private static void SaveUserInfo()
         {
             TextWriter? writer = null;
 
-            if (UserInfo == null)
-            {
-                UserInfo = new GithubUserInfo();
-            }
-
-            UserInfo.PersonalToken = token;
-            UserInfo.Username = username;
+            //Create new user info if one doesn't already exsist
+            UserInfo ??= new GithubUserInfo();
             try
             {
                 //Create directory before trying to write to file
@@ -63,7 +81,7 @@ namespace BananaGit.Utilities
             }
         }
 
-        public static void LoadGithubCredentials()
+        public static void LoadUserInfo()
         {
             TextReader? reader = null;
             try
@@ -90,16 +108,29 @@ namespace BananaGit.Utilities
                 reader?.Close();
             }
         }
+
+        /// <summary>
+        /// Save a cloned repo to user info
+        /// </summary>
+        /// <param name="localFilePath"></param>
+        /// <param name="repoURL"></param>
+        public static void SaveRepositoryInformation(string localFilePath, string repoURL)
+        {
+            SaveableRepository repo = new(localFilePath, repoURL);
+            UserInfo?.SavedRepositories?.Add(repo);
+
+            SaveUserInfo();
+        }
     }
 
     public class GithubUserInfo
     {
         public string? Username { get; set; }
         public string? PersonalToken { get; set; }
-        public string? FilePath { get; set; }
-        public string URL { get; set; }
+
+        public List<SaveableRepository>? SavedRepositories { get; set; }
     }
-    public struct SaveableRepository(string path, string url)
+    public class SaveableRepository(string path, string url)
     {
         public string FilePath { get; set; } = path;
         public string URL { get; set; } = url;
