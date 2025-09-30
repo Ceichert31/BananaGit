@@ -118,11 +118,24 @@ namespace BananaGit.ViewModels
                 using var repo = new Repository(localRepo.FilePath);
                 var stats = repo.RetrieveStatus(new StatusOptions());
 
+                //If no changes have been made, don't do anything
+                if (!stats.IsDirty) return;
+
                 var untracked = stats.Untracked;
+                var changed = stats.Modified;
+                var staged = stats.Staged;
                 var added = stats.Added;
                 foreach (var file in untracked)
                 {
                     CurrentChanges.Add($"+{file.FilePath}" ?? "N/A");
+                }
+                foreach (var file in changed)
+                {
+                    CurrentChanges.Add($"+{file.FilePath}" ?? "N/A");
+                }
+                foreach (var file in staged)
+                {
+                    StagedChanges.Add($"+{file.FilePath}");
                 }
                 foreach (var file in added)
                 {
