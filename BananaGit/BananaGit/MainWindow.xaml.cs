@@ -10,8 +10,11 @@ namespace BananaGit
     /// </summary>
     public partial class MainWindow : Window
     {
-        private GitInfoViewModel gitInfoVM = new();
-        private EnterCredentialsView enterCredentialsView = new();
+        private EventHandler openCloneWindow;
+
+        private GitInfoViewModel? gitInfoVM;
+        private EnterCredentialsView? enterCredentialsView;
+        private CloneRepoView? cloneRepoView;
 
         private GithubUserInfo? userInfo = new();
 
@@ -19,7 +22,17 @@ namespace BananaGit
         {
             InitializeComponent();
 
+            Show();
+
+            cloneRepoView = new CloneRepoView();
+            cloneRepoView.Owner = this;
+           
+            openCloneWindow += OpenCloneWindow;
+
+            gitInfoVM = new(openCloneWindow);
+
             DataContext = gitInfoVM;
+            cloneRepoView.DataContext = gitInfoVM;
 
             //Load user info
             JsonDataManager.LoadUserInfo(ref userInfo);
@@ -27,11 +40,14 @@ namespace BananaGit
             //If no user info could be loaded
             if (userInfo == null)
             {
+                enterCredentialsView = new EnterCredentialsView();
+                enterCredentialsView.Owner = this;
                 enterCredentialsView.ShowDialog();
-                //enterCredentialsView.Owner = this;
             }
         }
-
-        
+        private void OpenCloneWindow(object? sender, EventArgs e)
+        {
+            cloneRepoView?.ShowDialog();
+        }
     }
 }

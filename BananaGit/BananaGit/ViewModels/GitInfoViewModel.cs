@@ -54,7 +54,9 @@ namespace BananaGit.ViewModels
 
         private GithubUserInfo? githubUserInfo;
 
-        public GitInfoViewModel() 
+        private EventHandler openCloneWindow;
+
+        public GitInfoViewModel(EventHandler openCloneWindow) 
         {
             _updateGitInfoTimer.Tick += UpdateRepoStatus;
             _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);
@@ -74,7 +76,8 @@ namespace BananaGit.ViewModels
                 RepoURL = currentRepo.URL;
                 hasCloned = true;
             }
-              
+
+            this.openCloneWindow = openCloneWindow;
             PropertyChanged += UpdateCurrentRepository;
         }
 
@@ -166,6 +169,9 @@ namespace BananaGit.ViewModels
         public void CloneRepo()
         {
             if (githubUserInfo == null) return;
+
+            //Notify that we want to open window
+            openCloneWindow.Invoke(this, null);
 
             CloneRepo(githubUserInfo);
         }
