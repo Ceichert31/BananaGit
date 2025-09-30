@@ -17,6 +17,7 @@
     <Grid>
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
             <RowDefinition Height="*" />
@@ -27,6 +28,15 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
+
+        <!--  Toolbar  -->
+        <ToolBar Grid.ColumnSpan="3">
+            <Image Source="Assets/Banana.png" />
+            <Button Command="" Content="Clone" />
+            <Button Command="" Content="Push" />
+            <Button Command="" Content="Pull" />
+        </ToolBar>
+
 
         <!--<ContentControl
             Grid.Row="1"
@@ -41,32 +51,13 @@
         </ContentControl>-->
 
         <!--  Push Section  -->
-        <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Username" />
-                <TextBox
-                    Width="150"
-                    Foreground="Black"
-                    Text="{Binding UsernameInput}"
-                    />
-            </StackPanel>
-
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Repo Name" />
-                <TextBox
-                    Width="150"
-                    Foreground="Black"
-                    Text="{Binding RepoName}"
-                    />
-            </StackPanel>
-
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="1"
+            HorizontalAlignment="Stretch"
+            >
             <StackPanel Orientation="Horizontal">
                 <Label Content="Message" />
-                <TextBox
-                    Width="150"
-                    Foreground="Black"
-                    Text="{Binding CommitMessage}"
-                    />
             </StackPanel>
             <Button Command="{Binding PushFilesCommand}" Content="Push" />
         </StackPanel>
@@ -114,37 +105,64 @@
         </StackPanel>
 
         <!--  Repo Status  -->
-        <StackPanel Grid.Row="0" Grid.Column="2">
 
-            <ItemsControl
-                Height="81"
-                HorizontalAlignment="Stretch"
-                Background="Black"
-                Foreground="White"
-                ItemsSource="{Binding CurrentChanges}"
-                />
-            <Button
-                Padding="3"
-                HorizontalAlignment="Center"
-                Command="{Binding UpdateRepoStatusCommand}"
-                Content="Clone"
-                />
-            <Button
-                Padding="3"
-                HorizontalAlignment="Center"
-                Command="{Binding StageFilesCommand}"
-                Content="Stage"
-                />
-        </StackPanel>
+        <ItemsControl
+            Grid.Row="1"
+            Grid.Column="3"
+            Height="135"
+            HorizontalAlignment="Stretch"
+            Background="Black"
+            Foreground="White"
+            ItemsSource="{Binding CurrentChanges}"
+            >
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <Button Content="+" />
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
         <Button
             Grid.Row="1"
             Grid.Column="2"
-            Margin="88,60,88,60"
             Padding="3"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Command="{Binding StageFilesCommand}"
+            Content="Stage"
+            />
+
+        <ItemsControl
+            Grid.Row="2"
+            Grid.Column="3"
+            Height="135"
+            HorizontalAlignment="Stretch"
+            Background="Black"
+            Foreground="White"
+            ItemsSource="{Binding StagedChanges}"
+            />
+        <Button
+            Grid.Row="3"
+            Grid.Column="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
             Command="{Binding CommitStagedFilesCommand}"
             Content="Commit"
             />
 
-        <Image Source="Assets/Banana.png" />
+        <Image Grid.Row="1" Source="Assets/Banana.png" />
+
+        <StackPanel Grid.Row="3" Grid.Column="3">
+            <Label Content="Commit Message" />
+            <TextBox
+                Grid.Row="3"
+                Grid.Column="2"
+                Width="200"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Top"
+                Foreground="Black"
+                Text="{Binding CommitMessage}"
+                />
+        </StackPanel>
     </Grid>
 </Window>

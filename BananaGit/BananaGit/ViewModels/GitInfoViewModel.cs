@@ -51,18 +51,27 @@ namespace BananaGit.ViewModels
 
         private readonly DispatcherTimer _updateGitInfoTimer = new();
 
+        private GithubUserInfo? githubUserInfo;
+
         public GitInfoViewModel() 
         {
             _updateGitInfoTimer.Tick += UpdateRepoStatus;
             _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);
             _updateGitInfoTimer.Start();
 
-            JsonDataManager.LoadUserInfo();
+            JsonDataManager.LoadUserInfo(ref githubUserInfo);
 
-            if (JsonDataManager.UserInfo?.SavedRepositories?[0] != null)
-                currentRepo = JsonDataManager.UserInfo.SavedRepositories[0];
+            if (githubUserInfo == null)
+            {
+                throw new Exception("ERROR: Data couldn't be loaded!");
+            }
 
-
+            if (githubUserInfo.SavedRepositories?[0] != null)
+            {
+                currentRepo = githubUserInfo.SavedRepositories[0];
+                LocalRepoFilePath = currentRepo.FilePath;
+            }
+              
             PropertyChanged += UpdateCurrentRepository;
         }
 
@@ -75,11 +84,13 @@ namespace BananaGit.ViewModels
         {
             if (e.PropertyName == nameof(RepoURL))
             {
-                JsonDataManager.SetCurrentRepoURL(RepoURL);
+                githubUserInfo.SavedRepositories[0].URL = RepoURL;
+                JsonDataManager.SaveUserInfo(githubUserInfo);
             }
             else if (e.PropertyName == nameof(LocalRepoFilePath))
             {
-                JsonDataManager.SetCurrentRepoFilePath(LocalRepoFilePath);
+                githubUserInfo.SavedRepositories[0].FilePath = LocalRepoFilePath;
+                JsonDataManager.SaveUserInfo(githubUserInfo);
             }
         }
 
@@ -92,17 +103,19 @@ namespace BananaGit.ViewModels
             try
             {
                 if (!hasCloned) return;
-                if (JsonDataManager.UserInfo.SavedRepositories == null) return;
-                if (JsonDataManager.UserInfo.SavedRepositories[0] == null) return;
+                if (githubUserInfo.SavedRepositories == null) return;
+                if (githubUserInfo.SavedRepositories[0] == null) return;
 
-                var localRepo = JsonDataManager.UserInfo.SavedRepositories[0];
+                var localRepo = githubUserInfo.SavedRepositories[0];
 
                 if (localRepo.FilePath == null || localRepo.FilePath == "") return;
 
                 CurrentChanges.Clear();
+                StagedChanges.Clear();
 
                 using var repo = new Repository(localRepo.FilePath);
                 var stats = repo.RetrieveStatus(new StatusOptions());
+
                 var untracked = stats.Untracked;
                 var added = stats.Added;
                 foreach (var file in untracked)
@@ -124,9 +137,9 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void CloneRepo()
         {
-            if (JsonDataManager.UserInfo == null) return;
+            if (githubUserInfo == null) return;
 
-            CloneRepo(JsonDataManager.UserInfo);
+            CloneRepo(githubUserInfo);
         }
 
         [RelayCommand]
@@ -164,10 +177,10 @@ namespace BananaGit.ViewModels
             {
                 using (var repo = new Repository(LocalRepoFilePath))
                 {
-                    Signature author = new Signature(JsonDataManager.UserInfo?.Username, "ceichert3114@gmail.com", DateTime.Now);
+                    Signature author = new Signature(githubUserInfo?.Username, "ceichert3114@gmail.com", DateTime.Now);
                     Signature committer = author;
 
-                    Commit commit = repo.Commit("User input here", author, committer);
+                    Commit commit = repo.Commit(CommitMessage, author, committer);
                 }
             }
             catch (Exception)
@@ -223,8 +236,8 @@ namespace BananaGit.ViewModels
                         CredentialsProvider = (url, username, types) => 
                         new UsernamePasswordCredentials
                         {
-                            Username = JsonDataManager.UserInfo?.Username,
-                            Password = JsonDataManager.UserInfo?.PersonalToken
+                            Username = githubUserInfo?.Username,
+                            Password = githubUserInfo?.PersonalToken
                         }
                     };
 
@@ -245,8 +258,8 @@ namespace BananaGit.ViewModels
                         CredentialsProvider = (url, username, types) => 
                         new UsernamePasswordCredentials
                         {
-                            Username = JsonDataManager.UserInfo?.Username,
-                            Password = JsonDataManager.UserInfo?.PersonalToken
+                            Username = githubUserInfo?.Username,
+                            Password = githubUserInfo?.PersonalToken
                         }
                     };
 
@@ -283,7 +296,9 @@ namespace BananaGit.ViewModels
                             }
                     }
                 };
-                JsonDataManager.SaveRepositoryInformation(LocalRepoFilePath, RepoURL);
+
+                //Save repo to github user info
+                githubUserInfo?.SavedRepositories?.Add(new(LocalRepoFilePath, RepoURL));
 
                 Repository.Clone(RepoURL, LocalRepoFilePath, options);
                 hasCloned = true;
@@ -292,6 +307,10 @@ namespace BananaGit.ViewModels
             {
                 Console.WriteLine($"Failed to Clone {ex.Message}");
                 throw;
+            }
+            finally
+            {
+                JsonDataManager.SaveUserInfo(githubUserInfo);
             }
         }
     }

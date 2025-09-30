@@ -9,60 +9,23 @@ using Newtonsoft.Json;
 
 namespace BananaGit.Utilities
 {
-    public static class JsonDataManager
+    public class JsonDataManager
     {
         public static bool HasPersonalToken = false;
 
         private const string USER_DATA_LOCATION = "C:\\BananaGit/";
         private const string USER_DATA_NAME = "UserInfo.txt";
 
-        public static GithubUserInfo? UserInfo;
-
-        public static void SetCurrentRepoURL(string url)
-        {
-            if (UserInfo == null) return;
-
-            if (UserInfo?.SavedRepositories == null)
-            {
-                UserInfo.SavedRepositories = new();
-                UserInfo?.SavedRepositories?.Add(new("", url));
-                return;
-            }
-
-            UserInfo.SavedRepositories[0].URL = url;
-        }
-        public static void SetCurrentRepoFilePath(string filePath)
-        {
-            if (UserInfo == null) return;
-
-            if (UserInfo?.SavedRepositories == null)
-            {
-                UserInfo.SavedRepositories = new();
-                UserInfo?.SavedRepositories?.Add(new(filePath, ""));
-                return;
-            }
-
-            UserInfo.SavedRepositories[0].FilePath = filePath;
-        }
-
-        public static void SaveGithubCredentials(string username, string personalToken)
-        {
-            UserInfo.Username = username;
-            UserInfo.PersonalToken = personalToken;
-
-            SaveUserInfo();
-        }
-
         /// <summary>
         /// Saves the users personal github token to a local folder
         /// </summary>
         /// <param name="token">The users github token</param>
-        private static void SaveUserInfo()
+        public static void SaveUserInfo(GithubUserInfo? userInfo)
         {
             TextWriter? writer = null;
 
-            //Create new user info if one doesn't already exsist
-            UserInfo ??= new GithubUserInfo();
+            if (userInfo == null) return;
+            
             try
             {
                 //Create directory before trying to write to file
@@ -71,7 +34,7 @@ namespace BananaGit.Utilities
                     Directory.CreateDirectory(USER_DATA_LOCATION);
                 }
 
-                string jsonString = JsonConvert.SerializeObject(UserInfo, Formatting.Indented);
+                string jsonString = JsonConvert.SerializeObject(userInfo, Formatting.Indented);
                 writer = new StreamWriter(USER_DATA_LOCATION + USER_DATA_NAME, false);
                 writer.Write(jsonString);
             }
@@ -81,9 +44,10 @@ namespace BananaGit.Utilities
             }
         }
 
-        public static void LoadUserInfo()
+        public static void LoadUserInfo(ref GithubUserInfo? userInfo)
         {
             TextReader? reader = null;
+
             try
             {
                 //If directory hasn't been created yet, return nothing
@@ -95,8 +59,10 @@ namespace BananaGit.Utilities
 
                 reader = new StreamReader(USER_DATA_LOCATION + USER_DATA_NAME);
                 var fileContents = reader.ReadToEnd();
-                GithubUserInfo userInfo = JsonConvert.DeserializeObject<GithubUserInfo>(fileContents) ?? throw new NullReferenceException();
-                UserInfo = userInfo; 
+
+                //If data couldn't be loaded, convert github info to null
+                GithubUserInfo? loadedInfo = JsonConvert.DeserializeObject<GithubUserInfo>(fileContents) ?? null;
+                userInfo = loadedInfo; 
                 HasPersonalToken = true;
             }
             catch(Exception ex)
@@ -107,40 +73,6 @@ namespace BananaGit.Utilities
             {
                 reader?.Close();
             }
-        }
-
-        /// <summary>
-        /// Save a cloned repo to user info
-        /// </summary>
-        /// <param name="localFilePath"></param>
-        /// <param name="repoURL"></param>
-        public static void SaveRepositoryInformation(string localFilePath, string repoURL)
-        {
-            SaveableRepository repo = new(localFilePath, repoURL);
-            UserInfo?.SavedRepositories?.Add(repo);
-
-            SaveUserInfo();
-        }
-    }
-
-    public class GithubUserInfo
-    {
-        public string? Username { get; set; }
-        public string? PersonalToken { get; set; }
-
-        public List<SaveableRepository>? SavedRepositories { get; set; }
-    }
-    public class SaveableRepository(string path, string url)
-    {
-        public string FilePath { get; set; } = path;
-        public string URL { get; set; } = url;
-        public void SetURL(string url)
-        {
-            URL = url;
-        }
-        public void SetFilePath(string filePath)
-        {
-            FilePath = filePath;
         }
     }
 }

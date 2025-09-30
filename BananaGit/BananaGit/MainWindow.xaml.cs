@@ -13,17 +13,19 @@ namespace BananaGit
         private GitInfoViewModel gitInfoVM = new();
         private EnterCredentialsView enterCredentialsView = new();
 
+        private GithubUserInfo? userInfo = new();
+
         public MainWindow()
         {
             InitializeComponent();
 
             DataContext = gitInfoVM;
 
-            //Get token and check if it has been previously saved
-            JsonDataManager.LoadUserInfo();
+            //Load user info
+            JsonDataManager.LoadUserInfo(ref userInfo);
 
-            //Display prompt to enter personal token
-            if (JsonDataManager.UserInfo == null)
+            //If no user info could be loaded
+            if (userInfo == null)
             {
                 enterCredentialsView.ShowDialog();
                 //enterCredentialsView.Owner = this;
