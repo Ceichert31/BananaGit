@@ -12,26 +12,39 @@
     mc:Ignorable="d"
     >
     <Grid>
-        <Border
+
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <ScrollViewer
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
-            Background="#FFE135"
-            BorderBrush="Black"
-            BorderThickness="3"
+            CanContentScroll="True"
+            HorizontalScrollBarVisibility="Auto"
+            VerticalScrollBarVisibility="Auto"
             >
-            <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding CommitHistory}">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <StackPanel Orientation="Horizontal">
-                                <Label Content="{Binding Message}" />
-                                <Label Content="{Binding Author}" />
-                                <Label Content="{Binding Date}" />
+            <ItemsControl ItemsSource="{Binding CommitHistory}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="White" BorderThickness="3">
+                            <StackPanel Background="Black" Orientation="Vertical">
+                                <Label
+                                    Content="{Binding Message}"
+                                    FontWeight="Bold"
+                                    Foreground="White"
+                                    />
+                                <Label Content="{Binding Author}" Foreground="White" />
+                                <Label Content="{Binding Date}" Foreground="White" />
                             </StackPanel>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </ScrollViewer>
-        </Border>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </UserControl>

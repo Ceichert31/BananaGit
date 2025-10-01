@@ -28,11 +28,23 @@
             <ColumnDefinition Width="1.5*" />
         </Grid.ColumnDefinitions>
 
+        <!--  Render first to avoid overlap  -->
+        <Image
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            Opacity="0.35"
+            Source="Assets/Banana.png"
+            />
+
         <!--  Tool bar  -->
         <ContentControl
             x:Name="ToolbarContent"
             Grid.Row="0"
-            Grid.ColumnSpan="3"
+            Grid.ColumnSpan="4"
             Content="{Binding ToolbarView}"
             />
 
@@ -41,7 +53,7 @@
             x:Name="GitChangesContent"
             Grid.Row="1"
             Grid.RowSpan="2"
-            Grid.Column="3"
+            Grid.Column="2"
             Content="{Binding GitChangesView}"
             />
 
@@ -49,7 +61,7 @@
         <ContentControl
             x:Name="GitCommitContent"
             Grid.Row="3"
-            Grid.Column="3"
+            Grid.Column="2"
             Content="{Binding CommitView}"
             />
 
@@ -63,15 +75,12 @@
             Content="{Binding CommitHistoryView}"
             />
 
-        <Image
+        <GridSplitter
             Grid.Row="1"
             Grid.RowSpan="3"
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
-            Margin="-166,0,0,112"
+            Grid.Column="2"
+            Width="5"
             HorizontalAlignment="Left"
-            Opacity="0.35"
-            Source="Assets/Banana.png"
             />
     </Grid>
 </Window>
