@@ -26,6 +26,9 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private string _repoURL = string.Empty;
 
+        //Conventional Commit drop-down
+        [ObservableProperty]
+        private string _selectedCommitHeader = string.Empty;
 
         //Branches
         [ObservableProperty]
@@ -187,7 +190,7 @@ namespace BananaGit.ViewModels
                     Signature committer = author;
 
                     //Author commit
-                    Commit commit = repo.Commit(CommitMessage, author, committer);
+                    Commit commit = repo.Commit($"{SelectedCommitHeader} {CommitMessage}", author, committer);
 
                     //Clear commit message
                     CommitMessage = string.Empty;

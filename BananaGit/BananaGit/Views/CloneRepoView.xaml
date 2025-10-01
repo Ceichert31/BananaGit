@@ -48,11 +48,11 @@
                 IsEnabled="{Binding CanClone}"
                 />
 
-            <Label
-                HorizontalAlignment="Center"
-                Content="Selected Directory is not empty!"
-                Visibility="{Binding IsEmptyDirectory}"
-                />
+            <!-- <Label
+     HorizontalAlignment="Center"
+     Content="Selected Directory is not empty!"
+     Visibility="{Binding IsEmptyDirectory}"
+     />-->
         </StackPanel>
     </Grid>
 </Window>

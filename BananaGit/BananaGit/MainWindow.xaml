@@ -98,7 +98,7 @@
             <Label Content="Commit Message" />
 
             <DockPanel>
-                <ComboBox Width="70">
+                <ComboBox Width="70" Text="{Binding SelectedCommitHeader, Mode=TwoWay}">
                     <ComboBoxItem Content="feat:" />
                     <ComboBoxItem Content="fix:" />
                     <ComboBoxItem Content="refactor:" />
