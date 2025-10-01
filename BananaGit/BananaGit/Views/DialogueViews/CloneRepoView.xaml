@@ -11,6 +11,7 @@
     Height="300"
     d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
     Background="#FFEA78"
+    WindowStartupLocation="CenterOwner"
     mc:Ignorable="d"
     >
     <Grid>

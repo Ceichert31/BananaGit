@@ -35,9 +35,9 @@ namespace BananaGit.ViewModels
         private string _branchName = string.Empty;
 
         [ObservableProperty]
-        private ObservableCollection<string> _currentChanges = new();
+        private ObservableCollection<string> _currentChanges = [];
         [ObservableProperty]
-        private ObservableCollection<string> _stagedChanges = new();
+        private ObservableCollection<string> _stagedChanges = [];
 
         private SaveableRepository currentRepo = new("","");
 
@@ -100,6 +100,8 @@ namespace BananaGit.ViewModels
         private void UpdateCurrentRepository(object? sender, PropertyChangedEventArgs e)
         {
             if (!hasCloned) return;
+
+            if (githubUserInfo == null) return;
 
             if (e.PropertyName == nameof(RepoURL))
             {
@@ -356,7 +358,7 @@ namespace BananaGit.ViewModels
         public void OpenCloneWindow()
         {
             //Notify that we want to open window
-            openCloneWindow.Invoke(this, null);
+            openCloneWindow.Invoke(this, new());
         }
 
         [RelayCommand]
