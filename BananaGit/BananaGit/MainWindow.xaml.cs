@@ -10,7 +10,7 @@ namespace BananaGit
     /// </summary>
     public partial class MainWindow : Window
     {
-        private EventHandler openCloneWindow;
+        private readonly EventHandler openCloneWindow;
 
         private GitInfoViewModel? gitInfoVM;
         private EnterCredentialsView? enterCredentialsView;
@@ -47,6 +47,7 @@ namespace BananaGit
         }
         private void OpenCloneWindow(object? sender, EventArgs e)
         {
+            cloneRepoView = new();
             cloneRepoView?.ShowDialog();
         }
     }

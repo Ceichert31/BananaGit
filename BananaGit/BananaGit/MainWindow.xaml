@@ -26,13 +26,13 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="1.5*" />
         </Grid.ColumnDefinitions>
 
         <!--  Toolbar  -->
         <ToolBar Grid.ColumnSpan="3">
             <Image Source="Assets/Banana.png" />
-            <Button Command="{Binding CloneRepoCommand}" Content="Clone" />
+            <Button Command="{Binding OpenCloneWindowCommand}" Content="Clone" />
             <Button Command="{Binding PushFilesCommand}" Content="Push" />
             <Button Command="{Binding PullChangesCommand}" Content="Pull" />
         </ToolBar>
@@ -96,15 +96,23 @@
         <Image Grid.Row="1" Source="Assets/Banana.png" />
         <StackPanel Grid.Row="3" Grid.Column="3">
             <Label Content="Commit Message" />
-            <TextBox
-                Grid.Row="3"
-                Grid.Column="2"
-                Width="200"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Top"
-                Foreground="Black"
-                Text="{Binding CommitMessage}"
-                />
+
+            <DockPanel>
+                <ComboBox Width="70">
+                    <ComboBoxItem Content="feat:" />
+                    <ComboBoxItem Content="fix:" />
+                    <ComboBoxItem Content="refactor:" />
+                    <ComboBoxItem Content="chore:" />
+                </ComboBox>
+                <TextBox
+                    Grid.Row="3"
+                    Grid.Column="2"
+                    HorizontalAlignment="Stretch"
+                    Foreground="Black"
+                    Text="{Binding CommitMessage}"
+                    />
+            </DockPanel>
+
             <Button
                 Margin="0,10,0,0"
                 HorizontalAlignment="Center"

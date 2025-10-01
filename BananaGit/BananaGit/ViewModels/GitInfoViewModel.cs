@@ -15,14 +15,9 @@ namespace BananaGit.ViewModels
     {
         #region Properties
         [ObservableProperty]
-        private string _usernameInput = string.Empty;
-        [ObservableProperty]
         private string _repoName = string.Empty;
         [ObservableProperty]
         private string _commitMessage = string.Empty;
-
-        [ObservableProperty]
-        private string _repoInfo = string.Empty;
 
 
         //Clone properties
@@ -41,11 +36,16 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _stagedChanges = new();
 
-        private SaveableRepository currentRepo;
+        private SaveableRepository currentRepo = new("","");
+
+        private int currentRepoIndex = 0;
 
         //Flags
         [ObservableProperty]
         private bool _canClone = false;
+
+        [ObservableProperty]
+        private bool _isEmptyDirectory = false;
 
         private bool hasCloned = false;
         #endregion
@@ -64,21 +64,29 @@ namespace BananaGit.ViewModels
 
             JsonDataManager.LoadUserInfo(ref githubUserInfo);
 
+            this.openCloneWindow = openCloneWindow;
+            PropertyChanged += UpdateCurrentRepository;
+
             if (githubUserInfo == null)
             {
                 throw new Exception("ERROR: Data couldn't be loaded!");
             }
 
-            if (githubUserInfo.SavedRepositories?[0] != null)
+            //If no repos are cloned, display clone repo text
+            if (githubUserInfo.SavedRepositories.Count == 0)
             {
-                currentRepo = githubUserInfo.SavedRepositories[0];
+                hasCloned = false;
+                return;
+            }
+
+            //Load current repo data if there is an already opened repo
+            if (githubUserInfo.SavedRepositories?[currentRepoIndex] != null)
+            {
+                currentRepo = githubUserInfo.SavedRepositories[currentRepoIndex];
                 LocalRepoFilePath = currentRepo.FilePath;
                 RepoURL = currentRepo.URL;
                 hasCloned = true;
             }
-
-            this.openCloneWindow = openCloneWindow;
-            PropertyChanged += UpdateCurrentRepository;
         }
 
         private void UpdateRepoStatus(object? sender, EventArgs e)
@@ -88,14 +96,16 @@ namespace BananaGit.ViewModels
 
         private void UpdateCurrentRepository(object? sender, PropertyChangedEventArgs e)
         {
+            if (!hasCloned) return;
+
             if (e.PropertyName == nameof(RepoURL))
             {
-                githubUserInfo.SavedRepositories[0].URL = RepoURL;
+                githubUserInfo.SavedRepositories[currentRepoIndex].URL = RepoURL;
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             }
             else if (e.PropertyName == nameof(LocalRepoFilePath))
             {
-                githubUserInfo.SavedRepositories[0].FilePath = LocalRepoFilePath;
+                githubUserInfo.SavedRepositories[currentRepoIndex].FilePath = LocalRepoFilePath;
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             }
         }
@@ -106,15 +116,12 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void UpdateRepoStatus()
         {
+            if (!hasCloned) return;
             try
             {
-                if (!hasCloned) return;
-                if (githubUserInfo.SavedRepositories == null) return;
-                if (githubUserInfo.SavedRepositories[0] == null) return;
+                var localRepo = githubUserInfo?.SavedRepositories[currentRepoIndex];
 
-                var localRepo = githubUserInfo.SavedRepositories[0];
-
-                if (localRepo.FilePath == null || localRepo.FilePath == "") return;
+                if (localRepo?.FilePath == null || localRepo.FilePath == "") return;
 
                 if (!Directory.Exists(localRepo.FilePath)) return;
 
@@ -165,48 +172,7 @@ namespace BananaGit.ViewModels
             }
         }
 
-        [RelayCommand]
-        public void CloneRepo()
-        {
-            if (githubUserInfo == null) return;
-
-            //Notify that we want to open window
-            openCloneWindow.Invoke(this, null);
-
-            CloneRepo(githubUserInfo);
-        }
-
-        /// <summary>
-        /// Opens a windows prompt to select the desired file directory
-        /// </summary>
-        [RelayCommand]
-        public void ChooseCloneDirectory()
-        {
-            OpenFolderDialog dialog = new OpenFolderDialog();
-            dialog.Multiselect = false;
-
-            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-
-            if (dialog.ShowDialog() == true)
-            {
-                string selectedFilePath = dialog.FolderName;
-
-                CanClone = true;
-                LocalRepoFilePath = dialog.FolderName;
-
-                //Check if directory is empty
-                /* if (!Directory.EnumerateFiles(selectedFilePath).Any()) 
-                 {
-                     CanClone = true;
-                     LocalRepoFilePath = dialog.FolderName;
-                 }
-                 else
-                 {
-                     CanClone = false;
-                 }*/
-            }
-        }
-
+       
         /// <summary>
         /// Commits all staged files and makes them ready to push
         /// </summary>
@@ -382,6 +348,55 @@ namespace BananaGit.ViewModels
             }
             return true;
         }
+
+        [RelayCommand]
+        public void OpenCloneWindow()
+        {
+            //Notify that we want to open window
+            openCloneWindow.Invoke(this, null);
+        }
+
+        [RelayCommand]
+        public void CloneRepo()
+        {
+            if (githubUserInfo == null) return;
+
+            CloneRepo(githubUserInfo);
+        }
+
+        /// <summary>
+        /// Opens a windows prompt to select the desired file directory
+        /// </summary>
+        [RelayCommand]
+        public void ChooseCloneDirectory()
+        {
+            OpenFolderDialog dialog = new OpenFolderDialog();
+            dialog.Multiselect = false;
+
+            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+
+            if (dialog.ShowDialog() == true)
+            {
+                string selectedFilePath = dialog.FolderName;
+
+                CanClone = true;
+                LocalRepoFilePath = dialog.FolderName;
+
+                //Check if directory is empty
+                if (!Directory.EnumerateFiles(selectedFilePath).Any())
+                {
+                    CanClone = true;
+                    LocalRepoFilePath = dialog.FolderName;
+                    IsEmptyDirectory = true;
+                }
+                else
+                {
+                    CanClone = false;
+                    IsEmptyDirectory = false;
+                }
+            }
+        }
+
 
         /// <summary>
         /// Clone a repository

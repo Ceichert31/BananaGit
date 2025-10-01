@@ -17,14 +17,6 @@
         <!--  Clone Section  -->
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal">
-                <Label Content="Username" />
-                <TextBox
-                    Width="150"
-                    Foreground="Black"
-                    Text="{Binding UsernameInput}"
-                    />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
                 <Label Content="Repo URL" />
                 <TextBox
                     Width="150"
@@ -50,10 +42,16 @@
             <Button
                 Padding="3"
                 HorizontalAlignment="Center"
+                Click="CloseWindow_Click"
                 Command="{Binding CloneRepoCommand}"
                 Content="Clone"
-                Click="CloseWindow_Click"
                 IsEnabled="{Binding CanClone}"
+                />
+
+            <Label
+                HorizontalAlignment="Center"
+                Content="Selected Directory is not empty!"
+                Visibility="{Binding IsEmptyDirectory}"
                 />
         </StackPanel>
     </Grid>

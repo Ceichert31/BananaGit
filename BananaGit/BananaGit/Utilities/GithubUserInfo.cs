@@ -10,7 +10,7 @@ namespace BananaGit.Utilities
     {
         public string? Username { get; set; }
         public string? PersonalToken { get; set; }
-        public List<SaveableRepository>? SavedRepositories { get; set; }
+        public List<SaveableRepository> SavedRepositories { get; set; } = new();
     }
     public class SaveableRepository(string path, string url)
     {
