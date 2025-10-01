@@ -14,7 +14,7 @@ namespace BananaGit.Utilities
         public static bool HasPersonalToken = false;
 
         private const string USER_DATA_LOCATION = "C:\\BananaGit/";
-        private const string USER_DATA_NAME = "UserInfo.txt";
+        private const string USER_DATA_NAME = "UserInfo.json";
 
         /// <summary>
         /// Saves the users personal github token to a local folder

@@ -6,6 +6,7 @@
     xmlns:local="clr-namespace:BananaGit"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
+    xmlns:views="clr-namespace:BananaGit.Views"
     Title="MainWindow"
     Width="800"
     Height="450"
@@ -37,68 +38,19 @@
             <Button Command="{Binding PullChangesCommand}" Content="Pull" />
         </ToolBar>
 
-        <!--  Repo Status  -->
-        <ScrollViewer
+        <ContentControl
+            x:Name="GitChangesContent"
             Grid.Row="1"
+            Grid.RowSpan="2"
             Grid.Column="3"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            VerticalScrollBarVisibility="Auto"
-            >
-            <ItemsControl
-                Background="Black"
-                Foreground="White"
-                ItemsSource="{Binding CurrentChanges}"
-                />
-        </ScrollViewer>
-
-        <GridSplitter
-            Grid.Row="1"
-            Grid.Column="3"
-            Height="5"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Bottom"
             />
 
-        <!--  <ItemsControl.ItemTemplate>
-     <DataTemplate>
-         <StackPanel Orientation="Horizontal">
-             <Button HorizontalAlignment="Left" Content="+" />
-             <Label Content="Placeholder Name" Foreground="Black" />
-         </StackPanel>
-     </DataTemplate>
- </ItemsControl.ItemTemplate>-->
-
-        <Button
-            Grid.Row="1"
-            Grid.Column="2"
-            Padding="3"
-            HorizontalAlignment="Right"
-            VerticalAlignment="Bottom"
-            Command="{Binding StageFilesCommand}"
-            Content="Stage"
-            />
-
-        <ScrollViewer
-            Grid.Row="2"
-            Grid.Column="3"
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            VerticalScrollBarVisibility="Auto"
-            >
-            <ItemsControl
-                Background="Black"
-                Foreground="White"
-                ItemsSource="{Binding StagedChanges}"
-                />
-        </ScrollViewer>
-
-        <Image Grid.Row="1" Source="Assets/Banana.png" />
+        <!--  Commit section  -->
         <StackPanel Grid.Row="3" Grid.Column="3">
             <Label Content="Commit Message" />
-
             <DockPanel>
                 <ComboBox Width="70" Text="{Binding SelectedCommitHeader, Mode=TwoWay}">
+                    <ComboBoxItem Content="" IsSelected="true" />
                     <ComboBoxItem Content="feat:" />
                     <ComboBoxItem Content="fix:" />
                     <ComboBoxItem Content="refactor:" />
@@ -127,5 +79,16 @@
                 Content="Push"
                 />
         </StackPanel>
+
+        <Image
+            Grid.Row="1"
+            Grid.RowSpan="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Margin="-166,0,0,112"
+            HorizontalAlignment="Left"
+            Opacity="0.35"
+            Source="Assets/Banana.png"
+            />
     </Grid>
 </Window>
