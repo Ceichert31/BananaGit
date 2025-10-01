@@ -229,15 +229,12 @@ namespace BananaGit.ViewModels
             {
                 var files = Directory.EnumerateFiles(currentRepo.FilePath);
 
-                using (var repo = new Repository(LocalRepoFilePath))
+                using var repo = new Repository(LocalRepoFilePath);
+                foreach (var file in files)
                 {
-                    foreach (var file in files)
-                    {
-                        var fileName = Path.GetFileName(file);
-                        repo.Index.Add(fileName);
-                        //StagedChanges.Add(fileName);
-                        repo.Index.Write();
-                    }
+                    var fileName = Path.GetFileName(file);
+                    repo.Index.Add(fileName);
+                    repo.Index.Write();
                 }
             }
             catch (LibGit2SharpException ex)
@@ -252,52 +249,50 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                using (var repo = new Repository(currentRepo.FilePath))
+                using var repo = new Repository(currentRepo.FilePath);
+                var remote = repo.Network.Remotes["origin"];
+                if (remote != null)
                 {
-                    var remote = repo.Network.Remotes["origin"];
-                    if (remote != null)
-                    {
-                        repo.Network.Remotes.Remove("origin");
-                    }
-
-                    repo.Network.Remotes.Add("origin", RepoURL);
-                    remote = repo.Network.Remotes["origin"];
-                    if (remote == null) return;
-
-                    FetchOptions options = new FetchOptions
-                    {
-                        CredentialsProvider = (url, username, types) => 
-                        new UsernamePasswordCredentials
-                        {
-                            Username = githubUserInfo?.Username,
-                            Password = githubUserInfo?.PersonalToken
-                        }
-                    };
-
-                    var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
-                    Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
-
-                    var localBranchName = string.IsNullOrEmpty(BranchName) ? "main" : BranchName;
-                    var localBranch = repo.Branches[localBranchName];
-
-                    if (localBranch == null) return;
-
-                    repo.Branches.Update(localBranch, 
-                        b => b.Remote = remote.Name, 
-                        b => b.UpstreamBranch = localBranch.CanonicalName);
-
-                    var pushOptions = new PushOptions
-                    {
-                        CredentialsProvider = (url, username, types) => 
-                        new UsernamePasswordCredentials
-                        {
-                            Username = githubUserInfo?.Username,
-                            Password = githubUserInfo?.PersonalToken
-                        }
-                    };
-
-                    repo.Network.Push(localBranch, pushOptions);
+                    repo.Network.Remotes.Remove("origin");
                 }
+
+                repo.Network.Remotes.Add("origin", RepoURL);
+                remote = repo.Network.Remotes["origin"];
+                if (remote == null) return;
+
+                FetchOptions options = new FetchOptions
+                {
+                    CredentialsProvider = (url, username, types) =>
+                    new UsernamePasswordCredentials
+                    {
+                        Username = githubUserInfo?.Username,
+                        Password = githubUserInfo?.PersonalToken
+                    }
+                };
+
+                var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
+                Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
+
+                var localBranchName = string.IsNullOrEmpty(BranchName) ? "main" : BranchName;
+                var localBranch = repo.Branches[localBranchName];
+
+                if (localBranch == null) return;
+
+                repo.Branches.Update(localBranch,
+                    b => b.Remote = remote.Name,
+                    b => b.UpstreamBranch = localBranch.CanonicalName);
+
+                var pushOptions = new PushOptions
+                {
+                    CredentialsProvider = (url, username, types) =>
+                    new UsernamePasswordCredentials
+                    {
+                        Username = githubUserInfo?.Username,
+                        Password = githubUserInfo?.PersonalToken
+                    }
+                };
+
+                repo.Network.Push(localBranch, pushOptions);
             }
             catch (LibGit2SharpException ex)
             {

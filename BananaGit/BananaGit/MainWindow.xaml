@@ -28,18 +28,6 @@
             <ColumnDefinition Width="1.5*" />
         </Grid.ColumnDefinitions>
 
-        <!--  Render first to avoid overlap  -->
-        <Image
-            Grid.Row="1"
-            Grid.RowSpan="2"
-            Grid.Column="0"
-            Grid.ColumnSpan="2"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
-            Opacity="0.35"
-            Source="Assets/Banana.png"
-            />
-
         <!--  Tool bar  -->
         <ContentControl
             x:Name="ToolbarContent"
@@ -73,6 +61,20 @@
             Grid.Column="0"
             Grid.ColumnSpan="2"
             Content="{Binding CommitHistoryView}"
+            />
+
+        <!--  Render first to avoid overlap  -->
+        <Image
+            Grid.Row="1"
+            Grid.RowSpan="2"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Margin="-10,0,0,0"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Center"
+            IsHitTestVisible="False"
+            Opacity="0.35"
+            Source="Assets/Banana.png"
             />
 
         <GridSplitter
