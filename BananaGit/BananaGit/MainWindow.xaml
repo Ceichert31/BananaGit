@@ -53,6 +53,16 @@
             Content="{Binding CommitView}"
             />
 
+        <!--  Commit History  -->
+        <ContentControl
+            x:Name="CommitHistoryContent"
+            Grid.Row="1"
+            Grid.RowSpan="3"
+            Grid.Column="0"
+            Grid.ColumnSpan="2"
+            Content="{Binding CommitHistoryView}"
+            />
+
         <Image
             Grid.Row="1"
             Grid.RowSpan="3"

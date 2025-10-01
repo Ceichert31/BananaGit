@@ -39,6 +39,9 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _stagedChanges = [];
 
+        [ObservableProperty]
+        private ObservableCollection<GitCommitInfo> _commitHistory = [];
+
         private SaveableRepository currentRepo = new("","");
 
         private int currentRepoIndex = 0;
@@ -168,6 +171,20 @@ namespace BananaGit.ViewModels
                 foreach (var file in added)
                 {
                     StagedChanges.Add($"+{file.FilePath}" ?? "N/A");
+                }
+
+                CommitHistory.Clear();
+                //Update list of all commits
+                var commits = repo.Commits;
+                foreach (var item in commits)
+                {
+                    GitCommitInfo commitInfo = new();
+                    commitInfo.Author = item.Author.ToString();
+                    commitInfo.Date = 
+                        $"{item.Author.When.DateTime.ToLongTimeString()} {item.Author.When.DateTime.ToShortDateString()}";
+                    commitInfo.Message = item.Message;
+                    commitInfo.Commit = item.Id.ToString();
+                    CommitHistory.Add(commitInfo);
                 }
             }
             catch (LibGit2SharpException ex)
@@ -402,7 +419,6 @@ namespace BananaGit.ViewModels
             }
         }
 
-
         /// <summary>
         /// Clone a repository
         /// </summary>
@@ -443,5 +459,13 @@ namespace BananaGit.ViewModels
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             }
         }
+    }
+
+    public class GitCommitInfo
+    {
+        public string? Author { get; set; }
+        public string? Date { get; set; }
+        public string? Message { get; set; }
+        public string? Commit { get; set; }
     }
 }

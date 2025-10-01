@@ -10,6 +10,7 @@ namespace BananaGit.ViewModels
         public ToolbarView? ToolbarView { get; set; }
         public GitChangesView? GitChangesView { get; set; }
         public CommitView? CommitView { get; set; }
+        public CommitHistoryView? CommitHistoryView { get; set; }
 
         private readonly EventHandler openCloneWindow;
 
@@ -43,6 +44,10 @@ namespace BananaGit.ViewModels
                 DataContext = gitInfoVM
             };
             CommitView = new CommitView
+            {
+                DataContext = gitInfoVM
+            };
+            CommitHistoryView = new CommitHistoryView
             {
                 DataContext = gitInfoVM
             };
