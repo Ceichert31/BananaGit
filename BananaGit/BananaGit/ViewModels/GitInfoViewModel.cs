@@ -42,10 +42,6 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private ObservableCollection<GitCommitInfo> _commitHistory = [];
 
-        private SaveableRepository currentRepo = new("","");
-
-        private int currentRepoIndex = 0;
-
         //Flags
         [ObservableProperty]
         private bool _canClone = false;
@@ -87,20 +83,19 @@ namespace BananaGit.ViewModels
             else
             {  
                 //Load current repo data if there is an already opened repo
-                currentRepo = githubUserInfo.SavedRepository;
-                LocalRepoFilePath = currentRepo.FilePath;
-                RepoURL = currentRepo.URL;
+                LocalRepoFilePath = githubUserInfo.SavedRepository.FilePath;
+                RepoURL = githubUserInfo.SavedRepository.URL;
                 hasCloned = true;
             }
 
-            if (!Directory.Exists(currentRepo.FilePath))
+            if (!Directory.Exists(LocalRepoFilePath))
             {
                 hasCloned |= false;
                 return;
             }
 
             //Check if directory is empty
-            if (!Directory.EnumerateFiles(currentRepo.FilePath).Any())
+            if (!Directory.EnumerateFiles(LocalRepoFilePath).Any())
             {
                 hasCloned = false;
             }
@@ -277,7 +272,7 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                using var repo = new Repository(currentRepo.FilePath);
+                using var repo = new Repository(LocalRepoFilePath);
                 var remote = repo.Network.Remotes["origin"];
                 if (remote != null)
                 {
