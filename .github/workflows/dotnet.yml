@@ -28,4 +28,4 @@ jobs:
     - name: Build
       run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore 
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
