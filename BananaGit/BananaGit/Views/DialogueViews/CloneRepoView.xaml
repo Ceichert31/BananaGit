@@ -15,45 +15,30 @@
     mc:Ignorable="d"
     >
     <Grid>
-        <!--  Clone Section  -->
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Repo URL" />
-                <TextBox
-                    Width="150"
-                    Foreground="Black"
-                    Text="{Binding RepoURL}"
-                    />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Location" />
-                <TextBox
-                    Width="100"
-                    Foreground="Black"
-                    Text="{Binding LocalRepoFilePath}"
-                    />
-                <Button
-                    Padding="3"
-                    HorizontalAlignment="Center"
-                    Command="{Binding ChooseCloneDirectoryCommand}"
-                    Content="Directory"
-                    />
-            </StackPanel>
+            <ContentControl Content="{Binding}">
+                <ContentControl.Style>
+                    <Style TargetType="ContentControl">
+                        <Setter Property="ContentTemplate" Value="{StaticResource CloneRepoTemplate}" />
 
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding DirectoryHasFiles}" Value="True">
+                                <Setter Property="ContentTemplate" Value="{StaticResource DirectoryNotEmptyTemplate}" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ContentControl.Style>
+            </ContentControl>
             <Button
                 Padding="3"
                 HorizontalAlignment="Center"
+                VerticalAlignment="Center"
                 Click="CloseWindow_Click"
                 Command="{Binding CloneRepoCommand}"
                 Content="Clone"
                 IsEnabled="{Binding CanClone}"
                 />
-
-            <!-- <Label
-     HorizontalAlignment="Center"
-     Content="Selected Directory is not empty!"
-     Visibility="{Binding IsEmptyDirectory}"
-     />-->
         </StackPanel>
+
     </Grid>
 </Window>

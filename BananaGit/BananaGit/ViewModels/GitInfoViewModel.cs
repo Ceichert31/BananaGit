@@ -51,7 +51,7 @@ namespace BananaGit.ViewModels
         private bool _canClone = false;
 
         [ObservableProperty]
-        private bool _isEmptyDirectory = false;
+        private bool _directoryHasFiles = false;
 
         private bool hasCloned = false;
         #endregion
@@ -93,6 +93,22 @@ namespace BananaGit.ViewModels
                 RepoURL = currentRepo.URL;
                 hasCloned = true;
             }
+
+            if (!Directory.Exists(currentRepo.FilePath))
+            {
+                hasCloned |= false;
+                return;
+            }
+
+            //Check if directory is empty
+            if (!Directory.EnumerateFiles(currentRepo.FilePath).Any())
+            {
+                hasCloned = false;
+            }
+            else
+            {
+                hasCloned = true;
+            }
         }
 
         private void UpdateRepoStatus(object? sender, EventArgs e)
@@ -127,17 +143,29 @@ namespace BananaGit.ViewModels
             if (!hasCloned) return;
             try
             {
-                var localRepo = githubUserInfo?.SavedRepositories[currentRepoIndex];
+                if (LocalRepoFilePath == null || LocalRepoFilePath == "") return;
 
-                if (localRepo?.FilePath == null || localRepo.FilePath == "") return;
-
-                if (!Directory.Exists(localRepo.FilePath)) return;
+                if (!Directory.Exists(LocalRepoFilePath)) return;
 
                 CurrentChanges.Clear();
                 StagedChanges.Clear();
 
-                using var repo = new Repository(localRepo.FilePath);
+                using var repo = new Repository(LocalRepoFilePath);
                 var stats = repo.RetrieveStatus(new StatusOptions());
+
+                CommitHistory.Clear();
+                //Update list of all commits
+                var commits = repo.Commits;
+                foreach (var item in commits)
+                {
+                    GitCommitInfo commitInfo = new();
+                    commitInfo.Author = item.Author.ToString();
+                    commitInfo.Date =
+                        $"{item.Author.When.DateTime.ToLongTimeString()} {item.Author.When.DateTime.ToShortDateString()}";
+                    commitInfo.Message = item.Message;
+                    commitInfo.Commit = item.Id.ToString();
+                    CommitHistory.Add(commitInfo);
+                }
 
                 //If no changes have been made, don't do anything
                 if (!stats.IsDirty) return;
@@ -171,20 +199,6 @@ namespace BananaGit.ViewModels
                 foreach (var file in added)
                 {
                     StagedChanges.Add($"+{file.FilePath}" ?? "N/A");
-                }
-
-                CommitHistory.Clear();
-                //Update list of all commits
-                var commits = repo.Commits;
-                foreach (var item in commits)
-                {
-                    GitCommitInfo commitInfo = new();
-                    commitInfo.Author = item.Author.ToString();
-                    commitInfo.Date = 
-                        $"{item.Author.When.DateTime.ToLongTimeString()} {item.Author.When.DateTime.ToShortDateString()}";
-                    commitInfo.Message = item.Message;
-                    commitInfo.Commit = item.Id.ToString();
-                    CommitHistory.Add(commitInfo);
                 }
             }
             catch (LibGit2SharpException ex)
@@ -230,11 +244,24 @@ namespace BananaGit.ViewModels
                 var files = Directory.EnumerateFiles(currentRepo.FilePath);
 
                 using var repo = new Repository(LocalRepoFilePath);
+
+                var removed = repo.RetrieveStatus().Removed;
+                var missing = repo.RetrieveStatus().Missing;
+
                 foreach (var file in files)
                 {
                     var fileName = Path.GetFileName(file);
                     repo.Index.Add(fileName);
                     repo.Index.Write();
+                    //Commands.Stage(repo, file);
+                }
+
+                foreach (var file in missing)
+                {
+                /*    var fileName = Path.GetFileName();
+                    repo.Index.Add(fileName);
+                    repo.Index.Write();*/
+                    Commands.Stage(repo, file.FilePath);
                 }
             }
             catch (LibGit2SharpException ex)
@@ -387,30 +414,37 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void ChooseCloneDirectory()
         {
-            OpenFolderDialog dialog = new OpenFolderDialog();
-            dialog.Multiselect = false;
-
-            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-
-            if (dialog.ShowDialog() == true)
+            try
             {
-                string selectedFilePath = dialog.FolderName;
+                OpenFolderDialog dialog = new OpenFolderDialog();
+                dialog.Multiselect = false;
 
-                CanClone = true;
-                LocalRepoFilePath = dialog.FolderName;
+                dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
 
-                //Check if directory is empty
-                if (!Directory.EnumerateFiles(selectedFilePath).Any())
+                if (dialog.ShowDialog() == true)
                 {
-                    CanClone = true;
-                    LocalRepoFilePath = dialog.FolderName;
-                    IsEmptyDirectory = true;
+                    string selectedFilePath = dialog.FolderName;
+
+                    //Check if directory is empty
+                    if (!Directory.EnumerateFiles(selectedFilePath).Any())
+                    {
+                        CanClone = true;
+                        LocalRepoFilePath = dialog.FolderName;
+                        DirectoryHasFiles = false;
+                    }
+                    else
+                    {
+                        //Check if repo
+                        var repo = new Repository(selectedFilePath);
+                        CanClone = true;
+                        LocalRepoFilePath = dialog.FolderName;
+                    }
                 }
-                else
-                {
-                    CanClone = false;
-                    IsEmptyDirectory = false;
-                }
+            }
+            catch (LibGit2SharpException)
+            {
+                CanClone = false;
+                DirectoryHasFiles = true;
             }
         }
 

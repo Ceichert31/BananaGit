@@ -25,8 +25,10 @@ namespace BananaGit.ViewModels
             //If no user info could be loaded
             if (userInfo == null)
             {
-                EnterCredentialsView = new EnterCredentialsView();
-                EnterCredentialsView.Owner = App.Current.MainWindow;
+                EnterCredentialsView = new EnterCredentialsView()
+                {
+                    Owner = App.Current.MainWindow
+                };
                 EnterCredentialsView.ShowDialog();
             }
 

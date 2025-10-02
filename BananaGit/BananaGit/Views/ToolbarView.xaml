@@ -7,7 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
     d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
-    d:DesignHeight="25"
+    d:DesignHeight="30"
     d:DesignWidth="800"
     mc:Ignorable="d"
     >
@@ -15,6 +15,7 @@
         <!--  Toolbar  -->
         <ToolBar Grid.ColumnSpan="3">
             <Image Source="../Assets/Banana.png" />
+            <Button Command="{Binding ChooseCloneDirectoryCommand}" Content="Open" />
             <Button Command="{Binding OpenCloneWindowCommand}" Content="Clone" />
             <Button Command="{Binding PushFilesCommand}" Content="Push" />
             <Button Command="{Binding PullChangesCommand}" Content="Pull" />
