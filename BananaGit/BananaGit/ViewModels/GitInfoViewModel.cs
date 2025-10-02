@@ -79,16 +79,15 @@ namespace BananaGit.ViewModels
             }
 
             //If no repos are cloned, display clone repo text
-            if (githubUserInfo.SavedRepositories.Count == 0)
+            if (githubUserInfo.SavedRepository == null)
             {
                 hasCloned = false;
                 return;
             }
-
-            //Load current repo data if there is an already opened repo
-            if (githubUserInfo.SavedRepositories?[currentRepoIndex] != null)
-            {
-                currentRepo = githubUserInfo.SavedRepositories[currentRepoIndex];
+            else
+            {  
+                //Load current repo data if there is an already opened repo
+                currentRepo = githubUserInfo.SavedRepository;
                 LocalRepoFilePath = currentRepo.FilePath;
                 RepoURL = currentRepo.URL;
                 hasCloned = true;
@@ -122,14 +121,16 @@ namespace BananaGit.ViewModels
 
             if (githubUserInfo == null) return;
 
+            if (githubUserInfo.SavedRepository == null) return; 
+
             if (e.PropertyName == nameof(RepoURL))
             {
-                githubUserInfo.SavedRepositories[currentRepoIndex].URL = RepoURL;
+                githubUserInfo.SavedRepository.URL = RepoURL;
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             }
             else if (e.PropertyName == nameof(LocalRepoFilePath))
             {
-                githubUserInfo.SavedRepositories[currentRepoIndex].FilePath = LocalRepoFilePath;
+                githubUserInfo.SavedRepository.FilePath = LocalRepoFilePath;
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             }
         }
@@ -434,9 +435,11 @@ namespace BananaGit.ViewModels
                     }
                     else
                     {
-                        //Check if repo
+                        //Check if file location is local repo
                         var repo = new Repository(selectedFilePath);
                         CanClone = true;
+
+                        //Set active repo as locally opened repo
                         LocalRepoFilePath = dialog.FolderName;
                         RepoURL = repo.Network.Remotes["origin"].Url;
                     }
@@ -474,7 +477,9 @@ namespace BananaGit.ViewModels
                 };
 
                 //Save repo to github user info
-                githubUserInfo?.SavedRepositories?.Add(new(LocalRepoFilePath, RepoURL));
+                userInfo.SavedRepository.FilePath = LocalRepoFilePath;
+                userInfo.SavedRepository.URL = RepoURL;
+                JsonDataManager.SaveUserInfo(userInfo);
                 Repository.Clone(RepoURL, LocalRepoFilePath, options);
                 hasCloned = true;
             }
