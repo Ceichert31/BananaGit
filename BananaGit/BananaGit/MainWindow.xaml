@@ -25,6 +25,7 @@
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="1.5*" />
         </Grid.ColumnDefinitions>
 
@@ -41,7 +42,7 @@
             x:Name="GitChangesContent"
             Grid.Row="1"
             Grid.RowSpan="2"
-            Grid.Column="2"
+            Grid.Column="3"
             Content="{Binding GitChangesView}"
             />
 
@@ -49,7 +50,7 @@
         <ContentControl
             x:Name="GitCommitContent"
             Grid.Row="3"
-            Grid.Column="2"
+            Grid.Column="3"
             Content="{Binding CommitView}"
             />
 
@@ -82,7 +83,8 @@
             Grid.RowSpan="3"
             Grid.Column="2"
             Width="5"
-            HorizontalAlignment="Left"
+            HorizontalAlignment="Center"
+            VerticalAlignment="Stretch"
             />
     </Grid>
 </Window>
