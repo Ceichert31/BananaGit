@@ -241,7 +241,7 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                var files = Directory.EnumerateFiles(currentRepo.FilePath);
+                var files = Directory.EnumerateFiles(LocalRepoFilePath);
 
                 using var repo = new Repository(LocalRepoFilePath);
 
@@ -438,6 +438,7 @@ namespace BananaGit.ViewModels
                         var repo = new Repository(selectedFilePath);
                         CanClone = true;
                         LocalRepoFilePath = dialog.FolderName;
+                        RepoURL = repo.Network.Remotes["origin"].Url;
                     }
                 }
             }
@@ -474,7 +475,6 @@ namespace BananaGit.ViewModels
 
                 //Save repo to github user info
                 githubUserInfo?.SavedRepositories?.Add(new(LocalRepoFilePath, RepoURL));
-
                 Repository.Clone(RepoURL, LocalRepoFilePath, options);
                 hasCloned = true;
             }

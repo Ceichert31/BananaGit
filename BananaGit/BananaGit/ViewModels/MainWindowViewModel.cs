@@ -27,7 +27,7 @@ namespace BananaGit.ViewModels
             {
                 EnterCredentialsView = new EnterCredentialsView()
                 {
-                    Owner = App.Current.MainWindow
+                    //Owner = App.Current.MainWindow
                 };
                 EnterCredentialsView.ShowDialog();
             }
