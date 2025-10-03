@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Threading;
+using BananaGit.Exceptions;
+using BananaGit.Models;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -49,7 +51,8 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private bool _directoryHasFiles = false;
 
-        private bool hasCloned = false;
+        [ObservableProperty]
+        private bool _noRepoCloned;
         #endregion
 
         private readonly DispatcherTimer _updateGitInfoTimer = new();
@@ -69,53 +72,78 @@ namespace BananaGit.ViewModels
             this.openCloneWindow = openCloneWindow;
             PropertyChanged += UpdateCurrentRepository;
 
-            if (githubUserInfo == null)
-            {
-                throw new Exception("ERROR: Data couldn't be loaded!");
-            }
-
-            //If no repos are cloned, display clone repo text
-            if (githubUserInfo.SavedRepository == null)
-            {
-                hasCloned = false;
-                githubUserInfo.SavedRepository = new("", "");
-                return;
-            }
-            else
-            {  
-                //Load current repo data if there is an already opened repo
-                LocalRepoFilePath = githubUserInfo.SavedRepository.FilePath;
-                RepoURL = githubUserInfo.SavedRepository.URL;
-                hasCloned = true;
-            }
-
-            if (!Directory.Exists(LocalRepoFilePath))
-            {
-                hasCloned |= false;
-                return;
-            }
-
-            //Check if directory is empty
-            if (!Directory.EnumerateFiles(LocalRepoFilePath).Any())
-            {
-                hasCloned = false;
-            }
-            else
-            {
-                hasCloned = true;
-            }
+            Initialize();
         }
 
-        private void UpdateRepoStatus(object? sender, EventArgs e)
+        /// <summary>
+        /// Runs checks on whether local repo is valid
+        /// </summary>
+        /// <exception cref="RepoLocationException"></exception>
+        private void Initialize()
         {
-            UpdateRepoStatus();
+            try
+            {
+                //Save data missing
+                if (githubUserInfo == null)
+                {
+                    throw new LoadDataException("ERROR: Data couldn't be loaded!");
+                }
+
+                //If no repos are cloned, display clone repo text
+                if (githubUserInfo.SavedRepository == null)
+                {
+                    NoRepoCloned = true;
+                    throw new InvalidRepoException("No saved repository after loading!");
+                }
+                else
+                {
+                    //Check if repo data is empty
+                    if (githubUserInfo.SavedRepository.URL.Equals(string.Empty) &&
+                       githubUserInfo.SavedRepository.FilePath.Equals(string.Empty))
+                    {
+                        throw new InvalidRepoException("Saved repository is empty!");
+                    }
+
+                    //Load current repo data if there is an already opened repo
+                    LocalRepoFilePath = githubUserInfo.SavedRepository.FilePath;
+                    RepoURL = githubUserInfo.SavedRepository.URL;
+                }
+
+                //Check if repo location exists
+                if (!Directory.Exists(LocalRepoFilePath))
+                {
+                    NoRepoCloned = true;
+                    throw new RepoLocationException("Local repository file location missing!");
+                }
+
+                //Check if directory is empty
+                if (!Directory.EnumerateFiles(LocalRepoFilePath).Any())
+                {
+                    throw new RepoLocationException("Repository location is empty!");
+                }
+
+                NoRepoCloned = false;
+            }
+            catch (GitException ex)
+            {
+                //Output to debug console
+                Console.WriteLine(ex.Message);
+                NoRepoCloned = true;
+            }
+           
         }
 
+        /// <summary>
+        /// Updates the repository info and saves it when changed
+        /// </summary>
+        /// <param name="sender">The event caller</param>
+        /// <param name="e">The event arguments</param>
         private void UpdateCurrentRepository(object? sender, PropertyChangedEventArgs e)
         {
-            if (!hasCloned) return;
+            if (NoRepoCloned) return;
 
             if (githubUserInfo == null) return;
+            if (githubUserInfo.SavedRepository == null) return;
 
             if (e.PropertyName == nameof(RepoURL))
             {
@@ -133,9 +161,9 @@ namespace BananaGit.ViewModels
         /// Update the current unstaged changes
         /// </summary>
         [RelayCommand]
-        public void UpdateRepoStatus()
+        public void UpdateRepoStatus(object? sender, EventArgs e)
         {
-            if (!hasCloned) return;
+            if (NoRepoCloned) return;
             try
             {
                 if (LocalRepoFilePath == null || LocalRepoFilePath == "") return;

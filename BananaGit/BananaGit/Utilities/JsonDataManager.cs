@@ -5,6 +5,7 @@ using System.Linq;
 using System.Security.Policy;
 using System.Text;
 using System.Threading.Tasks;
+using BananaGit.Models;
 using Newtonsoft.Json;
 
 namespace BananaGit.Utilities

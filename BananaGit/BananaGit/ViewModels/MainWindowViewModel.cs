@@ -1,4 +1,5 @@
-﻿using BananaGit.Utilities;
+﻿using BananaGit.Models;
+using BananaGit.Utilities;
 using BananaGit.Views;
 
 namespace BananaGit.ViewModels
