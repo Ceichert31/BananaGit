@@ -21,7 +21,7 @@ namespace BananaGit.Utilities
         /// Saves the users personal github token to a local folder
         /// </summary>
         /// <param name="token">The users github token</param>
-        public static void SaveUserInfo(GithubUserInfo? userInfo)
+        public static void SaveUserInfo(GitInfoModel? userInfo)
         {
             TextWriter? writer = null;
 
@@ -49,7 +49,7 @@ namespace BananaGit.Utilities
         /// Loads the github user info into the passed in user info variable
         /// </summary>
         /// <param name="userInfo">The variable where the user info is drawn into</param>
-        public static void LoadUserInfo(ref GithubUserInfo? userInfo)
+        public static void LoadUserInfo(ref GitInfoModel? userInfo)
         {
             TextReader? reader = null;
 
@@ -66,7 +66,7 @@ namespace BananaGit.Utilities
                 var fileContents = reader.ReadToEnd();
 
                 //If data couldn't be loaded, convert github info to null
-                GithubUserInfo? loadedInfo = JsonConvert.DeserializeObject<GithubUserInfo>(fileContents) ?? null;
+                GitInfoModel? loadedInfo = JsonConvert.DeserializeObject<GitInfoModel>(fileContents) ?? null;
                 userInfo = loadedInfo; 
                 HasPersonalToken = true;
             }

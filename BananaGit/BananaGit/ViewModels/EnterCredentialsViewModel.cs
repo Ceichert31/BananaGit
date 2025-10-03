@@ -19,7 +19,7 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private string _username = "";
 
-        private readonly GithubUserInfo githubUserInfo = new();
+        private readonly GitInfoModel githubUserInfo = new();
 
         [RelayCommand]
         public void UpdateCredentials()

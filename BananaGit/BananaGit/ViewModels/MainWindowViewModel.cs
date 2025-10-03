@@ -16,7 +16,7 @@ namespace BananaGit.ViewModels
         private readonly EventHandler openCloneWindow;
 
         private readonly GitInfoViewModel? gitInfoVM;
-        private readonly GithubUserInfo? userInfo;
+        private readonly GitInfoModel? userInfo;
 
         public MainWindowViewModel() 
         {
