@@ -1,7 +1,7 @@
 ﻿using System.Windows;
 using BananaGit.ViewModels;
 
-namespace BananaGit
+namespace BananaGit.Views
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml

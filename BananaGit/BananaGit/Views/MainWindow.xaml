@@ -1,9 +1,9 @@
 ﻿<Window
-    x:Class="BananaGit.MainWindow"
+    x:Class="BananaGit.Views.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:BananaGit"
+    xmlns:local="clr-namespace:BananaGit.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
     xmlns:views="clr-namespace:BananaGit.Views"
@@ -75,7 +75,7 @@
             VerticalAlignment="Center"
             IsHitTestVisible="False"
             Opacity="0.35"
-            Source="Assets/Banana.png"
+            Source="../Assets/Banana.png"
             />
 
         <GridSplitter
