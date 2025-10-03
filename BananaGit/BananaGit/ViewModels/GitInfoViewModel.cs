@@ -78,7 +78,6 @@ namespace BananaGit.ViewModels
         /// <summary>
         /// Runs checks on whether local repo is valid
         /// </summary>
-        /// <exception cref="RepoLocationException"></exception>
         private void Initialize()
         {
             try
@@ -98,7 +97,7 @@ namespace BananaGit.ViewModels
                 else
                 {
                     //Check if repo data is empty
-                    if (githubUserInfo.SavedRepository.IsValidRepository())
+                    if (!githubUserInfo.SavedRepository.IsValidRepository())
                     {
                         throw new InvalidRepoException("Saved repository is empty!");
                     }

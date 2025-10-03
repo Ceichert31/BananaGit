@@ -13,8 +13,9 @@
     >
     <Grid>
         <!--  Toolbar  -->
-        <ToolBar Grid.ColumnSpan="3">
+        <ToolBar Grid.ColumnSpan="3" ToolBarTray.IsLocked="True">
             <Image Source="../Assets/Banana.png" />
+            <Button Content="Settings" />
             <Button Command="{Binding ChooseCloneDirectoryCommand}" Content="Open" />
             <Button Command="{Binding OpenCloneWindowCommand}" Content="Clone" />
             <Button Command="{Binding PushFilesCommand}" Content="Push" />

@@ -23,7 +23,12 @@
         /// <returns></returns>
         public bool IsValidRepository()
         {
-            return FilePath != null || URL != null || FilePath != "" || URL != "";
+            if (FilePath == null || URL == null)
+                return false;
+            if (FilePath.Equals(string.Empty) || URL.Equals(string.Empty))
+                return false;
+
+            return true;
         }
     }
     public class GitCommitInfo
