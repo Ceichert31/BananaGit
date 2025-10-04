@@ -74,7 +74,7 @@
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
             IsHitTestVisible="False"
-            Opacity="0.35"
+            Opacity="0.2"
             Source="../Assets/Banana.png"
             />
 

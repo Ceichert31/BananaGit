@@ -220,7 +220,7 @@ namespace BananaGit.ViewModels
                     {
                         Author = item.Author.ToString(),
                         Date =
-                        $"{item.Author.When.DateTime.ToLongTimeString()} {item.Author.When.DateTime.ToShortDateString()}",
+                        $"{item.Author.When.DateTime.ToShortTimeString()} {item.Author.When.DateTime.ToShortDateString()}",
                         Message = item.Message,
                         Commit = item.Id.ToString()
                     };

@@ -31,15 +31,17 @@
             <ItemsControl ItemsSource="{Binding CommitHistory}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="White" BorderThickness="3">
-                            <StackPanel Background="Black" Orientation="Vertical">
+                        <Border BorderBrush="Black" BorderThickness="3">
+                            <StackPanel Background="{StaticResource BananaYellow}" Orientation="Vertical">
                                 <Label
                                     Content="{Binding Message}"
                                     FontWeight="Bold"
-                                    Foreground="White"
+                                    Foreground="Black"
                                     />
-                                <Label Content="{Binding Author}" Foreground="White" />
-                                <Label Content="{Binding Date}" Foreground="White" />
+                                <StackPanel Margin="0,-10,0,0" Orientation="Horizontal">
+                                    <Label Content="{Binding Author}" Foreground="Black" />
+                                    <Label Content="{Binding Date}" Foreground="Black" />
+                                </StackPanel>
                             </StackPanel>
                         </Border>
                     </DataTemplate>
