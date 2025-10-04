@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Windows;
 using System.Windows.Threading;
 using BananaGit.Exceptions;
 using BananaGit.Models;
@@ -126,7 +127,7 @@ namespace BananaGit.ViewModels
             catch (GitException ex)
             {
                 //Output to debug console
-                Trace.WriteLine(ex.Message);
+                OutputError(ex.Message);
                 NoRepoCloned = true;
             }
            
@@ -178,9 +179,17 @@ namespace BananaGit.ViewModels
             catch (GitException ex)
             {
                 NoRepoCloned = true;
-                Trace.WriteLine(ex.Message);
+                OutputError(ex.Message);
             }
            
+        }
+        /// <summary>
+        /// Throws errors on the main thread
+        /// </summary>
+        /// <param name="message"></param>
+        private static void OutputError(string message)
+        {
+            Application.Current.Dispatcher.Invoke(() => { Trace.WriteLine(message); });
         }
 
         /// <summary>
@@ -242,11 +251,11 @@ namespace BananaGit.ViewModels
             }
             catch (GitException ex)
             {
-                Trace.WriteLine(ex.Message);
+                OutputError(ex.Message);
             }
             catch (LibGit2SharpException ex)
             {
-                Trace.WriteLine(ex.Message);
+                OutputError(ex.Message);
             }
         }
 
@@ -275,7 +284,7 @@ namespace BananaGit.ViewModels
             }
             catch (LibGit2SharpException)
             {
-                Trace.WriteLine($"Failed to commit {LocalRepoFilePath}");
+                OutputError($"Failed to commit {LocalRepoFilePath}");
             }
         }
 
@@ -303,7 +312,7 @@ namespace BananaGit.ViewModels
             }
             catch (LibGit2SharpException ex)
             {
-                Trace.WriteLine($"Failed to stage {ex.Message}");
+                OutputError($"Failed to stage {ex.Message}");
                 throw;
             }
         }
@@ -369,7 +378,7 @@ namespace BananaGit.ViewModels
                 }
                 catch (LibGit2SharpException ex)
                 {
-                    Trace.WriteLine($"Failed to Push {ex.Message}");
+                    OutputError($"Failed to Push {ex.Message}");
                 }
             });
         }
@@ -408,22 +417,22 @@ namespace BananaGit.ViewModels
                         if (result.Status == MergeStatus.Conflicts)
                         {
                             //Display in front end eventually
-                            Trace.WriteLine("Conflict detected");
+                            OutputError("Conflict detected");
                             return;
                         }
                         else if (result.Status == MergeStatus.UpToDate)
                         {
                             //Display in front end eventually
-                            Trace.WriteLine("Up to date");
+                            OutputError("Up to date");
                             return;
                         }
 
-                        Trace.WriteLine("Pulled Successfuly");
+                        OutputError("Pulled Successfuly");
                     }
                 }
                 catch (LibGit2SharpException ex)
                 {
-                    Trace.WriteLine(ex.Message);
+                    OutputError(ex.Message);
                 }
             });
         }
