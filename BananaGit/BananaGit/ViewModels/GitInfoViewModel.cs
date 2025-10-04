@@ -287,7 +287,7 @@ namespace BananaGit.ViewModels
                     HasCommitedFiles = true;
                 }
             }
-            catch (LibGit2SharpException)
+            catch (Exception)
             {
                 OutputError($"Failed to commit {LocalRepoFilePath}");
             }
