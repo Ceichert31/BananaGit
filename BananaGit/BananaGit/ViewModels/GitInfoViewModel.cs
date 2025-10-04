@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Windows.Threading;
 using BananaGit.Exceptions;
@@ -125,7 +126,7 @@ namespace BananaGit.ViewModels
             catch (GitException ex)
             {
                 //Output to debug console
-                Console.WriteLine(ex.Message);
+                Trace.WriteLine(ex.Message);
                 NoRepoCloned = true;
             }
            
@@ -177,7 +178,7 @@ namespace BananaGit.ViewModels
             catch (GitException ex)
             {
                 NoRepoCloned = true;
-                Console.WriteLine(ex.Message);
+                Trace.WriteLine(ex.Message);
             }
            
         }
@@ -248,11 +249,11 @@ namespace BananaGit.ViewModels
             }
             catch (GitException ex)
             {
-                Console.WriteLine(ex.Message);
+                Trace.WriteLine(ex.Message);
             }
             catch (LibGit2SharpException ex)
             {
-                Console.WriteLine(ex.Message);
+                Trace.WriteLine(ex.Message);
             }
         }
 
@@ -281,7 +282,7 @@ namespace BananaGit.ViewModels
             }
             catch (LibGit2SharpException)
             {
-                Console.WriteLine($"Failed to commit {LocalRepoFilePath}");
+                Trace.WriteLine($"Failed to commit {LocalRepoFilePath}");
             }
         }
 
@@ -317,7 +318,7 @@ namespace BananaGit.ViewModels
             }
             catch (LibGit2SharpException ex)
             {
-                Console.WriteLine($"Failed to stage {ex.Message}");
+                Trace.WriteLine($"Failed to stage {ex.Message}");
                 throw;
             }
         }
@@ -383,7 +384,7 @@ namespace BananaGit.ViewModels
                 }
                 catch (LibGit2SharpException ex)
                 {
-                    Console.WriteLine($"Failed to Push {ex.Message}");
+                    Trace.WriteLine($"Failed to Push {ex.Message}");
                 }
             });
         }
@@ -422,22 +423,22 @@ namespace BananaGit.ViewModels
                         if (result.Status == MergeStatus.Conflicts)
                         {
                             //Display in front end eventually
-                            Console.WriteLine("Conflict detected");
+                            Trace.WriteLine("Conflict detected");
                             return;
                         }
                         else if (result.Status == MergeStatus.UpToDate)
                         {
                             //Display in front end eventually
-                            Console.WriteLine("Up to date");
+                            Trace.WriteLine("Up to date");
                             return;
                         }
 
-                        Console.WriteLine("Pulled Successfuly");
+                        Trace.WriteLine("Pulled Successfuly");
                     }
                 }
                 catch (LibGit2SharpException ex)
                 {
-                    Console.WriteLine(ex.Message);
+                    Trace.WriteLine(ex.Message);
                 }
             });
         }
@@ -452,7 +453,7 @@ namespace BananaGit.ViewModels
         {
             if (notifyFlags == CheckoutNotifyFlags.Conflict)
             {
-                Console.WriteLine($"Conflict found in file {path}");
+                Trace.WriteLine($"Conflict found in file {path}");
             }
             return true;
         }
@@ -532,7 +533,7 @@ namespace BananaGit.ViewModels
                 CanClone = false;
                 NoRepoCloned = true;
                 DirectoryHasFiles = true;
-                Console.WriteLine(ex.Message);
+                Trace.WriteLine(ex.Message);
             }
         }
 
@@ -568,7 +569,7 @@ namespace BananaGit.ViewModels
             }
             catch (LibGit2SharpException ex)
             {
-                Console.WriteLine($"Failed to Clone {ex.Message}");
+                Trace.WriteLine($"Failed to Clone {ex.Message}");
             }
         }
         #endregion

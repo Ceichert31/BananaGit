@@ -12,6 +12,8 @@ namespace BananaGit.ViewModels
         public GitChangesView? GitChangesView { get; set; }
         public CommitView? CommitView { get; set; }
         public CommitHistoryView? CommitHistoryView { get; set; }
+        
+        public TerminalView? TerminalView { get; set; }
 
         private readonly EventHandler openCloneWindow;
 
@@ -54,6 +56,11 @@ namespace BananaGit.ViewModels
             {
                 DataContext = gitInfoVM
             };
+            TerminalView = new TerminalView()
+            {
+                DataContext = new TerminalViewModel()
+            };
+            TerminalView.Show();
         }
         private void OpenCloneWindow(object? sender, EventArgs e)
         {
