@@ -330,59 +330,62 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void PushFiles()
         {
-            try
+            Task.Run(() =>
             {
-                VerifyPath(LocalRepoFilePath);
-
-                using var repo = new Repository(LocalRepoFilePath);
-                var remote = repo.Network.Remotes["origin"];
-                if (remote != null)
+                try
                 {
-                    repo.Network.Remotes.Remove("origin");
+                    VerifyPath(LocalRepoFilePath);
+
+                    using var repo = new Repository(LocalRepoFilePath);
+                    var remote = repo.Network.Remotes["origin"];
+                    if (remote != null)
+                    {
+                        repo.Network.Remotes.Remove("origin");
+                    }
+
+                    repo.Network.Remotes.Add("origin", RepoURL);
+                    remote = repo.Network.Remotes["origin"];
+                    if (remote == null) return;
+
+                    FetchOptions options = new FetchOptions
+                    {
+                        CredentialsProvider = (url, username, types) =>
+                        new UsernamePasswordCredentials
+                        {
+                            Username = githubUserInfo?.Username,
+                            Password = githubUserInfo?.PersonalToken
+                        }
+                    };
+
+                    var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
+                    Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
+
+                    var localBranchName = string.IsNullOrEmpty(BranchName) ? "main" : BranchName;
+                    var localBranch = repo.Branches[localBranchName];
+
+                    if (localBranch == null) return;
+
+                    repo.Branches.Update(localBranch,
+                        b => b.Remote = remote.Name,
+                        b => b.UpstreamBranch = localBranch.CanonicalName);
+
+                    var pushOptions = new PushOptions
+                    {
+                        CredentialsProvider = (url, username, types) =>
+                        new UsernamePasswordCredentials
+                        {
+                            Username = githubUserInfo?.Username,
+                            Password = githubUserInfo?.PersonalToken
+                        }
+                    };
+
+                    repo.Network.Push(localBranch, pushOptions);
                 }
-
-                repo.Network.Remotes.Add("origin", RepoURL);
-                remote = repo.Network.Remotes["origin"];
-                if (remote == null) return;
-
-                FetchOptions options = new FetchOptions
+                catch (LibGit2SharpException ex)
                 {
-                    CredentialsProvider = (url, username, types) =>
-                    new UsernamePasswordCredentials
-                    {
-                        Username = githubUserInfo?.Username,
-                        Password = githubUserInfo?.PersonalToken
-                    }
-                };
-
-                var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
-                Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
-
-                var localBranchName = string.IsNullOrEmpty(BranchName) ? "main" : BranchName;
-                var localBranch = repo.Branches[localBranchName];
-
-                if (localBranch == null) return;
-
-                repo.Branches.Update(localBranch,
-                    b => b.Remote = remote.Name,
-                    b => b.UpstreamBranch = localBranch.CanonicalName);
-
-                var pushOptions = new PushOptions
-                {
-                    CredentialsProvider = (url, username, types) =>
-                    new UsernamePasswordCredentials
-                    {
-                        Username = githubUserInfo?.Username,
-                        Password = githubUserInfo?.PersonalToken
-                    }
-                };
-
-                repo.Network.Push(localBranch, pushOptions);
-            }
-            catch (LibGit2SharpException ex)
-            {
-                Console.WriteLine($"Failed to Push {ex.Message}");
-            }
+                    Console.WriteLine($"Failed to Push {ex.Message}");
+                }
+            });
         }
 
         /// <summary>
@@ -391,50 +394,52 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void PullChanges()
         {
-            try
-            {
-                VerifyPath(LocalRepoFilePath);
-
-                var options = new PullOptions();
-                options.FetchOptions = new FetchOptions();
-                options.FetchOptions.CredentialsProvider = new CredentialsHandler((url, username, types) => new UsernamePasswordCredentials
+            Task.Run(() => {
+                try
                 {
-                    Username = githubUserInfo?.Username, 
-                    Password = githubUserInfo?.PersonalToken
-                });
+                    VerifyPath(LocalRepoFilePath);
 
-                options.MergeOptions = new MergeOptions();
-                options.MergeOptions.FastForwardStrategy = FastForwardStrategy.Default;
-                options.MergeOptions.OnCheckoutNotify = new CheckoutNotifyHandler(ShowConflict);
-                options.MergeOptions.CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict;
-                using (var repo = new Repository(LocalRepoFilePath))
-                {
-
-                    //Create signature and pull
-                    Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
-                    var result = Commands.Pull(repo, signature, options);
-
-                    //Check for merge conflicts
-                    if (result.Status == MergeStatus.Conflicts)
+                    var options = new PullOptions();
+                    options.FetchOptions = new FetchOptions();
+                    options.FetchOptions.CredentialsProvider = new CredentialsHandler((url, username, types) => new UsernamePasswordCredentials
                     {
-                        //Display in front end eventually
-                        Console.WriteLine("Conflict detected");
-                        return;
-                    }
-                    else if (result.Status == MergeStatus.UpToDate)
-                    {
-                        //Display in front end eventually
-                        Console.WriteLine("Up to date");
-                        return;
-                    }
+                        Username = githubUserInfo?.Username,
+                        Password = githubUserInfo?.PersonalToken
+                    });
 
-                    Console.WriteLine("Pulled Successfuly");
+                    options.MergeOptions = new MergeOptions();
+                    options.MergeOptions.FastForwardStrategy = FastForwardStrategy.Default;
+                    options.MergeOptions.OnCheckoutNotify = new CheckoutNotifyHandler(ShowConflict);
+                    options.MergeOptions.CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict;
+                    using (var repo = new Repository(LocalRepoFilePath))
+                    {
+
+                        //Create signature and pull
+                        Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
+                        var result = Commands.Pull(repo, signature, options);
+
+                        //Check for merge conflicts
+                        if (result.Status == MergeStatus.Conflicts)
+                        {
+                            //Display in front end eventually
+                            Console.WriteLine("Conflict detected");
+                            return;
+                        }
+                        else if (result.Status == MergeStatus.UpToDate)
+                        {
+                            //Display in front end eventually
+                            Console.WriteLine("Up to date");
+                            return;
+                        }
+
+                        Console.WriteLine("Pulled Successfuly");
+                    }
                 }
-            }
-            catch (LibGit2SharpException ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
+                catch (LibGit2SharpException ex)
+                {
+                    Console.WriteLine(ex.Message);
+                }
+            });
         }
 
         /// <summary>

@@ -38,6 +38,7 @@
             Height="5"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
+            Background="{StaticResource BananaYellow}"
             />
 
         <!--  <ItemsControl.ItemTemplate>
@@ -52,11 +53,13 @@
         <Button
             Grid.Row="0"
             Grid.Column="2"
+            Margin="0,0,0,5"
             Padding="3"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             Command="{Binding StageFilesCommand}"
             Content="Stage"
+            Style="{StaticResource GenericButton}"
             />
 
         <ScrollViewer
