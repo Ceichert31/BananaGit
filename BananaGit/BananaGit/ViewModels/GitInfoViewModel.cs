@@ -295,8 +295,6 @@ namespace BananaGit.ViewModels
             {
                 VerifyPath(LocalRepoFilePath);
 
-                var files = Directory.EnumerateFiles(LocalRepoFilePath);
-
                 using var repo = new Repository(LocalRepoFilePath);
 
                 var status = repo.RetrieveStatus();
