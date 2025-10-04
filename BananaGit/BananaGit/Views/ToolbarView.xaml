@@ -18,7 +18,11 @@
             <Button Content="Settings" />
             <Button Command="{Binding ChooseCloneDirectoryCommand}" Content="Open" />
             <Button Command="{Binding OpenCloneWindowCommand}" Content="Clone" />
-            <Button Command="{Binding PushFilesCommand}" Content="Push" />
+            <Button
+                Command="{Binding PushFilesCommand}"
+                Content="Push"
+                IsEnabled="{Binding HasCommitedFiles}"
+                />
             <Button Command="{Binding PullChangesCommand}" Content="Pull" />
         </ToolBar>
     </Grid>

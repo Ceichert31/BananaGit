@@ -11,8 +11,6 @@ namespace BananaGit.ViewModels
 
         private TerminalListener _listener;
 
-        private event Action<string> RecievedMessage;
-
         public TerminalViewModel() 
         {
             Output = new ObservableCollection<string>();

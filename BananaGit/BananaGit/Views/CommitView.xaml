@@ -64,6 +64,7 @@
                     VerticalAlignment="Stretch"
                     Command="{Binding PushFilesCommand}"
                     Content="Push"
+                    IsEnabled="{Binding HasCommitedFiles}"
                     Style="{StaticResource GenericButton}"
                     />
             </StackPanel>

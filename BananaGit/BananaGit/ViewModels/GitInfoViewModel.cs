@@ -55,6 +55,9 @@ namespace BananaGit.ViewModels
 
         [ObservableProperty]
         private bool _noRepoCloned;
+
+        [ObservableProperty]
+        private bool _hasCommitedFiles;
         #endregion
 
         private readonly DispatcherTimer _updateGitInfoTimer = new();
@@ -280,6 +283,8 @@ namespace BananaGit.ViewModels
 
                     //Clear commit message
                     CommitMessage = string.Empty;
+
+                    HasCommitedFiles = true;
                 }
             }
             catch (LibGit2SharpException)
@@ -376,6 +381,7 @@ namespace BananaGit.ViewModels
                     };
 
                     repo.Network.Push(localBranch, pushOptions);
+                    HasCommitedFiles = false;
                 }
                 catch (LibGit2SharpException ex)
                 {
