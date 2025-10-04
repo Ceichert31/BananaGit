@@ -17,6 +17,8 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private string _userToken = "";
         [ObservableProperty]
+        private string _email = "";
+        [ObservableProperty]
         private string _username = "";
 
         private readonly GitInfoModel githubUserInfo = new();
@@ -25,6 +27,7 @@ namespace BananaGit.ViewModels
         public void UpdateCredentials()
         {
             githubUserInfo.Username = Username;
+            githubUserInfo.Email = Email;
             githubUserInfo.PersonalToken = UserToken;
             JsonDataManager.SaveUserInfo(githubUserInfo);
             onEnterCredentials?.Invoke(this, new EventArgs());

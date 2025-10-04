@@ -119,11 +119,11 @@ namespace BananaGit.ViewModels
                     throw new RepoLocationException("Local repository file location missing!");
                 }
 
-                //Check if directory is empty
-                if (!Directory.EnumerateFiles(LocalRepoFilePath).Any())
+              /*  //Check if directory is empty
+                if (!Directory.EnumerateFiles(LocalRepoFilePath))
                 {
                     throw new RepoLocationException("Repository location is empty!");
-                }
+                }*/
 
                 NoRepoCloned = false;
             }
@@ -233,7 +233,7 @@ namespace BananaGit.ViewModels
                 foreach (var file in stats)
                 {
                     //Changes logic
-                    if (file.State == FileStatus.ModifiedInWorkdir || file.State == FileStatus.NewInWorkdir)
+                    if (file.State == FileStatus.ModifiedInWorkdir || file.State == FileStatus.NewInWorkdir || file.State == FileStatus.RenamedInWorkdir)
                     {
                         CurrentChanges.Add($"+{file.FilePath.GetName()}");
                     }
@@ -242,7 +242,7 @@ namespace BananaGit.ViewModels
                         CurrentChanges.Add($"-{file.FilePath.GetName()}");
                     }
                     //Staging logic
-                    else if (file.State == FileStatus.ModifiedInIndex || file.State == FileStatus.NewInIndex)
+                    else if (file.State == FileStatus.ModifiedInIndex || file.State == FileStatus.NewInIndex || file.State == FileStatus.RenamedInIndex)
                     {
                         StagedChanges.Add($"+{file.FilePath.GetName()}");
                     }
@@ -275,7 +275,7 @@ namespace BananaGit.ViewModels
 
                 using (var repo = new Repository(LocalRepoFilePath))
                 {
-                    Signature author = new(githubUserInfo?.Username, "ceichert3114@gmail.com", DateTime.Now);
+                    Signature author = new(githubUserInfo?.Username, githubUserInfo?.Email, DateTime.Now);
                     Signature committer = author;
 
                     //Author commit

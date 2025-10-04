@@ -9,6 +9,7 @@
             SavedRepository = new(string.Empty, string.Empty);
         }
         public string? Username { get; set; }
+        public string? Email { get; set; }
         public string? PersonalToken { get; set; }
         public SaveableRepository? SavedRepository { get; set; }
     }
