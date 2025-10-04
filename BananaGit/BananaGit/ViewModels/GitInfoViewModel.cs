@@ -201,50 +201,43 @@ namespace BananaGit.ViewModels
 
                 CommitHistory.Clear();
                 //Update list of all commits
-                var commits = repo.Commits;
+                var commits = repo.Commits.ToList();
                 foreach (var item in commits)
                 {
-                    GitCommitInfo commitInfo = new();
-                    commitInfo.Author = item.Author.ToString();
-                    commitInfo.Date =
-                        $"{item.Author.When.DateTime.ToLongTimeString()} {item.Author.When.DateTime.ToShortDateString()}";
-                    commitInfo.Message = item.Message;
-                    commitInfo.Commit = item.Id.ToString();
+                    GitCommitInfo commitInfo = new()
+                    {
+                        Author = item.Author.ToString(),
+                        Date =
+                        $"{item.Author.When.DateTime.ToLongTimeString()} {item.Author.When.DateTime.ToShortDateString()}",
+                        Message = item.Message,
+                        Commit = item.Id.ToString()
+                    };
                     CommitHistory.Add(commitInfo);
                 }
 
                 //If no changes have been made, don't do anything
                 if (!stats.IsDirty) return;
-
-                var untracked = stats.Untracked;
-                var changed = stats.Modified;
-                var staged = stats.Staged;
-                var added = stats.Added;
-                var removed = stats.Removed;
-                var missing = stats.Missing;
-                foreach (var file in untracked)
+                
+                foreach (var file in stats)
                 {
-                    CurrentChanges.Add($"+{file.FilePath}" ?? "N/A");
-                }
-                foreach (var file in removed)
-                {
-                    CurrentChanges.Add($"-{file.FilePath}" ?? "N/A");
-                }
-                foreach (var file in missing)
-                {
-                    CurrentChanges.Add($"-{file.FilePath}" ?? "N/A");
-                }
-                foreach (var file in changed)
-                {
-                    CurrentChanges.Add($"+{file.FilePath}" ?? "N/A");
-                }
-                foreach (var file in staged)
-                {
-                    StagedChanges.Add($"+{file.FilePath}");
-                }
-                foreach (var file in added)
-                {
-                    StagedChanges.Add($"+{file.FilePath}" ?? "N/A");
+                    //Changes logic
+                    if (file.State == FileStatus.ModifiedInWorkdir || file.State == FileStatus.NewInWorkdir)
+                    {
+                        CurrentChanges.Add($"+{file.FilePath.GetName()}");
+                    }
+                    else if (file.State == FileStatus.DeletedFromWorkdir)
+                    {
+                        CurrentChanges.Add($"-{file.FilePath.GetName()}");
+                    }
+                    //Staging logic
+                    else if (file.State == FileStatus.ModifiedInIndex || file.State == FileStatus.NewInIndex)
+                    {
+                        StagedChanges.Add($"+{file.FilePath.GetName()}");
+                    }
+                    else if (file.State == FileStatus.DeletedFromIndex)
+                    {
+                        StagedChanges.Add($"-{file.FilePath.GetName()}");
+                    }
                 }
             }
             catch (GitException ex)
@@ -297,22 +290,14 @@ namespace BananaGit.ViewModels
 
                 using var repo = new Repository(LocalRepoFilePath);
 
-                var removed = repo.RetrieveStatus().Removed;
-                var missing = repo.RetrieveStatus().Missing;
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty) return;
 
-                foreach (var file in files)
-                {
-                    var fileName = Path.GetFileName(file);
-                    repo.Index.Add(fileName);
-                    repo.Index.Write();
-                    //Commands.Stage(repo, file);
-                }
 
-                foreach (var file in missing)
+                foreach (var file in status)
                 {
-                /*    var fileName = Path.GetFileName();
-                    repo.Index.Add(fileName);
-                    repo.Index.Write();*/
+                    if (file.State == FileStatus.Ignored) continue;
+
                     Commands.Stage(repo, file.FilePath);
                 }
             }
