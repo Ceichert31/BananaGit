@@ -325,6 +325,9 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void PushFiles()
         {
+            //Pull before pushing
+            PullChanges();
+
             Task.Run(() =>
             {
                 try
