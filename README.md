@@ -7,7 +7,8 @@ My plan for BananaGit is to make an easy-to-use, free, and open-source GitHub GU
 ### Current Version V1.3
 The current version of BananaGit features commit history, pushing/pulling, and staging/committing with a built-in conventional commit drop-down.
 
-<img width="1170" height="659" alt="image" src="https://github.com/user-attachments/assets/c7348457-568d-4436-a3f3-824056eeb9d0" />
+<img width="1175" height="659" alt="image" src="https://github.com/user-attachments/assets/63bdd6db-17b6-4c5a-beca-99d50ff9db4f" />
+
 
 https://github.com/user-attachments/assets/f28d6eed-3064-462d-a926-5503ad87b54a
 
