@@ -39,9 +39,9 @@ namespace BananaGit.ViewModels
         private string _branchName = string.Empty;
 
         [ObservableProperty]
-        private ObservableCollection<string> _currentChanges = [];
+        private ObservableCollection<ChangedFile> _currentChanges = [];
         [ObservableProperty]
-        private ObservableCollection<string> _stagedChanges = [];
+        private ObservableCollection<ChangedFile> _stagedChanges = [];
 
         [ObservableProperty]
         private ObservableCollection<GitCommitInfo> _commitHistory = [];
@@ -119,12 +119,6 @@ namespace BananaGit.ViewModels
                     throw new RepoLocationException("Local repository file location missing!");
                 }
 
-              /*  //Check if directory is empty
-                if (!Directory.EnumerateFiles(LocalRepoFilePath))
-                {
-                    throw new RepoLocationException("Repository location is empty!");
-                }*/
-
                 NoRepoCloned = false;
             }
             catch (GitException ex)
@@ -133,7 +127,11 @@ namespace BananaGit.ViewModels
                 OutputError(ex.Message);
                 NoRepoCloned = true;
             }
-           
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
+
         }
 
         /// <summary>
@@ -184,7 +182,11 @@ namespace BananaGit.ViewModels
                 NoRepoCloned = true;
                 OutputError(ex.Message);
             }
-           
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
+
         }
         /// <summary>
         /// Throws errors on the main thread
@@ -233,30 +235,24 @@ namespace BananaGit.ViewModels
                 foreach (var file in stats)
                 {
                     //Changes logic
-                    if (file.State == FileStatus.ModifiedInWorkdir || file.State == FileStatus.NewInWorkdir || file.State == FileStatus.RenamedInWorkdir)
+                    if (file.State == FileStatus.ModifiedInWorkdir || file.State == FileStatus.NewInWorkdir 
+                        || file.State == FileStatus.RenamedInWorkdir || file.State == FileStatus.DeletedFromWorkdir)
                     {
-                        CurrentChanges.Add($"+{file.FilePath.GetName()}");
-                    }
-                    else if (file.State == FileStatus.DeletedFromWorkdir)
-                    {
-                        CurrentChanges.Add($"-{file.FilePath.GetName()}");
+                        CurrentChanges.Add(new(file, file.FilePath));
                     }
                     //Staging logic
-                    else if (file.State == FileStatus.ModifiedInIndex || file.State == FileStatus.NewInIndex || file.State == FileStatus.RenamedInIndex)
+                    else if (file.State == FileStatus.ModifiedInIndex || file.State == FileStatus.NewInIndex 
+                        || file.State == FileStatus.RenamedInIndex || file.State == FileStatus.DeletedFromIndex)
                     {
-                        StagedChanges.Add($"+{file.FilePath.GetName()}");
-                    }
-                    else if (file.State == FileStatus.DeletedFromIndex)
-                    {
-                        StagedChanges.Add($"-{file.FilePath.GetName()}");
+                        StagedChanges.Add(new(file, file.FilePath));
                     }
                 }
             }
-            catch (GitException ex)
+            catch (LibGit2SharpException ex)
             {
                 OutputError(ex.Message);
             }
-            catch (LibGit2SharpException ex)
+            catch (Exception ex)
             {
                 OutputError(ex.Message);
             }
@@ -287,9 +283,14 @@ namespace BananaGit.ViewModels
                     HasCommitedFiles = true;
                 }
             }
-            catch (Exception)
+            catch (LibGit2SharpException ex)
             {
                 OutputError($"Failed to commit {LocalRepoFilePath}");
+                OutputError(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
             }
         }
 
@@ -317,6 +318,60 @@ namespace BananaGit.ViewModels
             {
                 OutputError($"Failed to stage {ex.Message}");
                 throw;
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
+        }
+
+        [RelayCommand]
+        public void StageFile(ChangedFile file)
+        {
+            try
+            {
+                VerifyPath(LocalRepoFilePath);
+
+                using var repo = new Repository(LocalRepoFilePath);
+
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty) return;
+
+                Commands.Stage(repo, file.FilePath);
+            }
+            catch (LibGit2SharpException ex)
+            {
+                OutputError($"Failed to stage {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
+        }
+
+        [RelayCommand]
+        public void UnstageFile(ChangedFile file)
+        {
+            try
+            {
+                VerifyPath(LocalRepoFilePath);
+
+                using var repo = new Repository(LocalRepoFilePath);
+
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty) return;
+
+                Commands.Unstage(repo, file.FilePath);
+            }
+            catch (LibGit2SharpException ex)
+            {
+                OutputError($"Failed to stage {ex.Message}");
+                throw;
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
             }
         }
         #endregion
@@ -387,6 +442,10 @@ namespace BananaGit.ViewModels
                 {
                     OutputError($"Failed to Push {ex.Message}");
                 }
+                catch (Exception ex)
+                {
+                    OutputError(ex.Message);
+                }
             });
         }
 
@@ -437,7 +496,7 @@ namespace BananaGit.ViewModels
                         OutputError("Pulled Successfuly");
                     }
                 }
-                catch (LibGit2SharpException ex)
+                catch (Exception ex)
                 {
                     OutputError(ex.Message);
                 }
@@ -529,7 +588,7 @@ namespace BananaGit.ViewModels
                     }
                 }
             }
-            catch (LibGit2SharpException ex)
+            catch (Exception ex)
             {
                 CanClone = false;
                 NoRepoCloned = true;
@@ -571,6 +630,10 @@ namespace BananaGit.ViewModels
             catch (LibGit2SharpException ex)
             {
                 Trace.WriteLine($"Failed to Clone {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
             }
         }
         #endregion
