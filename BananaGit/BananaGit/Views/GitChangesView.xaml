@@ -29,7 +29,23 @@
                 Background="Black"
                 Foreground="White"
                 ItemsSource="{Binding CurrentChanges}"
-                />
+                >
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Background="White" Orientation="Horizontal">
+                            <Button
+                                HorizontalAlignment="Left"
+                                Background="{StaticResource FlowerPurple}"
+                                Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}"
+                                Content="+"
+                                Foreground="White"
+                                />
+                            <Label Content="{Binding Name}" Foreground="Black" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </ScrollViewer>
 
         <GridSplitter
@@ -41,14 +57,7 @@
             Background="{StaticResource BananaYellow}"
             />
 
-        <!--  <ItemsControl.ItemTemplate>
-    <DataTemplate>
-        <StackPanel Orientation="Horizontal">
-            <Button HorizontalAlignment="Left" Content="+" />
-            <Label Content="Placeholder Name" Foreground="Black" />
-        </StackPanel>
-    </DataTemplate>
-</ItemsControl.ItemTemplate>-->
+
 
         <Button
             Grid.Row="0"
@@ -73,7 +82,23 @@
                 Background="Black"
                 Foreground="White"
                 ItemsSource="{Binding StagedChanges}"
-                />
+                >
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <StackPanel Background="White" Orientation="Horizontal">
+                            <Button
+                                HorizontalAlignment="Left"
+                                Background="{StaticResource FlowerPurple}"
+                                Command="{Binding DataContext.UnstageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                CommandParameter="{Binding}"
+                                Content="-"
+                                Foreground="White"
+                                />
+                            <Label Content="{Binding Name}" Foreground="Black" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </ScrollViewer>
     </Grid>
 </UserControl>
