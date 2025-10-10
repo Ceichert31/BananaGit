@@ -4,8 +4,8 @@ BananaGit is a GitHub GUI designed to be intuitive and easy to learn. BananaGit 
 ## Vision/Planned features
 My plan for BananaGit is to make an easy-to-use, free, and open-source GitHub GUI for both experienced version control users and newcomers. Some future planned features are: branching/merge conflict resolution, stashing/popping, multi-repo support, and built-in tutorials. 
 
-### Current Version V1.0.6
-The current version of BananaGit has many bug fixes, with email integration now available and hopefully full GitHub account integration in the next version!
+### Current Version V1.1.0
+The current version of BananaGit has much better error handling and can now stage/unstage specific files. Branching is planned for the next update.
 
 <img width="1175" height="659" alt="image" src="https://github.com/user-attachments/assets/63bdd6db-17b6-4c5a-beca-99d50ff9db4f" />
 
