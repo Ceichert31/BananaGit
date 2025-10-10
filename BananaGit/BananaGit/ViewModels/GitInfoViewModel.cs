@@ -235,8 +235,9 @@ namespace BananaGit.ViewModels
                 foreach (var file in stats)
                 {
                     //Changes logic
-                    if (file.State == FileStatus.ModifiedInWorkdir || file.State == FileStatus.NewInWorkdir 
-                        || file.State == FileStatus.RenamedInWorkdir || file.State == FileStatus.DeletedFromWorkdir)
+                    if (file.State == FileStatus.ModifiedInWorkdir || file.State == FileStatus.NewInWorkdir || 
+                        file.State == FileStatus.RenamedInWorkdir || file.State == FileStatus.DeletedFromWorkdir || 
+                        file.State == (FileStatus.NewInIndex | FileStatus.ModifiedInWorkdir))
                     {
                         CurrentChanges.Add(new(file, file.FilePath));
                     }

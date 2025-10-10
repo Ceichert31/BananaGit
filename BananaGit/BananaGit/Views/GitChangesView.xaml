@@ -32,18 +32,20 @@
                 >
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Background="White" Orientation="Horizontal">
-                            <Button
-                                Width="20"
-                                HorizontalAlignment="Left"
-                                Background="{StaticResource FlowerPurple}"
-                                Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                CommandParameter="{Binding}"
-                                Content="+"
-                                Foreground="White"
-                                />
-                            <Label Content="{Binding Name}" Foreground="Black" />
-                        </StackPanel>
+                        <Border BorderBrush="{StaticResource FlowerPurple}" BorderThickness="2">
+                            <StackPanel Background="{StaticResource BananaYellow}" Orientation="Horizontal">
+                                <Button
+                                    Width="20"
+                                    HorizontalAlignment="Left"
+                                    Background="{StaticResource FlowerPurple}"
+                                    Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}"
+                                    Content="+"
+                                    Foreground="White"
+                                    />
+                                <Label Content="{Binding Name}" Foreground="Black" />
+                            </StackPanel>
+                        </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
@@ -58,8 +60,6 @@
             Background="{StaticResource BananaYellow}"
             />
 
-
-
         <Button
             Grid.Row="0"
             Grid.Column="2"
@@ -68,7 +68,7 @@
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
             Command="{Binding StageFilesCommand}"
-            Content="Stage"
+            Content="Stage All"
             Style="{StaticResource GenericButton}"
             />
 
@@ -86,18 +86,20 @@
                 >
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <StackPanel Background="White" Orientation="Horizontal">
-                            <Button
-                                Width="20"
-                                HorizontalAlignment="Left"
-                                Background="{StaticResource FlowerPurple}"
-                                Command="{Binding DataContext.UnstageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                CommandParameter="{Binding}"
-                                Content="-"
-                                Foreground="White"
-                                />
-                            <Label Content="{Binding Name}" Foreground="Black" />
-                        </StackPanel>
+                        <Border BorderBrush="{StaticResource FlowerPurple}" BorderThickness="2">
+                            <StackPanel Background="{StaticResource BananaYellow}" Orientation="Horizontal">
+                                <Button
+                                    Width="20"
+                                    HorizontalAlignment="Left"
+                                    Background="{StaticResource FlowerPurple}"
+                                    Command="{Binding DataContext.UnstageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                    CommandParameter="{Binding}"
+                                    Content="-"
+                                    Foreground="White"
+                                    />
+                                <Label Content="{Binding Name}" Foreground="Black" />
+                            </StackPanel>
+                        </Border>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
