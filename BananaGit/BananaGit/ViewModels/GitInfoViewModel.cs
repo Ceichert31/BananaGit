@@ -44,6 +44,9 @@ namespace BananaGit.ViewModels
         private ObservableCollection<ChangedFile> _stagedChanges = [];
 
         [ObservableProperty]
+        private ObservableCollection<Branch> _branches = [];
+
+        [ObservableProperty]
         private ObservableCollection<GitCommitInfo> _commitHistory = [];
 
         //Flags
@@ -119,7 +122,18 @@ namespace BananaGit.ViewModels
                     throw new RepoLocationException("Local repository file location missing!");
                 }
 
+                //Mark that we succesfully cloned the repo
                 NoRepoCloned = false;
+
+                //Update branches
+                using (var repo = new Repository(LocalRepoFilePath))
+                {
+                    foreach (var branch in repo.Branches)
+                    {
+                        if (branch.IsRemote) continue;
+                        Branches.Add(branch);
+                    }
+                }
             }
             catch (GitException ex)
             {
@@ -475,7 +489,16 @@ namespace BananaGit.ViewModels
                     options.MergeOptions.CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict;
                     using (var repo = new Repository(LocalRepoFilePath))
                     {
-
+                        Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            //Update branches
+                            foreach (var branch in repo.Branches)
+                            {
+                                if (branch.IsRemote) continue;
+                                Branches.Add(branch);
+                            }
+                        });
+                      
                         //Create signature and pull
                         Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
                         var result = Commands.Pull(repo, signature, options);

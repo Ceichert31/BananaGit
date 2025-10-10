@@ -24,6 +24,18 @@
                 IsEnabled="{Binding HasCommitedFiles}"
                 />
             <Button Command="{Binding PullChangesCommand}" Content="Pull" />
+            <ComboBox
+                Width="60"
+                HorizontalAlignment="Left"
+                ItemsSource="{Binding Branches}"
+                Text="Current Branch"
+                >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <Label Content="{Binding FriendlyName}" FontSize="10" />
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
         </ToolBar>
     </Grid>
 </UserControl>

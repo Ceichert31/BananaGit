@@ -22,6 +22,7 @@
         </Grid.ColumnDefinitions>
 
         <ScrollViewer
+            Grid.Row="1"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CanContentScroll="True"
