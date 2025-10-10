@@ -25,6 +25,8 @@ namespace BananaGit.Views
 
         private readonly EventHandler credentialsEnteredEvent;
 
+        private bool credentialsEntered;
+
         public EnterCredentialsView()
         {
             InitializeComponent();
@@ -39,7 +41,15 @@ namespace BananaGit.Views
 
         private void CloseCredentialDialogue(object? sender, EventArgs e)
         {
+            credentialsEntered = true;
             Close();
+        }
+
+        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            if (credentialsEntered) return;
+
+            App.Current.Shutdown();
         }
     }
 }
