@@ -34,6 +34,7 @@
                     <DataTemplate>
                         <StackPanel Background="White" Orientation="Horizontal">
                             <Button
+                                Width="20"
                                 HorizontalAlignment="Left"
                                 Background="{StaticResource FlowerPurple}"
                                 Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
@@ -87,6 +88,7 @@
                     <DataTemplate>
                         <StackPanel Background="White" Orientation="Horizontal">
                             <Button
+                                Width="20"
                                 HorizontalAlignment="Left"
                                 Background="{StaticResource FlowerPurple}"
                                 Command="{Binding DataContext.UnstageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
