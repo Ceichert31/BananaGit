@@ -28,11 +28,11 @@
                 Width="60"
                 HorizontalAlignment="Left"
                 ItemsSource="{Binding Branches}"
-                Text="Current Branch"
+                Text="{Binding CurrentBranch, Mode=TwoWay}"
                 >
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <Label Content="{Binding FriendlyName}" FontSize="10" />
+                        <Label Content="{Binding FriendlyName}" />
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>

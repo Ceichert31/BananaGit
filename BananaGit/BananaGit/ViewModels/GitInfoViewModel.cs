@@ -34,10 +34,6 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private string _selectedCommitHeader = string.Empty;
 
-        //Branches
-        [ObservableProperty]
-        private string _branchName = string.Empty;
-
         [ObservableProperty]
         private ObservableCollection<ChangedFile> _currentChanges = [];
         [ObservableProperty]
@@ -45,6 +41,9 @@ namespace BananaGit.ViewModels
 
         [ObservableProperty]
         private ObservableCollection<Branch> _branches = [];
+
+        [ObservableProperty]
+        private string _currentBranch = "main";
 
         [ObservableProperty]
         private ObservableCollection<GitCommitInfo> _commitHistory = [];
@@ -130,7 +129,7 @@ namespace BananaGit.ViewModels
                 {
                     foreach (var branch in repo.Branches)
                     {
-                        if (branch.IsRemote) continue;
+                        /*if (branch.IsRemote) continue;*/
                         Branches.Add(branch);
                     }
                 }
@@ -229,7 +228,7 @@ namespace BananaGit.ViewModels
 
                 CommitHistory.Clear();
                 //Update list of all commits
-                var commits = repo.Commits.ToList();
+                var commits = repo.Branches[CurrentBranch].Commits.ToList();
                 foreach (var item in commits)
                 {
                     GitCommitInfo commitInfo = new()
@@ -399,7 +398,7 @@ namespace BananaGit.ViewModels
         public void PushFiles()
         {
             //Pull before pushing
-            PullChanges();
+            //PullChanges();
 
             Task.Run(() =>
             {
@@ -408,14 +407,14 @@ namespace BananaGit.ViewModels
                     VerifyPath(LocalRepoFilePath);
 
                     using var repo = new Repository(LocalRepoFilePath);
-                    var remote = repo.Network.Remotes["origin"];
+                    var remote = repo.Network.Remotes[CurrentBranch];
                     if (remote != null)
                     {
-                        repo.Network.Remotes.Remove("origin");
+                        repo.Network.Remotes.Remove(CurrentBranch);
                     }
 
-                    repo.Network.Remotes.Add("origin", RepoURL);
-                    remote = repo.Network.Remotes["origin"];
+                    repo.Network.Remotes.Add(CurrentBranch, RepoURL);
+                    remote = repo.Network.Remotes[CurrentBranch];
                     if (remote == null) return;
 
                     FetchOptions options = new FetchOptions
@@ -431,7 +430,7 @@ namespace BananaGit.ViewModels
                     var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
                     Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
 
-                    var localBranchName = string.IsNullOrEmpty(BranchName) ? "main" : BranchName;
+                    var localBranchName = string.IsNullOrEmpty(CurrentBranch) ? "main" : CurrentBranch;
                     var localBranch = repo.Branches[localBranchName];
 
                     if (localBranch == null) return;
@@ -491,6 +490,7 @@ namespace BananaGit.ViewModels
                     {
                         Application.Current.Dispatcher.Invoke(() =>
                         {
+                            Branches.Clear();
                             //Update branches
                             foreach (var branch in repo.Branches)
                             {
