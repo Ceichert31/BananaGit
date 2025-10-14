@@ -68,19 +68,20 @@ namespace BananaGit.ViewModels
 
         private GitInfoModel? githubUserInfo;
 
-        private EventHandler openCloneWindow;
-
         private int _commitHistoryLength = 30;
 
-        public GitInfoViewModel(EventHandler openCloneWindow) 
+        private IDialogService _dialogService;
+
+        public GitInfoViewModel(IDialogService dialogService) 
         {
+            _dialogService = dialogService;
+
             _updateGitInfoTimer.Tick += UpdateRepoStatus;
             _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);
             _updateGitInfoTimer.Start();
 
             JsonDataManager.LoadUserInfo(ref githubUserInfo);
 
-            this.openCloneWindow = openCloneWindow;
             PropertyChanged += UpdateCurrentRepository;
 
             Initialize();
@@ -572,12 +573,6 @@ namespace BananaGit.ViewModels
         #endregion
 
         #region Clone 
-        [RelayCommand]
-        public void OpenCloneWindow()
-        {
-            //Notify that we want to open window
-            openCloneWindow.Invoke(this, new());
-        }
 
         [RelayCommand]
         public void CloneRepo()
@@ -687,6 +682,19 @@ namespace BananaGit.ViewModels
             {
                 Trace.WriteLine(ex.Message);
             }
+        }
+        #endregion
+
+        #region Dialog Commands
+        [RelayCommand]
+        public void OpenCloneWindow()
+        {
+            _dialogService.ShowCloneRepoDialog(this);
+        }
+        [RelayCommand]
+        public void OpenRemoteWindow()
+        {
+            _dialogService.ShowRemoteBranchesDialog(this);
         }
         #endregion
     }

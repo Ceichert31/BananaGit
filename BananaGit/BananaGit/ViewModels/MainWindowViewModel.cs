@@ -22,27 +22,10 @@ namespace BananaGit.ViewModels
             //If no user info could be loaded
             if (userInfo == null)
             {
-                /* EnterCredentialsView = new EnterCredentialsView()
-                 {
-                     //Owner = App.Current.MainWindow
-                 };
-                 EnterCredentialsView.ShowDialog();*/
-
                 _dialogService.ShowCredentialsDialog(_gitInfoViewModel);
             }
 
-         /*   openCloneWindow += OpenCloneWindow;*/
-
-            //_gitInfoViewModel = new();
+            _gitInfoViewModel = new(_dialogService);
         }
-      /*  private void OpenCloneWindow(object? sender, EventArgs e)
-        {
-            CloneRepoView = new()
-            {
-                DataContext = _gitInfoViewModel,
-                Owner = App.Current.MainWindow
-            };
-            CloneRepoView?.ShowDialog();
-        }*/
     }
 }

@@ -44,7 +44,7 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <!--  Open remote popup and add remotes as local branches  -->
-            <Button Content="Remotes" />
+            <Button Command="{Binding OpenRemoteWindowCommand}" Content="Remotes" />
         </ToolBar>
     </Grid>
 </UserControl>
