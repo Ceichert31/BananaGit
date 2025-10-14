@@ -68,6 +68,8 @@ namespace BananaGit.ViewModels
 
         private EventHandler openCloneWindow;
 
+        private int _commitHistoryLength = 30;
+
         public GitInfoViewModel(EventHandler openCloneWindow) 
         {
             _updateGitInfoTimer.Tick += UpdateRepoStatus;
@@ -229,13 +231,16 @@ namespace BananaGit.ViewModels
                 CommitHistory.Clear();
                 //Update list of all commits
                 var commits = repo.Branches[CurrentBranch].Commits.ToList();
-                foreach (var item in commits)
+
+                //Limits commit history to a certain length
+                for (int i = 0; i < _commitHistoryLength; ++i)
                 {
+                    var item = commits[i];
                     GitCommitInfo commitInfo = new()
                     {
                         Author = item.Author.ToString(),
                         Date =
-                        $"{item.Author.When.DateTime.ToShortTimeString()} {item.Author.When.DateTime.ToShortDateString()}",
+                       $"{item.Author.When.DateTime.ToShortTimeString()} {item.Author.When.DateTime.ToShortDateString()}",
                         Message = item.Message,
                         Commit = item.Id.ToString()
                     };
@@ -397,9 +402,6 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void PushFiles()
         {
-            //Pull before pushing
-            //PullChanges();
-
             Task.Run(() =>
             {
                 try
