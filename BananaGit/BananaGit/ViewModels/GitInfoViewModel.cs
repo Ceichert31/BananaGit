@@ -280,19 +280,18 @@ namespace BananaGit.ViewModels
             {
                 VerifyPath(LocalRepoFilePath);
 
-                using (var repo = new Repository(LocalRepoFilePath))
-                {
-                    Signature author = new(githubUserInfo?.Username, githubUserInfo?.Email, DateTime.Now);
-                    Signature committer = author;
+                using var repo = new Repository(LocalRepoFilePath);
 
-                    //Author commit
-                    Commit commit = repo.Commit($"{SelectedCommitHeader} {CommitMessage}", author, committer);
+                Signature author = new(githubUserInfo?.Username, githubUserInfo?.Email, DateTime.Now);
+                Signature committer = author;
 
-                    //Clear commit message
-                    CommitMessage = string.Empty;
+                //Author commit
+                Commit commit = repo.Commit($"{SelectedCommitHeader} {CommitMessage}", author, committer);
 
-                    HasCommitedFiles = true;
-                }
+                //Clear commit message
+                CommitMessage = string.Empty;
+
+                HasCommitedFiles = true;
             }
             catch (LibGit2SharpException ex)
             {
@@ -308,32 +307,35 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void StageFiles()
         {
-            try
+            Task.Run(() =>
             {
-                VerifyPath(LocalRepoFilePath);
-
-                using var repo = new Repository(LocalRepoFilePath);
-
-                var status = repo.RetrieveStatus();
-                if (!status.IsDirty) return;
-
-
-                foreach (var file in status)
+                try
                 {
-                    if (file.State == FileStatus.Ignored) continue;
+                    VerifyPath(LocalRepoFilePath);
 
-                    Commands.Stage(repo, file.FilePath);
+                    using var repo = new Repository(LocalRepoFilePath);
+
+                    var status = repo.RetrieveStatus();
+                    if (!status.IsDirty) return;
+
+
+                    foreach (var file in status)
+                    {
+                        if (file.State == FileStatus.Ignored) continue;
+
+                        Commands.Stage(repo, file.FilePath);
+                    }
                 }
-            }
-            catch (LibGit2SharpException ex)
-            {
-                OutputError($"Failed to stage {ex.Message}");
-                throw;
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
+                catch (LibGit2SharpException ex)
+                {
+                    OutputError($"Failed to stage {ex.Message}");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    OutputError(ex.Message);
+                }
+            });
         }
 
         [RelayCommand]
@@ -528,7 +530,7 @@ namespace BananaGit.ViewModels
                 //Update branches
                 foreach (var branch in repo.Branches)
                 {
-                    if (branch.IsRemote) continue;
+                    //if (branch.IsRemote) continue;
                     Branches.Add(branch);
                 }
             });
