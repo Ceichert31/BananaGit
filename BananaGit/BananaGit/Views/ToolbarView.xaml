@@ -25,6 +25,7 @@
                 />
             <Button Command="{Binding PullChangesCommand}" Content="Pull" />
             <ComboBox
+                x:Name="BranchList"
                 Width="100"
                 Padding="-1"
                 HorizontalAlignment="Left"
@@ -35,7 +36,10 @@
                 >
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
-                        <Label Content="{Binding FriendlyName}" />
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="{Binding FriendlyName}" />
+                            <Label Content="{Binding IsRemote}" />
+                        </StackPanel>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>

@@ -524,13 +524,25 @@ namespace BananaGit.ViewModels
         /// <param name="repo"></param>
         private void UpdateBranches(Repository repo, string currentBranch)
         {
+            var fetchOptions = new FetchOptions { Prune = true };
+            var remote = repo.Network.Remotes["origin"]; 
+
+            Commands.Fetch(repo, remote.Name, new string[0], fetchOptions, "");
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 Branches.Clear();
                 //Update branches
                 foreach (var branch in repo.Branches)
                 {
-                    //if (branch.IsRemote) continue;
+                    if (branch.IsRemote)
+                    {
+                        if (branch.FriendlyName.Contains("ref"))
+                        {
+                            continue;
+                        }
+                    }
+
                     Branches.Add(branch);
                 }
             });
