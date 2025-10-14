@@ -25,8 +25,11 @@
                 />
             <Button Command="{Binding PullChangesCommand}" Content="Pull" />
             <ComboBox
-                Width="60"
+                Width="100"
+                Padding="-1"
                 HorizontalAlignment="Left"
+                VerticalAlignment="Stretch"
+                FontSize="10"
                 ItemsSource="{Binding Branches}"
                 Text="{Binding CurrentBranch, Mode=TwoWay}"
                 >
