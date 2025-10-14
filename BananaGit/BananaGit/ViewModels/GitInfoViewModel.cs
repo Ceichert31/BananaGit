@@ -23,7 +23,6 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private string _commitMessage = string.Empty;
 
-
         //Clone properties
         [ObservableProperty]
         private string _localRepoFilePath = string.Empty;
@@ -40,7 +39,10 @@ namespace BananaGit.ViewModels
         private ObservableCollection<ChangedFile> _stagedChanges = [];
 
         [ObservableProperty]
-        private ObservableCollection<Branch> _branches = [];
+        private ObservableCollection<Branch> _localBranches = [];
+
+        [ObservableProperty]
+        private ObservableCollection<Branch> _remoteBranches = [];
 
         [ObservableProperty]
         private string _currentBranch = "main";
@@ -531,7 +533,9 @@ namespace BananaGit.ViewModels
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                Branches.Clear();
+                LocalBranches.Clear();
+                RemoteBranches.Clear();
+
                 //Update branches
                 foreach (var branch in repo.Branches)
                 {
@@ -541,9 +545,10 @@ namespace BananaGit.ViewModels
                         {
                             continue;
                         }
+                        RemoteBranches.Add(branch);
+                        continue;
                     }
-
-                    Branches.Add(branch);
+                    LocalBranches.Add(branch);
                 }
             });
             CurrentBranch = currentBranch;
@@ -622,7 +627,7 @@ namespace BananaGit.ViewModels
                         //Set active repo as locally opened repo
                         LocalRepoFilePath = dialog.FolderName;
                         RepoURL = repo.Network.Remotes["origin"].Url;
-                        CurrentBranch = "main";
+                        UpdateBranches(repo, "main");
 
                         //Save to user info
                         githubUserInfo.SavedRepository = new(LocalRepoFilePath, RepoURL);

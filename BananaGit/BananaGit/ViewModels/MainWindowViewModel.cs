@@ -1,24 +1,18 @@
 ﻿using BananaGit.Models;
 using BananaGit.Utilities;
 using BananaGit.Views;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BananaGit.ViewModels
 {
-    class MainWindowViewModel
+    partial class MainWindowViewModel : ObservableObject
     {
-        public EnterCredentialsView? EnterCredentialsView { get; set; }
-        public CloneRepoView? CloneRepoView { get; set; }
-        public ToolbarView? ToolbarView { get; set; }
-        public GitChangesView? GitChangesView { get; set; }
-        public CommitView? CommitView { get; set; }
-        public CommitHistoryView? CommitHistoryView { get; set; }
-        
-        public TerminalView? TerminalView { get; set; }
+        [ObservableProperty]
+        private GitInfoViewModel? _gitInfoViewModel;
 
-        private readonly EventHandler openCloneWindow;
-
-        private readonly GitInfoViewModel? gitInfoVM;
         private readonly GitInfoModel? userInfo;
+
+        private readonly DialogService _dialogService = new();
 
         public MainWindowViewModel() 
         {
@@ -28,48 +22,27 @@ namespace BananaGit.ViewModels
             //If no user info could be loaded
             if (userInfo == null)
             {
-                EnterCredentialsView = new EnterCredentialsView()
-                {
-                    //Owner = App.Current.MainWindow
-                };
-                EnterCredentialsView.ShowDialog();
+                /* EnterCredentialsView = new EnterCredentialsView()
+                 {
+                     //Owner = App.Current.MainWindow
+                 };
+                 EnterCredentialsView.ShowDialog();*/
+
+                _dialogService.ShowCredentialsDialog(_gitInfoViewModel);
             }
 
-            openCloneWindow += OpenCloneWindow;
+         /*   openCloneWindow += OpenCloneWindow;*/
 
-            gitInfoVM = new(openCloneWindow);
-
-            //Setup user controls for main window
-            ToolbarView = new ToolbarView()
-            {
-                DataContext = gitInfoVM
-            };
-            GitChangesView = new GitChangesView
-            {
-                DataContext = gitInfoVM
-            };
-            CommitView = new CommitView
-            {
-                DataContext = gitInfoVM
-            };
-            CommitHistoryView = new CommitHistoryView
-            {
-                DataContext = gitInfoVM
-            };
-            TerminalView = new TerminalView()
-            {
-                DataContext = new TerminalViewModel()
-            };
-            TerminalView.Show();
+            //_gitInfoViewModel = new();
         }
-        private void OpenCloneWindow(object? sender, EventArgs e)
+      /*  private void OpenCloneWindow(object? sender, EventArgs e)
         {
             CloneRepoView = new()
             {
-                DataContext = gitInfoVM,
+                DataContext = _gitInfoViewModel,
                 Owner = App.Current.MainWindow
             };
             CloneRepoView?.ShowDialog();
-        }
+        }*/
     }
 }

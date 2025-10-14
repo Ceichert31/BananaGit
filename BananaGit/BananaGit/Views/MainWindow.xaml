@@ -30,38 +30,34 @@
         </Grid.ColumnDefinitions>
 
         <!--  Tool bar  -->
-        <ContentControl
-            x:Name="ToolbarContent"
+        <local:ToolbarView
             Grid.Row="0"
             Grid.ColumnSpan="4"
-            Content="{Binding ToolbarView}"
+            DataContext="{Binding GitInfoViewModel}"
             />
 
         <!--  Git Changes  -->
-        <ContentControl
-            x:Name="GitChangesContent"
+        <local:GitChangesView
             Grid.Row="1"
             Grid.RowSpan="2"
             Grid.Column="3"
-            Content="{Binding GitChangesView}"
+            DataContext="{Binding GitInfoViewModel}"
             />
 
         <!--  Git Commit  -->
-        <ContentControl
-            x:Name="GitCommitContent"
+        <local:CommitView
             Grid.Row="3"
             Grid.Column="3"
-            Content="{Binding CommitView}"
+            DataContext="{Binding GitInfoViewModel}"
             />
 
         <!--  Commit History  -->
-        <ContentControl
-            x:Name="CommitHistoryContent"
+        <local:CommitHistoryView
             Grid.Row="1"
             Grid.RowSpan="3"
             Grid.Column="0"
             Grid.ColumnSpan="2"
-            Content="{Binding CommitHistoryView}"
+            DataContext="{Binding GitInfoViewModel}"
             />
 
         <!--  Render first to avoid overlap  -->

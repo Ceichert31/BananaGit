@@ -43,6 +43,8 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+            <!--  Open remote popup and add remotes as local branches  -->
+            <Button Content="Remotes" />
         </ToolBar>
     </Grid>
 </UserControl>
