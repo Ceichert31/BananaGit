@@ -144,6 +144,7 @@ namespace BananaGit.ViewModels
 
         }
 
+        #region Update Methods
         /// <summary>
         /// Updates the repository info and saves it when changed
         /// </summary>
@@ -166,45 +167,6 @@ namespace BananaGit.ViewModels
                 githubUserInfo.SavedRepository.FilePath = LocalRepoFilePath;
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             }
-        }
-
-        /// <summary>
-        /// Checks current repositories file location before using it
-        /// </summary>
-        /// <param name="path"></param>
-        /// <exception cref="RepoLocationException"></exception>
-        private void VerifyPath(string path)
-        {
-            try
-            {
-                if (LocalRepoFilePath == null || LocalRepoFilePath == "")
-                {
-                    throw new RepoLocationException("Local repository file path is empty!");
-                }
-
-                if (!Directory.Exists(LocalRepoFilePath))
-                {
-                    throw new RepoLocationException("Local repository file path is missing!");
-                }
-            }
-            catch (GitException ex)
-            {
-                NoRepoCloned = true;
-                OutputError(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
-
-        }
-        /// <summary>
-        /// Throws errors on the main thread
-        /// </summary>
-        /// <param name="message"></param>
-        private static void OutputError(string message)
-        {
-            Application.Current.Dispatcher.Invoke(() => { Trace.WriteLine(message); });
         }
 
         /// <summary>
@@ -244,18 +206,18 @@ namespace BananaGit.ViewModels
 
                 //If no changes have been made, don't do anything
                 if (!stats.IsDirty) return;
-                
+
                 foreach (var file in stats)
                 {
                     //Changes logic
-                    if (file.State == FileStatus.ModifiedInWorkdir || file.State == FileStatus.NewInWorkdir || 
-                        file.State == FileStatus.RenamedInWorkdir || file.State == FileStatus.DeletedFromWorkdir || 
+                    if (file.State == FileStatus.ModifiedInWorkdir || file.State == FileStatus.NewInWorkdir ||
+                        file.State == FileStatus.RenamedInWorkdir || file.State == FileStatus.DeletedFromWorkdir ||
                         file.State == (FileStatus.NewInIndex | FileStatus.ModifiedInWorkdir))
                     {
                         CurrentChanges.Add(new(file, file.FilePath));
                     }
                     //Staging logic
-                    else if (file.State == FileStatus.ModifiedInIndex || file.State == FileStatus.NewInIndex 
+                    else if (file.State == FileStatus.ModifiedInIndex || file.State == FileStatus.NewInIndex
                         || file.State == FileStatus.RenamedInIndex || file.State == FileStatus.DeletedFromIndex)
                     {
                         StagedChanges.Add(new(file, file.FilePath));
@@ -271,6 +233,7 @@ namespace BananaGit.ViewModels
                 OutputError(ex.Message);
             }
         }
+        #endregion
 
         #region Stage/Commit
         /// <summary>
@@ -695,6 +658,47 @@ namespace BananaGit.ViewModels
         public void OpenRemoteWindow()
         {
             _dialogService.ShowRemoteBranchesDialog(this);
+        }
+        #endregion
+
+        #region Helper Methods
+        /// <summary>
+        /// Checks current repositories file location before using it
+        /// </summary>
+        /// <param name="path"></param>
+        /// <exception cref="RepoLocationException"></exception>
+        private void VerifyPath(string path)
+        {
+            try
+            {
+                if (LocalRepoFilePath == null || LocalRepoFilePath == "")
+                {
+                    throw new RepoLocationException("Local repository file path is empty!");
+                }
+
+                if (!Directory.Exists(LocalRepoFilePath))
+                {
+                    throw new RepoLocationException("Local repository file path is missing!");
+                }
+            }
+            catch (GitException ex)
+            {
+                NoRepoCloned = true;
+                OutputError(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
+
+        }
+        /// <summary>
+        /// Throws errors on the main thread
+        /// </summary>
+        /// <param name="message"></param>
+        private static void OutputError(string message)
+        {
+            Application.Current.Dispatcher.Invoke(() => { Trace.WriteLine(message); });
         }
         #endregion
     }
