@@ -126,7 +126,7 @@ namespace BananaGit.ViewModels
                 //Mark that we succesfully cloned the repo
                 NoRepoCloned = false;
 
-                UpdateBranches(new Repository(LocalRepoFilePath));
+                UpdateBranches(new Repository(LocalRepoFilePath), CurrentBranch);
             }
             catch (GitException ex)
             {
@@ -487,7 +487,7 @@ namespace BananaGit.ViewModels
 
                     using var repo = new Repository(LocalRepoFilePath);
 
-                    UpdateBranches(repo);
+                    UpdateBranches(repo, CurrentBranch);
 
                     //Create signature and pull
                     Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
@@ -520,7 +520,7 @@ namespace BananaGit.ViewModels
         /// Checks if any new branches were added and adds them to list
         /// </summary>
         /// <param name="repo"></param>
-        private void UpdateBranches(Repository repo)
+        private void UpdateBranches(Repository repo, string currentBranch)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -532,6 +532,7 @@ namespace BananaGit.ViewModels
                     Branches.Add(branch);
                 }
             });
+            CurrentBranch = currentBranch;
         }
 
         /// <summary>
