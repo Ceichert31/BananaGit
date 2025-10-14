@@ -126,15 +126,7 @@ namespace BananaGit.ViewModels
                 //Mark that we succesfully cloned the repo
                 NoRepoCloned = false;
 
-                //Update branches
-                using (var repo = new Repository(LocalRepoFilePath))
-                {
-                    foreach (var branch in repo.Branches)
-                    {
-                        /*if (branch.IsRemote) continue;*/
-                        Branches.Add(branch);
-                    }
-                }
+                UpdateBranches(new Repository(LocalRepoFilePath));
             }
             catch (GitException ex)
             {
@@ -476,55 +468,68 @@ namespace BananaGit.ViewModels
                 {
                     VerifyPath(LocalRepoFilePath);
 
-                    var options = new PullOptions();
-                    options.FetchOptions = new FetchOptions();
+                    var options = new PullOptions
+                    {
+                        FetchOptions = new FetchOptions()
+                    };
                     options.FetchOptions.CredentialsProvider = new CredentialsHandler((url, username, types) => new UsernamePasswordCredentials
                     {
                         Username = githubUserInfo?.Username,
                         Password = githubUserInfo?.PersonalToken
                     });
 
-                    options.MergeOptions = new MergeOptions();
-                    options.MergeOptions.FastForwardStrategy = FastForwardStrategy.Default;
-                    options.MergeOptions.OnCheckoutNotify = new CheckoutNotifyHandler(ShowConflict);
-                    options.MergeOptions.CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict;
-                    using (var repo = new Repository(LocalRepoFilePath))
+                    options.MergeOptions = new MergeOptions
                     {
-                        Application.Current.Dispatcher.Invoke(() =>
-                        {
-                            Branches.Clear();
-                            //Update branches
-                            foreach (var branch in repo.Branches)
-                            {
-                                if (branch.IsRemote) continue;
-                                Branches.Add(branch);
-                            }
-                        });
-                      
-                        //Create signature and pull
-                        Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
-                        var result = Commands.Pull(repo, signature, options);
+                        FastForwardStrategy = FastForwardStrategy.Default,
+                        OnCheckoutNotify = new CheckoutNotifyHandler(ShowConflict),
+                        CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict
+                    };
 
-                        //Check for merge conflicts
-                        if (result.Status == MergeStatus.Conflicts)
-                        {
-                            //Display in front end eventually
-                            OutputError("Conflict detected");
-                            return;
-                        }
-                        else if (result.Status == MergeStatus.UpToDate)
-                        {
-                            //Display in front end eventually
-                            OutputError("Up to date");
-                            return;
-                        }
+                    using var repo = new Repository(LocalRepoFilePath);
 
-                        OutputError("Pulled Successfuly");
+                    UpdateBranches(repo);
+
+                    //Create signature and pull
+                    Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
+                    var result = Commands.Pull(repo, signature, options);
+
+                    //Check for merge conflicts
+                    if (result.Status == MergeStatus.Conflicts)
+                    {
+                        //Display in front end eventually
+                        OutputError("Conflict detected");
+                        return;
                     }
+                    else if (result.Status == MergeStatus.UpToDate)
+                    {
+                        //Display in front end eventually
+                        OutputError("Up to date");
+                        return;
+                    }
+
+                    OutputError("Pulled Successfuly");
                 }
                 catch (Exception ex)
                 {
                     OutputError(ex.Message);
+                }
+            });
+        }
+
+        /// <summary>
+        /// Checks if any new branches were added and adds them to list
+        /// </summary>
+        /// <param name="repo"></param>
+        private void UpdateBranches(Repository repo)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                Branches.Clear();
+                //Update branches
+                foreach (var branch in repo.Branches)
+                {
+                    if (branch.IsRemote) continue;
+                    Branches.Add(branch);
                 }
             });
         }
@@ -602,6 +607,7 @@ namespace BananaGit.ViewModels
                         //Set active repo as locally opened repo
                         LocalRepoFilePath = dialog.FolderName;
                         RepoURL = repo.Network.Remotes["origin"].Url;
+                        CurrentBranch = "main";
 
                         //Save to user info
                         githubUserInfo.SavedRepository = new(LocalRepoFilePath, RepoURL);
