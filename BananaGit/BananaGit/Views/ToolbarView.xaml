@@ -31,7 +31,7 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Stretch"
                 FontSize="10"
-                ItemsSource="{Binding Branches}"
+                ItemsSource="{Binding LocalBranches}"
                 Text="{Binding CurrentBranch, Mode=TwoWay}"
                 >
                 <ComboBox.ItemTemplate>
