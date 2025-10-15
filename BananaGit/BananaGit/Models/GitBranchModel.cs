@@ -5,18 +5,18 @@ using LibGit2Sharp;
 
 namespace BananaGit.Models
 {
-    partial class GitBranchModel : ObservableObject
+    partial class GitBranch : ObservableObject
     {
         public string Name { get; set; }
         public bool IsRemote { get; set; }
 
-        public GitBranchModel(string name, bool isRemote)
+        public GitBranch(string name, bool isRemote)
         {
             Name = name;
             IsRemote = isRemote;
         }
 
-        public GitBranchModel(Branch branch) 
+        public GitBranch(Branch branch) 
         {
             Name = branch.FriendlyName;
             IsRemote = branch.IsRemote;

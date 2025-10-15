@@ -39,13 +39,13 @@ namespace BananaGit.ViewModels
         private ObservableCollection<ChangedFile> _stagedChanges = [];
 
         [ObservableProperty]
-        private ObservableCollection<GitBranchModel> _localBranches = [];
+        private ObservableCollection<GitBranch> _localBranches = [];
 
         [ObservableProperty]
-        private ObservableCollection<GitBranchModel> _remoteBranches = [];
+        private ObservableCollection<GitBranch> _remoteBranches = [];
 
         [ObservableProperty]
-        private string _currentBranch = "main";
+        private GitBranch _currentBranch = new("main", false);
 
         [ObservableProperty]
         private ObservableCollection<GitCommitInfo> _commitHistory = [];
@@ -187,9 +187,9 @@ namespace BananaGit.ViewModels
 
                 CommitHistory.Clear();
                 //Update list of all commits
-                if (CurrentBranch == null || CurrentBranch == "") throw new NullReferenceException("Current branch isn't set");
+                if (CurrentBranch == null || CurrentBranch.Name == "") throw new NullReferenceException("Current branch isn't set");
 
-                var currentBranch = repo.Branches[CurrentBranch] ?? throw new NullReferenceException("Current branch isn't set");
+                var currentBranch = repo.Branches[CurrentBranch.Name] ?? throw new NullReferenceException("Current branch isn't set");
 
                 var commits = currentBranch.Commits.ToList();
 
@@ -242,14 +242,14 @@ namespace BananaGit.ViewModels
         /// Checks if any new branches were added and adds them to list
         /// </summary>
         /// <param name="repo"></param>
-        private void UpdateBranches(Repository repo, string currentBranch)
+        private void UpdateBranches(Repository repo, GitBranch currentBranch)
         {
             var fetchOptions = new FetchOptions { Prune = true };
             var remote = repo.Network.Remotes["origin"];
 
             Commands.Fetch(repo, remote.Name, new string[0], fetchOptions, "");
 
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current.Dispatcher.Invoke((Action)(() =>
             {
                 LocalBranches.Clear();
                 RemoteBranches.Clear();
@@ -262,12 +262,12 @@ namespace BananaGit.ViewModels
                         if (branch.FriendlyName.Contains("refs"))
                             continue;
 
-                        RemoteBranches.Add(new GitBranchModel(branch));
+                        RemoteBranches.Add(new GitBranch(branch));
                         continue;
                     }
-                    LocalBranches.Add(new GitBranchModel(branch));
+                    LocalBranches.Add(new GitBranch(branch));
                 }
-            });
+            }));
             CurrentBranch = currentBranch;
         }
 
@@ -422,14 +422,14 @@ namespace BananaGit.ViewModels
                     VerifyPath(LocalRepoFilePath);
 
                     using var repo = new Repository(LocalRepoFilePath);
-                    var remote = repo.Network.Remotes[CurrentBranch];
+                    var remote = repo.Network.Remotes[CurrentBranch.Name];
                     if (remote != null)
                     {
-                        repo.Network.Remotes.Remove(CurrentBranch);
+                        repo.Network.Remotes.Remove(CurrentBranch.Name);
                     }
 
-                    repo.Network.Remotes.Add(CurrentBranch, RepoURL);
-                    remote = repo.Network.Remotes[CurrentBranch];
+                    repo.Network.Remotes.Add(CurrentBranch.Name, RepoURL);
+                    remote = repo.Network.Remotes[CurrentBranch.Name];
                     if (remote == null) return;
 
                     FetchOptions options = new FetchOptions
@@ -445,7 +445,7 @@ namespace BananaGit.ViewModels
                     var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
                     Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
 
-                    var localBranchName = string.IsNullOrEmpty(CurrentBranch) ? "main" : CurrentBranch;
+                    var localBranchName = string.IsNullOrEmpty(CurrentBranch.Name) ? "main" : CurrentBranch.Name;
                     var localBranch = repo.Branches[localBranchName];
 
                     if (localBranch == null) return;
@@ -588,7 +588,7 @@ namespace BananaGit.ViewModels
                         //Set active repo as locally opened repo
                         LocalRepoFilePath = dialog.FolderName;
                         RepoURL = repo.Network.Remotes["origin"].Url;
-                        UpdateBranches(repo, "main");
+                        UpdateBranches(repo, new("main", false));
 
                         //Save to user info
                         githubUserInfo.SavedRepository = new(LocalRepoFilePath, RepoURL);
