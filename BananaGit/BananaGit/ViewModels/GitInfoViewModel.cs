@@ -39,10 +39,10 @@ namespace BananaGit.ViewModels
         private ObservableCollection<ChangedFile> _stagedChanges = [];
 
         [ObservableProperty]
-        private ObservableCollection<Branch> _localBranches = [];
+        private ObservableCollection<GitBranchModel> _localBranches = [];
 
         [ObservableProperty]
-        private ObservableCollection<Branch> _remoteBranches = [];
+        private ObservableCollection<GitBranchModel> _remoteBranches = [];
 
         [ObservableProperty]
         private string _currentBranch = "main";
@@ -187,7 +187,11 @@ namespace BananaGit.ViewModels
 
                 CommitHistory.Clear();
                 //Update list of all commits
-                var commits = repo.Branches[CurrentBranch].Commits.ToList();
+                if (CurrentBranch == null || CurrentBranch == "") throw new NullReferenceException("Current branch isn't set");
+
+                var currentBranch = repo.Branches[CurrentBranch] ?? throw new NullReferenceException("Current branch isn't set");
+
+                var commits = currentBranch.Commits.ToList();
 
                 //Limits commit history to a certain length
                 for (int i = 0; i < _commitHistoryLength; ++i)
@@ -233,6 +237,55 @@ namespace BananaGit.ViewModels
                 OutputError(ex.Message);
             }
         }
+
+        /// <summary>
+        /// Checks if any new branches were added and adds them to list
+        /// </summary>
+        /// <param name="repo"></param>
+        private void UpdateBranches(Repository repo, string currentBranch)
+        {
+            var fetchOptions = new FetchOptions { Prune = true };
+            var remote = repo.Network.Remotes["origin"];
+
+            Commands.Fetch(repo, remote.Name, new string[0], fetchOptions, "");
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                LocalBranches.Clear();
+                RemoteBranches.Clear();
+
+                //Update branches
+                foreach (var branch in repo.Branches)
+                {
+                    if (branch.IsRemote)
+                    {
+                        if (branch.FriendlyName.Contains("refs"))
+                            continue;
+
+                        RemoteBranches.Add(new GitBranchModel(branch));
+                        continue;
+                    }
+                    LocalBranches.Add(new GitBranchModel(branch));
+                }
+            });
+            CurrentBranch = currentBranch;
+        }
+
+        /// <summary>
+        /// The callback for conflicts
+        /// </summary>
+        /// <param name="path">The file that conflicted</param>
+        /// <param name="notifyFlags">The checkout notify flag</param>
+        /// <returns></returns>
+        private bool ShowConflict(string path, CheckoutNotifyFlags notifyFlags)
+        {
+            if (notifyFlags == CheckoutNotifyFlags.Conflict)
+            {
+                Trace.WriteLine($"Conflict found in file {path}");
+            }
+            return true;
+        }
+
         #endregion
 
         #region Stage/Commit
@@ -483,56 +536,6 @@ namespace BananaGit.ViewModels
                 }
             });
         }
-
-        /// <summary>
-        /// Checks if any new branches were added and adds them to list
-        /// </summary>
-        /// <param name="repo"></param>
-        private void UpdateBranches(Repository repo, string currentBranch)
-        {
-            var fetchOptions = new FetchOptions { Prune = true };
-            var remote = repo.Network.Remotes["origin"]; 
-
-            Commands.Fetch(repo, remote.Name, new string[0], fetchOptions, "");
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                LocalBranches.Clear();
-                RemoteBranches.Clear();
-
-                //Update branches
-                foreach (var branch in repo.Branches)
-                {
-                    if (branch.IsRemote)
-                    {
-                        if (branch.FriendlyName.Contains("ref"))
-                        {
-                            continue;
-                        }
-                        RemoteBranches.Add(branch);
-                        continue;
-                    }
-                    LocalBranches.Add(branch);
-                }
-            });
-            CurrentBranch = currentBranch;
-        }
-
-        /// <summary>
-        /// The callback for conflicts
-        /// </summary>
-        /// <param name="path">The file that conflicted</param>
-        /// <param name="notifyFlags">The checkout notify flag</param>
-        /// <returns></returns>
-        private bool ShowConflict(string path, CheckoutNotifyFlags notifyFlags)
-        {
-            if (notifyFlags == CheckoutNotifyFlags.Conflict)
-            {
-                Trace.WriteLine($"Conflict found in file {path}");
-            }
-            return true;
-        }
-
         #endregion
 
         #region Clone 

@@ -37,7 +37,7 @@
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
-                            <Label Content="{Binding FriendlyName}" />
+                            <Label Content="{Binding Name}" />
                             <Label Content="{Binding IsRemote}" />
                         </StackPanel>
                     </DataTemplate>
