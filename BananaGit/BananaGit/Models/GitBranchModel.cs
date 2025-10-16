@@ -39,7 +39,7 @@ namespace BananaGit.Models
         }
 
         [RelayCommand]
-        public void RemoveRemote()
+        public void RemoveRemoteBranch()
         {
             if (!IsRemote) return;
 
@@ -53,6 +53,29 @@ namespace BananaGit.Models
                     using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
 
                     repo.Network.Remotes.Remove(Branch.RemoteName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
+        }
+
+        [RelayCommand]
+        public void RemoveLocalBranch()
+        {
+            if (IsRemote) return;
+
+            try
+            {
+                GitInfoModel? gitInfo = new();
+                JsonDataManager.LoadUserInfo(ref gitInfo);
+
+                if (gitInfo != null)
+                {
+                    using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
+
+                    repo.Branches.Remove(Branch.CanonicalName);
                 }
             }
             catch (Exception ex)
