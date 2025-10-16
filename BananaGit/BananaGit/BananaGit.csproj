@@ -14,6 +14,8 @@
 
   <ItemGroup>
     <None Remove="Assets\Banana.png" />
+    <None Remove="Assets\ExampleGitChangeImage.png" />
+    <None Remove="Assets\ExampleStagedFileImage.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -31,6 +33,15 @@
 
   <ItemGroup>
     <Page Include="App.xaml" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Assets\ExampleGitChangeImage.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Assets\ExampleStagedFileImage.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
 </Project>

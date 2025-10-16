@@ -18,10 +18,34 @@
             TabStripPlacement="Left"
             >
             <TabItem Header="Starting with Git" Style="{StaticResource TabStyle}">
-                Example Text
-                AAAAAAAAAAAAAAAAAAA
+                <TextBlock TextWrapping="WrapWithOverflow">
+                    Git is a version control system
+                    that allows you to work remotely with teams on
+                    a codebase.<LineBreak />
+                    <LineBreak />
+                    To get started, try making a change to a file. You should see that
+                    file show up in the git changes view on the right.<LineBreak />
+
+                    <LineBreak />
+                    <LineBreak />
+                    Example of modified file:<InlineUIContainer>
+                        <Image Source="../Assets/ExampleGitChangeImage.png" />
+                    </InlineUIContainer>
+                </TextBlock>
             </TabItem>
-            <TabItem Header="Staging" Style="{StaticResource TabStyle}" />
+            <TabItem Header="Staging" Style="{StaticResource TabStyle}">
+                <TextBlock TextWrapping="WrapWithOverflow">
+                    If you hit the plus next to the modified file,
+                    or if you hit the stage all button, this will prepare the
+                    modified files to be commited.<LineBreak /><LineBreak />
+                    This will allow you to send your updated files to the repo,
+                    so others can recieve your changes.<LineBreak />
+                    <LineBreak />
+                    Example of staged file:<InlineUIContainer>
+                        <Image Source="../Assets/ExampleStagedFileImage.png" />
+                    </InlineUIContainer>
+                </TextBlock>
+            </TabItem>
             <TabItem Header="Commiting" Style="{StaticResource TabStyle}" />
             <TabItem Header="The Workflow" Style="{StaticResource TabStyle}" />
             <TabItem Header="Branches" Style="{StaticResource TabStyle}" />
