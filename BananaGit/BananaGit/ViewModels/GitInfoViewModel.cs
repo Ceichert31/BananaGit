@@ -45,7 +45,7 @@ namespace BananaGit.ViewModels
         private ObservableCollection<GitBranch> _remoteBranches = [];
 
         [ObservableProperty]
-        private GitBranch _currentBranch = new("main", false);
+        private GitBranch _currentBranch = new();
 
         [ObservableProperty]
         private ObservableCollection<GitCommitInfo> _commitHistory = [];
@@ -591,7 +591,7 @@ namespace BananaGit.ViewModels
                         //Set active repo as locally opened repo
                         LocalRepoFilePath = dialog.FolderName;
                         RepoURL = repo.Network.Remotes["origin"].Url;
-                        UpdateBranches(repo, new("main", false));
+                        UpdateBranches(repo, new());
 
                         //Save to user info
                         githubUserInfo.SavedRepository = new(LocalRepoFilePath, RepoURL);

@@ -33,13 +33,12 @@
                 VerticalAlignment="Stretch"
                 FontSize="10"
                 ItemsSource="{Binding LocalBranches}"
-                Text="{Binding CurrentBranch, Mode=TwoWay}"
+                SelectedItem="{Binding CurrentBranch, Mode=TwoWay}"
                 >
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
                             <Label Content="{Binding Name}" />
-                            <Label Content="{Binding IsRemote}" />
                         </StackPanel>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
