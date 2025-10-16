@@ -62,6 +62,9 @@ namespace BananaGit.ViewModels
 
         [ObservableProperty]
         private bool _hasCommitedFiles;
+
+        [ObservableProperty]
+        private bool _isTutorialOpen;
         #endregion
 
         private readonly DispatcherTimer _updateGitInfoTimer = new();
@@ -661,6 +664,12 @@ namespace BananaGit.ViewModels
         public void OpenRemoteWindow()
         {
             _dialogService.ShowRemoteBranchesDialog(this);
+        }
+
+        [RelayCommand]
+        public void OpenTutorialPage()
+        {
+            IsTutorialOpen = !IsTutorialOpen;
         }
         #endregion
 

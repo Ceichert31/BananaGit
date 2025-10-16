@@ -11,6 +11,7 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles/MainWindowDictionary.xaml" />
                 <ResourceDictionary Source="Styles/DialogueViews/CloneRepoDictionary.xaml" />
+                <ResourceDictionary Source="Styles/TutorialDictionary.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

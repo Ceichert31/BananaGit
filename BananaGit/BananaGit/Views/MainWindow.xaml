@@ -51,14 +51,25 @@
             DataContext="{Binding GitInfoViewModel}"
             />
 
-        <!--  Commit History  -->
-        <local:CommitHistoryView
+        <!--  Commit History & Tutorial  -->
+        <ContentControl
             Grid.Row="1"
             Grid.RowSpan="3"
             Grid.Column="0"
             Grid.ColumnSpan="2"
-            DataContext="{Binding GitInfoViewModel}"
-            />
+            Content="{Binding}"
+            >
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <Setter Property="ContentTemplate" Value="{StaticResource CommitHistoryTemplate}" />
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsTutorialOpen}" Value="True">
+                            <Setter Property="ContentTemplate" Value="{StaticResource TutorialTemplate}" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
 
         <!--  Render first to avoid overlap  -->
         <Image

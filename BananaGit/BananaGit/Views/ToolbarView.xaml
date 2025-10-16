@@ -16,6 +16,7 @@
         <ToolBar Grid.ColumnSpan="3" ToolBarTray.IsLocked="True">
             <Image Source="../Assets/Banana.png" />
             <Button Content="Settings" />
+            <Button Command="{Binding OpenTutorialPageCommand}" Content="Tutorials" />
             <Button Command="{Binding ChooseCloneDirectoryCommand}" Content="Open" />
             <Button Command="{Binding OpenCloneWindowCommand}" Content="Clone" />
             <Button
