@@ -24,6 +24,7 @@
                 <DataTemplate>
                     <StackPanel Orientation="Horizontal">
                         <Button Command="{Binding CheckoutBranchCommand}" Content="+" />
+                        <Button Command="{Binding RemoveRemoteCommand}" Content="-" />
                         <Label Content="{Binding Name}" />
                     </StackPanel>
                 </DataTemplate>

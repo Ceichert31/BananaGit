@@ -1,4 +1,5 @@
-﻿using System.Windows.Controls;
+﻿using System.Diagnostics;
+using System.Windows.Controls;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -38,33 +39,63 @@ namespace BananaGit.Models
         }
 
         [RelayCommand]
+        public void RemoveRemote()
+        {
+            if (!IsRemote) return;
+
+            try
+            {
+                GitInfoModel? gitInfo = new();
+                JsonDataManager.LoadUserInfo(ref gitInfo);
+
+                if (gitInfo != null)
+                {
+                    using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
+
+                    repo.Network.Remotes.Remove(Branch.RemoteName);
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
+        }
+
+        [RelayCommand]
         public void CheckoutBranch()
         {
-            GitInfoModel? gitInfo = new();
-            JsonDataManager.LoadUserInfo(ref gitInfo);
+            if (!IsRemote) return;
 
-            if (gitInfo != null)
+            try
             {
-                using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
+                GitInfoModel? gitInfo = new();
+                JsonDataManager.LoadUserInfo(ref gitInfo);
 
-                //Fetch remotes
-
-                var options = new FetchOptions();
-
-                options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
+                if (gitInfo != null)
                 {
-                    Username = gitInfo.Username,
-                    Password = gitInfo.PersonalToken
-                };
-                Commands.Fetch(repo, Branch.RemoteName, new string[0], options, null);
+                    using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
 
-                string localBranchName = Branch.FriendlyName.Remove(0, 7);
-                Branch localBranch = repo.CreateBranch(localBranchName, Branch.Tip);
-                repo.Branches.Update(localBranch, b => b.TrackedBranch = Branch.CanonicalName);
-                Commands.Checkout(repo, localBranch);
+                    var options = new FetchOptions();
+
+                    options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
+                    {
+                        Username = gitInfo.Username,
+                        Password = gitInfo.PersonalToken
+                    };
+
+                    //Fetch remotes
+                    Commands.Fetch(repo, Branch.RemoteName, new string[0], options, null);
+
+                    string localBranchName = Branch.FriendlyName.Remove(0, 7);
+                    Branch localBranch = repo.CreateBranch(localBranchName, Branch.Tip);
+                    repo.Branches.Update(localBranch, b => b.TrackedBranch = Branch.CanonicalName);
+                    Commands.Checkout(repo, localBranch);
+                }
             }
-
-
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
         }
     }
 }
