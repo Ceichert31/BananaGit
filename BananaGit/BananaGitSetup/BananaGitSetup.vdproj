@@ -33,25 +33,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_1FEBC7F7D3F14FBCB20EBAE56CBCF99C"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
         "MsmKey" = "8:_29D5CB0647854E328BEDCC9F3113FCD6"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_2E7D5847FAC141FCA56FCCF408923946"
-        "OwnerKey" = "8:_UNDEFINED"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_4847B0EB6232450888709B579950BE3F"
         "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -210,72 +192,12 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_1FEBC7F7D3F14FBCB20EBAE56CBCF99C"
-            {
-            "SourcePath" = "8:..\\Publish\\Assets\\ExampleStagedFileImage.png"
-            "TargetName" = "8:ExampleStagedFileImage.png"
-            "Tag" = "8:"
-            "Folder" = "8:_1071C5DC3DB94952837B707D263E95D2"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_29D5CB0647854E328BEDCC9F3113FCD6"
             {
             "SourcePath" = "8:..\\Publish\\D3DCompiler_47_cor3.dll"
             "TargetName" = "8:D3DCompiler_47_cor3.dll"
             "Tag" = "8:"
             "Folder" = "8:_93C59CFA380E496C8F3DF30543145598"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_2E7D5847FAC141FCA56FCCF408923946"
-            {
-            "SourcePath" = "8:..\\Publish\\Assets\\Banana.png"
-            "TargetName" = "8:Banana.png"
-            "Tag" = "8:"
-            "Folder" = "8:_1071C5DC3DB94952837B707D263E95D2"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_4847B0EB6232450888709B579950BE3F"
-            {
-            "SourcePath" = "8:..\\Publish\\Assets\\ExampleGitChangeImage.png"
-            "TargetName" = "8:ExampleGitChangeImage.png"
-            "Tag" = "8:"
-            "Folder" = "8:_1071C5DC3DB94952837B707D263E95D2"
             "Condition" = "8:"
             "Transitive" = "11:FALSE"
             "Vital" = "11:TRUE"
@@ -417,17 +339,6 @@
             "Property" = "8:TARGETDIR"
                 "Folders"
                 {
-                    "{9EF0B969-E518-4E46-987F-47570745A589}:_1071C5DC3DB94952837B707D263E95D2"
-                    {
-                    "Name" = "8:Assets"
-                    "AlwaysCreate" = "11:FALSE"
-                    "Condition" = "8:"
-                    "Transitive" = "11:FALSE"
-                    "Property" = "8:_38E1258EFEB045B98E3C1BF455B829FA"
-                        "Folders"
-                        {
-                        }
-                    }
                 }
             }
             "{1525181F-901A-416C-8A58-119130FE478E}:_C8658EC3DB924C778846E21941281735"
@@ -458,7 +369,7 @@
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:BananaGitSetup"
         "ProductCode" = "8:{14AEA265-2C2F-4A5A-BE8D-46ECAC628FE0}"
-        "PackageCode" = "8:{C9CBCF12-29EA-4F79-806A-521DE7C2B514}"
+        "PackageCode" = "8:{7A2BCA48-677B-4AC8-9F40-9AD36DC34460}"
         "UpgradeCode" = "8:{5A16969D-40B9-4A38-86DF-A6212BDB6A9D}"
         "AspNetVersion" = "8:2.0.50727.0"
         "RestartWWWService" = "11:FALSE"
@@ -475,7 +386,7 @@
         "Keywords" = "8:"
         "ARPCOMMENTS" = "8:"
         "ARPURLINFOABOUT" = "8:"
-        "ARPPRODUCTICON" = "8:"
+        "ARPPRODUCTICON" = "8:_7DD4F3D16C2F408AA9906A0A2FFC6348"
         "ARPIconIndex" = "3:0"
         "SearchPath" = "8:"
         "UseSystemSearchPath" = "11:TRUE"
