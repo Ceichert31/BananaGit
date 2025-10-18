@@ -7,6 +7,9 @@ My plan for BananaGit is to make an easy-to-use, free, and open-source GitHub GU
 ### Current Version V1.2.0
 Big news for the BananaGit community! We now have branching! The UI for it is still temporary, but it is functionally there. Additionally, the latest version also adds a new Git tutorial menu with two tutorials.
 
+#### Notes
+Currently, the installer gets flagged as a virus. I can't afford a certificate right now to sign the installer, so it will most likely continue to flag as a virus. I pinky promise it isn't, and you'll just have to trust me. Sorry for the inconvenience. 
+
 #### Main page
 <img width="1481" height="733" alt="image" src="https://github.com/user-attachments/assets/80a12f84-ceee-4afe-8369-3aa662c6c424" />
 
@@ -17,5 +20,4 @@ Big news for the BananaGit community! We now have branching! The UI for it is st
 <img width="1473" height="727" alt="image" src="https://github.com/user-attachments/assets/093204d3-e0c0-41dc-bfef-542c729ca30c" />
 
 #### Changes
-
 <img width="1471" height="732" alt="image" src="https://github.com/user-attachments/assets/15efc277-f9a6-4f77-bdca-7b14205b76b8" />
