@@ -32,8 +32,9 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Stretch"
                 FontSize="10"
+                IsSynchronizedWithCurrentItem="True"
                 ItemsSource="{Binding LocalBranches}"
-                SelectedItem="{Binding CurrentBranch, Mode=TwoWay}"
+                SelectedItem="{Binding CurrentBranch}"
                 >
                 <ComboBox.ItemTemplate>
                     <DataTemplate>

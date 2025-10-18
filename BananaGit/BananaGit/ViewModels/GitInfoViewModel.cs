@@ -45,7 +45,7 @@ namespace BananaGit.ViewModels
         private ObservableCollection<GitBranch> _remoteBranches = [];
 
         [ObservableProperty]
-        private GitBranch _currentBranch = new();
+        private GitBranch _currentBranch;
 
         [ObservableProperty]
         private ObservableCollection<GitCommitInfo> _commitHistory = [];
@@ -132,6 +132,9 @@ namespace BananaGit.ViewModels
                 //Mark that we succesfully cloned the repo
                 NoRepoCloned = false;
 
+                //Add main on first run
+                CurrentBranch = new();
+                LocalBranches.Add(CurrentBranch);
                 UpdateBranches(new Repository(LocalRepoFilePath), CurrentBranch);
             }
             catch (GitException ex)
@@ -254,20 +257,27 @@ namespace BananaGit.ViewModels
 
             Application.Current.Dispatcher.Invoke((Action)(() =>
             {
-                LocalBranches.Clear();
-                RemoteBranches.Clear();
-
                 //Update branches
                 foreach (var branch in repo.Branches)
                 {
                     if (branch.IsRemote)
                     {
+                        //Filter out all remotes with ref in the name
                         if (branch.FriendlyName.Contains("refs"))
+                            continue;
+
+                        //Check if branch already exists
+                        if (RemoteBranches.Where(x => x.Branch == branch).Any())
                             continue;
 
                         RemoteBranches.Add(new GitBranch(branch));
                         continue;
                     }
+
+                    //Check if local branch already exists
+                    if (LocalBranches.Where(x => x.Branch == branch).Any())
+                        continue;
+
                     LocalBranches.Add(new GitBranch(branch));
                 }
             }));
@@ -591,6 +601,7 @@ namespace BananaGit.ViewModels
                         //Set active repo as locally opened repo
                         LocalRepoFilePath = dialog.FolderName;
                         RepoURL = repo.Network.Remotes["origin"].Url;
+                        ResetBranches();
                         UpdateBranches(repo, new());
 
                         //Save to user info
@@ -711,6 +722,17 @@ namespace BananaGit.ViewModels
         private static void OutputError(string message)
         {
             Application.Current.Dispatcher.Invoke(() => { Trace.WriteLine(message); });
+        }
+
+        /// <summary>
+        /// Resets collection of local branches and re-initializes the lists
+        /// </summary>
+        public void ResetBranches()
+        {
+            LocalBranches.Clear();
+            RemoteBranches.Clear();
+            CurrentBranch = new();
+            LocalBranches.Add(CurrentBranch);
         }
         #endregion
     }

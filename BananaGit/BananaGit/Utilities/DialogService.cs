@@ -23,8 +23,8 @@ namespace BananaGit.Utilities
         public bool ShowRemoteBranchesDialog(GitInfoViewModel? vm)
         {
             RemoteBranchView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
-
-            return view.ShowDialog() ?? false;
+            view.Show();
+            return true;
         }
     }
 
