@@ -19,9 +19,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\Banana.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Assets\Banana.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
     <Content Include="Assets\Banana.ico" />
   </ItemGroup>
 
@@ -36,12 +36,12 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Assets\ExampleGitChangeImage.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\ExampleStagedFileImage.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
+    <Resource Include="Assets\ExampleGitChangeImage.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
+    <Resource Include="Assets\ExampleStagedFileImage.png">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Resource>
   </ItemGroup>
 
 </Project>

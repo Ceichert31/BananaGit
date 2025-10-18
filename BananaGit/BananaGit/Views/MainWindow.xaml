@@ -82,7 +82,7 @@
             VerticalAlignment="Center"
             IsHitTestVisible="False"
             Opacity="0.2"
-            Source="../Assets/Banana.png"
+            Source="pack://application:,,,/Assets/Banana.png"
             />
 
         <GridSplitter

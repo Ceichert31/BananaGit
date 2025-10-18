@@ -29,7 +29,7 @@
                     <LineBreak />
                     <LineBreak />
                     Example of modified file:<InlineUIContainer>
-                        <Image Source="../Assets/ExampleGitChangeImage.png" />
+                        <Image Source="pack://application:,,,/Assets/ExampleGitChangeImage.png" />
                     </InlineUIContainer>
                 </TextBlock>
             </TabItem>
@@ -42,7 +42,7 @@
                     so others can recieve your changes.<LineBreak />
                     <LineBreak />
                     Example of staged file:<InlineUIContainer>
-                        <Image Source="../Assets/ExampleStagedFileImage.png" />
+                        <Image Source="pack://application:,,,/Assets/ExampleStagedFileImage.png" />
                     </InlineUIContainer>
                 </TextBlock>
             </TabItem>
