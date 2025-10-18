@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows7.0</TargetFramework>
+    <TargetFramework>net8.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
 	  <PublishSingleFile>true</PublishSingleFile>
 	<EnableWindowsTargeting>true</EnableWindowsTargeting>
 	<StartupObject>BananaGit.App</StartupObject>
-	<ApplicationIcon>Banana.ico</ApplicationIcon>
+	<ApplicationIcon>Assets/Banana.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -22,7 +22,7 @@
     <Content Include="Assets\Banana.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="Banana.ico" />
+    <Content Include="Assets\Banana.ico" />
   </ItemGroup>
 
   <ItemGroup>
