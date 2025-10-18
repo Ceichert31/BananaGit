@@ -22,7 +22,9 @@
     <Resource Include="Assets\Banana.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Resource>
-    <Content Include="Assets\Banana.ico" />
+    <Content Include="Assets\Banana.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>

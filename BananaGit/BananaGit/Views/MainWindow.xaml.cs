@@ -17,6 +17,5 @@ namespace BananaGit.Views
             viewModel = new MainWindowViewModel();
             DataContext = viewModel;
         }
-    
     }
 }

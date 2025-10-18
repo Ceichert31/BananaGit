@@ -7,11 +7,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
     xmlns:views="clr-namespace:BananaGit.Views"
-    Title="MainWindow"
+    Title="BananaGit"
     Width="1000"
     Height="500"
     d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
     Background="#FFEA78"
+    Icon="../Assets/Banana.ico"
+    WindowStartupLocation="CenterScreen"
     mc:Ignorable="d"
     >
 
@@ -33,6 +35,7 @@
         <local:ToolbarView
             Grid.Row="0"
             Grid.ColumnSpan="4"
+            Margin="0,-1,0,0"
             DataContext="{Binding GitInfoViewModel}"
             />
 
@@ -74,12 +77,12 @@
         <!--  Render first to avoid overlap  -->
         <Image
             Grid.Row="1"
-            Grid.RowSpan="2"
+            Grid.RowSpan="3"
             Grid.Column="0"
             Grid.ColumnSpan="2"
             Margin="-10,0,0,0"
-            HorizontalAlignment="Center"
-            VerticalAlignment="Center"
+            HorizontalAlignment="Stretch"
+            VerticalAlignment="Stretch"
             IsHitTestVisible="False"
             Opacity="0.2"
             Source="pack://application:,,,/Assets/Banana.png"
