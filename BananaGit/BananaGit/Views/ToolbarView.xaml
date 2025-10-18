@@ -16,19 +16,37 @@
         <ToolBar
             Grid.ColumnSpan="3"
             Margin="-10,0,0,0"
+            Background="#FFE245"
             ToolBarTray.IsLocked="True"
             >
             <Image Source="../Assets/Banana.png" />
-            <Button Content="Settings" />
-            <Button Command="{Binding OpenTutorialPageCommand}" Content="Tutorials" />
-            <Button Command="{Binding ChooseCloneDirectoryCommand}" Content="Open" />
-            <Button Command="{Binding OpenCloneWindowCommand}" Content="Clone" />
+            <Button Content="Settings" Foreground="Black" />
+            <Button
+                Command="{Binding OpenTutorialPageCommand}"
+                Content="Tutorials"
+                Foreground="Black"
+                />
+            <Button
+                Command="{Binding ChooseCloneDirectoryCommand}"
+                Content="Open"
+                Foreground="Black"
+                />
+            <Button
+                Command="{Binding OpenCloneWindowCommand}"
+                Content="Clone"
+                Foreground="Black"
+                />
             <Button
                 Command="{Binding PushFilesCommand}"
                 Content="Push"
+                Foreground="Black"
                 IsEnabled="{Binding HasCommitedFiles}"
                 />
-            <Button Command="{Binding PullChangesCommand}" Content="Pull" />
+            <Button
+                Command="{Binding PullChangesCommand}"
+                Content="Pull"
+                Foreground="Black"
+                />
             <ComboBox
                 x:Name="BranchList"
                 Width="100"
@@ -36,6 +54,7 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Stretch"
                 FontSize="10"
+                Foreground="Black"
                 IsSynchronizedWithCurrentItem="True"
                 ItemsSource="{Binding LocalBranches}"
                 SelectedItem="{Binding CurrentBranch}"
@@ -49,7 +68,11 @@
                 </ComboBox.ItemTemplate>
             </ComboBox>
             <!--  Open remote popup and add remotes as local branches  -->
-            <Button Command="{Binding OpenRemoteWindowCommand}" Content="Remotes" />
+            <Button
+                Command="{Binding OpenRemoteWindowCommand}"
+                Content="Remotes"
+                Foreground="Black"
+                />
         </ToolBar>
     </Grid>
 </UserControl>

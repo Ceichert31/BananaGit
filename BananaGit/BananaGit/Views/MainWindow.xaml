@@ -10,6 +10,8 @@
     Title="BananaGit"
     Width="1000"
     Height="500"
+    MinWidth="450"
+    MinHeight="450"
     d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
     Background="#FFEA78"
     Icon="../Assets/Banana.ico"
@@ -95,6 +97,7 @@
             Width="5"
             HorizontalAlignment="Center"
             VerticalAlignment="Stretch"
+            Background="White"
             />
     </Grid>
 </Window>

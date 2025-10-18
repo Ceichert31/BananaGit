@@ -25,6 +25,7 @@
 
     <SolidColorBrush x:Key="BananaYellow" Color="#FFEA78" />
     <SolidColorBrush x:Key="FlowerPurple" Color="#788DFF" />
+    <SolidColorBrush x:Key="DarkGold" Color="#debc00" />
 
     <DataTemplate x:Key="CloneRepoTemplate">
         <!--  Clone Section  -->
