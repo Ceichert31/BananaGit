@@ -45,7 +45,7 @@ namespace BananaGit.ViewModels
         private ObservableCollection<GitBranch> _remoteBranches = [];
 
         [ObservableProperty]
-        private GitBranch _currentBranch;
+        private GitBranch _currentBranch = new();
 
         [ObservableProperty]
         private ObservableCollection<GitCommitInfo> _commitHistory = [];
@@ -253,7 +253,7 @@ namespace BananaGit.ViewModels
             try
             {
                 var fetchOptions = new FetchOptions { Prune = true };
-                var remote = repo.Network.Remotes["origin"];
+                var remote = repo.Network.Remotes.FirstOrDefault();
 
 
                 if (remote != null)
@@ -293,9 +293,9 @@ namespace BananaGit.ViewModels
                 }));
                 CurrentBranch = currentBranch;
             }
-            catch (Exception e)
+            catch (Exception ex)
             {
-                OutputError(e.Message);
+                OutputError(ex.Message);
             }
         }
 
@@ -615,7 +615,16 @@ namespace BananaGit.ViewModels
 
                         //Set active repo as locally opened repo
                         LocalRepoFilePath = dialog.FolderName;
-                        RepoURL = repo.Network.Remotes["origin"].Url;
+                        var remote = repo.Network.Remotes.FirstOrDefault();
+                        if (remote != null)
+                        {
+                            RepoURL = remote.Url;
+                        }
+                        else
+                        {
+                            throw new NullReferenceException("Couldn't find any remotes!");
+                        }
+
                         ResetBranches();
                         UpdateBranches(repo, new());
 
