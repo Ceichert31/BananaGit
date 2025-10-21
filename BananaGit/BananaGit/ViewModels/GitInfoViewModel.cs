@@ -129,7 +129,7 @@ namespace BananaGit.ViewModels
                     throw new RepoLocationException("Local repository file location missing!");
                 }
 
-                //Mark that we succesfully cloned the repo
+                //Mark that we successfully cloned the repo
                 NoRepoCloned = false;
 
                 //Add main on first run
@@ -250,38 +250,53 @@ namespace BananaGit.ViewModels
         /// <param name="repo"></param>
         private void UpdateBranches(Repository repo, GitBranch currentBranch)
         {
-            var fetchOptions = new FetchOptions { Prune = true };
-            var remote = repo.Network.Remotes["origin"];
-
-            Commands.Fetch(repo, remote.Name, new string[0], fetchOptions, "");
-
-            Application.Current.Dispatcher.Invoke((Action)(() =>
+            try
             {
-                //Update branches
-                foreach (var branch in repo.Branches)
+                var fetchOptions = new FetchOptions { Prune = true };
+                var remote = repo.Network.Remotes["origin"];
+
+
+                if (remote != null)
                 {
-                    if (branch.IsRemote)
-                    {
-                        //Filter out all remotes with ref in the name
-                        if (branch.FriendlyName.Contains("refs"))
-                            continue;
-
-                        //Check if branch already exists
-                        if (RemoteBranches.Where(x => x.Branch == branch).Any())
-                            continue;
-
-                        RemoteBranches.Add(new GitBranch(branch));
-                        continue;
-                    }
-
-                    //Check if local branch already exists
-                    if (LocalBranches.Where(x => x.Branch == branch).Any())
-                        continue;
-
-                    LocalBranches.Add(new GitBranch(branch));
+                    Commands.Fetch(repo, remote.Name, new string[0], fetchOptions, "");
                 }
-            }));
-            CurrentBranch = currentBranch;
+                else
+                {
+                    throw new NullReferenceException("Couldn't retrieve remote!");
+                }
+
+                Application.Current.Dispatcher.Invoke((Action)(() =>
+                {
+                    //Update branches
+                    foreach (var branch in repo.Branches)
+                    {
+                        if (branch.IsRemote)
+                        {
+                            //Filter out all remotes with ref in the name
+                            if (branch.FriendlyName.Contains("refs"))
+                                continue;
+
+                            //Check if branch already exists
+                            if (RemoteBranches.Where(x => x.Branch == branch).Any())
+                                continue;
+
+                            RemoteBranches.Add(new GitBranch(branch));
+                            continue;
+                        }
+
+                        //Check if local branch already exists
+                        if (LocalBranches.Where(x => x.Branch == branch).Any())
+                            continue;
+
+                        LocalBranches.Add(new GitBranch(branch));
+                    }
+                }));
+                CurrentBranch = currentBranch;
+            }
+            catch (Exception e)
+            {
+                OutputError(e.Message);
+            }
         }
 
         /// <summary>
@@ -458,7 +473,7 @@ namespace BananaGit.ViewModels
                     var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
                     Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
 
-                    var localBranchName = string.IsNullOrEmpty(CurrentBranch.Name) ? "main" : CurrentBranch.Name;
+                    var localBranchName = string.IsNullOrEmpty(CurrentBranch.Name) ? repo.Head.FriendlyName : CurrentBranch.Name;
                     var localBranch = repo.Branches[localBranchName];
 
                     if (localBranch == null) return;
@@ -541,7 +556,7 @@ namespace BananaGit.ViewModels
                         return;
                     }
 
-                    OutputError("Pulled Successfuly");
+                    OutputError("Pulled Successfully");
                 }
                 catch (Exception ex)
                 {

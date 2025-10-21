@@ -11,7 +11,6 @@ namespace BananaGit.Models
     {
         public string Name { get; set; }
         public bool IsRemote { get; set; }
-
         public Branch Branch { get; set; }
 
         public GitBranch()
@@ -22,7 +21,7 @@ namespace BananaGit.Models
             if (gitInfo != null)
             {
                 using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-                Branch = repo.Branches["main"];
+                Branch = repo.Head;
                 Name = Branch.FriendlyName;
                 IsRemote = Branch.IsRemote;
             }
