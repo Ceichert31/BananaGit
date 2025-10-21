@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
@@ -10,21 +10,22 @@
 	<EnableWindowsTargeting>true</EnableWindowsTargeting>
 	<StartupObject>BananaGit.App</StartupObject>
 	<ApplicationIcon>Assets/Banana.ico</ApplicationIcon>
+	  <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
   </PropertyGroup>
 
   <ItemGroup>
-    <None Remove="Assets\Banana.png" />
-    <None Remove="Assets\ExampleGitChangeImage.png" />
-    <None Remove="Assets\ExampleStagedFileImage.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Assets\Banana.png">
+    <Content Include="Assets\Banana.png">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
+    </Content>
     <Content Include="Assets\Banana.ico">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
+	  <Content Include="Assets\ExampleGitChangeImage.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
+	  <Content Include="Assets\ExampleStagedFileImage.png">
+		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	  </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -36,14 +37,4 @@
   <ItemGroup>
     <Page Include="App.xaml" />
   </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Assets\ExampleGitChangeImage.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-    <Resource Include="Assets\ExampleStagedFileImage.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Resource>
-  </ItemGroup>
-
 </Project>

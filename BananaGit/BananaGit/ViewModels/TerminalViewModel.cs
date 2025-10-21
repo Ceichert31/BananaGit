@@ -34,7 +34,7 @@ namespace BananaGit.ViewModels
 
         public override void Write(string? message)
         {
-            RecievedMessage?.Invoke(message);
+            RecievedMessage?.Invoke(message ?? "");
         }
 
         public override void WriteLine(string? message)

@@ -15,7 +15,7 @@ namespace BananaGit.Utilities
 
         public bool ShowCredentialsDialog(GitInfoViewModel? vm)
         {
-            EnterCredentialsView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            EnterCredentialsView view = new() { DataContext = vm };
 
             return view.ShowDialog() ?? false;
         }
