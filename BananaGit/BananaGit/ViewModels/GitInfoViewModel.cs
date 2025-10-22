@@ -270,6 +270,8 @@ namespace BananaGit.ViewModels
                     //Update branches
                     foreach (var branch in repo.Branches)
                     {
+                        if (branch.FriendlyName == repo.Head.FriendlyName) continue;
+
                         if (branch.IsRemote)
                         {
                             //Filter out all remotes with ref in the name
