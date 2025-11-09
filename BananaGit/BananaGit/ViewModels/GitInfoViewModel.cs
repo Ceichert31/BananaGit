@@ -112,7 +112,7 @@ namespace BananaGit.ViewModels
                 else
                 {
                     //Check if repo data is empty
-                    if (!githubUserInfo.SavedRepository.IsValidRepository())
+                    if (Repository.IsValid(githubUserInfo.SavedRepository.FilePath) || githubUserInfo.SavedRepository.IsValidRepository())
                     {
                         throw new InvalidRepoException("Saved repository is empty!");
                     }
@@ -139,6 +139,7 @@ namespace BananaGit.ViewModels
             }
             catch (GitException ex)
             {
+                githubUserInfo.SavedRepository = null;
                 //Output to debug console
                 OutputError(ex.Message);
                 NoRepoCloned = true;
