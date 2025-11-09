@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Windows.Controls;
+using BananaGit.Exceptions;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -18,16 +19,36 @@ namespace BananaGit.Models
             GitInfoModel? gitInfo = new();
             JsonDataManager.LoadUserInfo(ref gitInfo);
 
-            if (gitInfo != null)
+            try
             {
-                using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-                Branch = repo.Head;
-                Name = Branch.FriendlyName;
-                IsRemote = Branch.IsRemote;
+                if (gitInfo != null)
+                {
+                    //Check if file path is still valid
+                    if (!Repository.IsValid(gitInfo.SavedRepository?.FilePath))
+                    {
+                        throw new InvalidRepoException("Saved file path is an invalid repo");
+                    }
+
+                    //Update info
+                    using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
+                    Branch = repo.Head;
+                    Name = Branch.FriendlyName;
+                    IsRemote = Branch.IsRemote;
+                }
+                else
+                {
+                    throw new NullReferenceException("Couldn't load user info");
+                }
             }
-            else
+            catch (InvalidRepoException)
             {
-                throw new NullReferenceException("Couldn't load user info");
+                //If file path isn't a valid repo, clear file path
+                gitInfo.SavedRepository.FilePath = string.Empty;
+                JsonDataManager.SaveUserInfo(gitInfo);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
             }
         }
         public GitBranch(Branch branch)
