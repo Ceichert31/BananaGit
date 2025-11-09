@@ -77,6 +77,11 @@
                 Content="Remotes"
                 Foreground="Black"
                 />
+            <Button
+                Command="{Binding OpenConsoleWindowCommand}"
+                Content="Console"
+                Foreground="Black"
+                />
         </ToolBar>
     </Grid>
 </UserControl>

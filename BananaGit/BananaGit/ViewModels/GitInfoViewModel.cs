@@ -112,7 +112,7 @@ namespace BananaGit.ViewModels
                 else
                 {
                     //Check if repo data is empty
-                    if (Repository.IsValid(githubUserInfo.SavedRepository.FilePath) || githubUserInfo.SavedRepository.IsValidRepository())
+                    if (!Repository.IsValid(githubUserInfo.SavedRepository.FilePath))
                     {
                         throw new InvalidRepoException("Saved repository is empty!");
                     }
@@ -714,6 +714,12 @@ namespace BananaGit.ViewModels
         public void OpenSettingsWindow()
         {
             _dialogService.ShowSettingsDialog(this);
+        }
+
+        [RelayCommand]
+        public void OpenConsoleWindow()
+        {
+            _dialogService.ShowConsoleDialog(this);
         }
         #endregion
 

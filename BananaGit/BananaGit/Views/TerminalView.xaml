@@ -11,6 +11,7 @@
     Height="400"
     d:DataContext="{d:DesignInstance Type=viewmodels:TerminalViewModel}"
     Background="Black"
+    WindowStartupLocation="CenterOwner"
     mc:Ignorable="d"
     >
     <Grid>
