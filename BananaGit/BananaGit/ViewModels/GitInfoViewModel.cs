@@ -143,6 +143,7 @@ namespace BananaGit.ViewModels
                 //Output to debug console
                 OutputError(ex.Message);
                 NoRepoCloned = true;
+                JsonDataManager.SaveUserInfo(githubUserInfo);
             }
             catch (Exception ex)
             {
