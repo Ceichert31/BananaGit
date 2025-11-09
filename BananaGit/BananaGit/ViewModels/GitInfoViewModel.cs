@@ -73,9 +73,9 @@ namespace BananaGit.ViewModels
 
         private int _commitHistoryLength = 30;
 
-        private IDialogService _dialogService;
+        private DialogService _dialogService;
 
-        public GitInfoViewModel(IDialogService dialogService) 
+        public GitInfoViewModel(DialogService dialogService) 
         {
             _dialogService = dialogService;
 
@@ -149,7 +149,6 @@ namespace BananaGit.ViewModels
             {
                 OutputError(ex.Message);
             }
-
         }
 
         #region Update Methods
@@ -709,6 +708,12 @@ namespace BananaGit.ViewModels
         public void OpenTutorialPage()
         {
             IsTutorialOpen = !IsTutorialOpen;
+        }
+
+        [RelayCommand]
+        public void OpenSettingsWindow()
+        {
+            _dialogService.ShowSettingsDialog(this);
         }
         #endregion
 

@@ -9,6 +9,8 @@
     Width="450"
     Height="450"
     Background="{StaticResource BananaYellow}"
+    ResizeMode="NoResize"
+    WindowStartupLocation="CenterOwner"
     mc:Ignorable="d"
     >
     <Grid />

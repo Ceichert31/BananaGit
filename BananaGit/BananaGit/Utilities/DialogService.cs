@@ -4,7 +4,7 @@ using BananaGit.Views.DialogueViews;
 
 namespace BananaGit.Utilities
 {
-    class DialogService : IDialogService
+    class DialogService
     {
         public bool ShowCloneRepoDialog(GitInfoViewModel? vm)
         {
@@ -26,12 +26,17 @@ namespace BananaGit.Utilities
             view.Show();
             return true;
         }
-    }
-
-    interface IDialogService
-    {
-        public bool ShowCredentialsDialog(GitInfoViewModel? vm);
-        public bool ShowCloneRepoDialog(GitInfoViewModel? vm);
-        public bool ShowRemoteBranchesDialog(GitInfoViewModel? vm);
+        public bool ShowSettingsDialog(GitInfoViewModel? vm)
+        {
+            SettingsView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            view.Show();
+            return true;
+        }
+        public bool ShowConsoleDialog(GitInfoViewModel? vm)
+        {
+            TerminalView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            view.Show();
+            return true;
+        }
     }
 }

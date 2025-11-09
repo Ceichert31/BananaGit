@@ -20,7 +20,11 @@
             ToolBarTray.IsLocked="True"
             >
             <Image Source="../Assets/Banana.png" />
-            <Button Content="Settings" Foreground="Black" />
+            <Button
+                Command="{Binding OpenSettingsWindowCommand}"
+                Content="Settings"
+                Foreground="Black"
+                />
             <Button
                 Command="{Binding OpenTutorialPageCommand}"
                 Content="Tutorials"
