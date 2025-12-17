@@ -31,7 +31,14 @@ namespace BananaGit.Models
 
                     //Update info
                     using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-                    Branch = repo.Head;
+                    string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.URL);
+
+                    if (branchName == null)
+                    {
+                        throw new InvalidRepoException("Couldn't find default branch name");
+                    }
+                    
+                    Branch = repo.Branches[branchName];
                     Name = Branch.FriendlyName;
                     IsRemote = Branch.IsRemote;
                 }
