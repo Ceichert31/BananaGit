@@ -142,11 +142,10 @@ namespace BananaGit.ViewModels
             }
             catch (GitException ex)
             {
-                githubUserInfo.SavedRepository = null;
                 //Output to debug console
                 OutputError(ex.Message);
                 NoRepoCloned = true;
-                JsonDataManager.SaveUserInfo(githubUserInfo);
+                //JsonDataManager.SaveUserInfo(githubUserInfo);
             }
             catch (Exception ex)
             {
@@ -588,7 +587,7 @@ namespace BananaGit.ViewModels
         /// Opens a windows prompt to select the desired file directory
         /// </summary>
         [RelayCommand]
-        public void ChooseCloneDirectory()
+        private void ChooseCloneDirectory()
         {
             try
             {
@@ -598,10 +597,11 @@ namespace BananaGit.ViewModels
                 }
 
                 //Open file select dialogue
-                OpenFolderDialog dialog = new OpenFolderDialog();
-                dialog.Multiselect = false;
-
-                dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                OpenFolderDialog dialog = new OpenFolderDialog
+                {
+                    Multiselect = false,
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
+                };
 
                 if (dialog.ShowDialog() == true)
                 {
@@ -631,17 +631,17 @@ namespace BananaGit.ViewModels
                             throw new NullReferenceException("Couldn't find any remotes!");
                         }
 
-                        ResetBranches();
-                        UpdateBranches(repo, new());
-
                         //Save to user info
                         githubUserInfo.SavedRepository = new(LocalRepoFilePath, RepoURL);
                         JsonDataManager.SaveUserInfo(githubUserInfo);
-
+                        
                         //Set flags
                         CanClone = true;
                         DirectoryHasFiles = false;
                         NoRepoCloned = false;
+                        
+                        ResetBranches();
+                        UpdateBranches(repo, new GitBranch());
                     }
                 }
             }
@@ -773,8 +773,6 @@ namespace BananaGit.ViewModels
         {
             LocalBranches.Clear();
             RemoteBranches.Clear();
-            CurrentBranch = new();
-            LocalBranches.Add(CurrentBranch);
         }
         #endregion
     }

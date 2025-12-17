@@ -68,7 +68,7 @@ namespace BananaGit.Models
             {
                 //If file path isn't a valid repo, clear file path
 
-                if (gitInfo?.SavedRepository != null)
+                /*f (gitInfo?.SavedRepository != null)
                 {
                     gitInfo.SavedRepository.FilePath = string.Empty;
                 }
@@ -76,9 +76,9 @@ namespace BananaGit.Models
                 {
                     if (gitInfo != null)
                         gitInfo.SavedRepository = new(string.Empty,string.Empty);
-                }
+                }*/
                 
-                JsonDataManager.SaveUserInfo(gitInfo);
+                //JsonDataManager.SaveUserInfo(gitInfo);
                 throw new GitException("No git repository saved or cloned");
             }
             catch (Exception ex)

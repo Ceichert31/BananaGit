@@ -2,16 +2,10 @@
 {
     public class GitInfoModel
     {
-        public GitInfoModel() 
-        {
-            Username = string.Empty;
-            PersonalToken = string.Empty;
-            SavedRepository = new(string.Empty, string.Empty);
-        }
-        public string? Username { get; set; }
+        public string? Username { get; set; } = string.Empty;
         public string? Email { get; set; }
-        public string? PersonalToken { get; set; }
-        public SaveableRepository? SavedRepository { get; set; }
+        public string? PersonalToken { get; set; } = string.Empty;
+        public SaveableRepository? SavedRepository { get; set; } = new(string.Empty, string.Empty);
     }
     public class SaveableRepository(string path, string url)
     {
