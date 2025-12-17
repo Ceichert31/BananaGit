@@ -9,9 +9,12 @@ using Microsoft.Win32;
 
 namespace BananaGit.Services
 {
+    /// <summary>
+    /// Handles all git commands and operations
+    /// </summary>
     public class GitService
     {
-        private GitInfoModel _gitInfo;
+        private readonly GitInfoModel? _gitInfo;
         public GitService() 
         {
             JsonDataManager.LoadUserInfo(ref _gitInfo);
@@ -29,14 +32,14 @@ namespace BananaGit.Services
         /// </summary>
         /// <param name="path"></param>
         /// <exception cref="RepoLocationException"></exception>
-        private void VerifyPath(string path)
+        private void VerifyPath(string? path)
         {
-            if (_gitInfo.SavedRepository?.FilePath == null || _gitInfo.SavedRepository?.FilePath == "")
+            if (_gitInfo?.SavedRepository?.FilePath == null || _gitInfo.SavedRepository?.FilePath == "")
             {
                 throw new RepoLocationException("Local repository file path is empty!");
             }
 
-            if (!Directory.Exists(_gitInfo.SavedRepository.FilePath))
+            if (!Directory.Exists(_gitInfo?.SavedRepository?.FilePath))
             {
                 throw new RepoLocationException("Local repository file path is missing!");
             }
@@ -67,15 +70,13 @@ namespace BananaGit.Services
         {
             Task.Run(() =>
             {
-                VerifyPath(_gitInfo.SavedRepository?.FilePath);
+                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
-                using var repo = new Repository(_gitInfo.SavedRepository?.FilePath);
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
 
                 //Set author for commiting
                 Signature author = new(_gitInfo?.Username, _gitInfo?.Email, DateTime.Now);
-                Signature committer = author;
-
-                repo.Commit(commitMessage, author, committer);
+                repo.Commit(commitMessage, author, author);
             });
         }
 
@@ -86,9 +87,9 @@ namespace BananaGit.Services
         {
             Task.Run(() =>
             {
-                VerifyPath(_gitInfo.SavedRepository?.FilePath);
+                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
-                using (var repo = new Repository(_gitInfo.SavedRepository?.FilePath))
+                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
                 {
                     //Get status and return if no changes have been made
                     var status = repo.RetrieveStatus();
@@ -112,9 +113,9 @@ namespace BananaGit.Services
         {
             Task.Run(() =>
             {
-                VerifyPath(_gitInfo.SavedRepository?.FilePath);
+                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
-                using (var repo = new Repository(_gitInfo.SavedRepository.FilePath))
+                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
                 {
                     var status = repo.RetrieveStatus();
                     if (!status.IsDirty) return;
@@ -132,9 +133,9 @@ namespace BananaGit.Services
         {
             Task.Run(() =>
             {
-                VerifyPath(_gitInfo.SavedRepository?.FilePath);
+                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
-                using (var repo = new Repository(_gitInfo.SavedRepository.FilePath))
+                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
                 {
                     var status = repo.RetrieveStatus();
                     if (!status.IsDirty) return;
@@ -154,9 +155,9 @@ namespace BananaGit.Services
         {
             Task.Run(() =>
             {
-                VerifyPath(_gitInfo.SavedRepository?.FilePath);
+                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
-                using (var repo = new Repository(_gitInfo.SavedRepository?.FilePath))
+                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
                 {
                     var remote = repo.Network.Remotes[branch.Name];
                     if (remote != null)
@@ -164,7 +165,7 @@ namespace BananaGit.Services
                         repo.Network.Remotes.Remove(branch.Name);
                     }
 
-                    repo.Network.Remotes.Add(branch.Name, _gitInfo.SavedRepository.URL);
+                    repo.Network.Remotes.Add(branch.Name, _gitInfo?.SavedRepository?.URL);
                     remote = repo.Network.Remotes[branch.Name];
 
                     if (remote == null) 
@@ -217,17 +218,19 @@ namespace BananaGit.Services
         public string PullFiles(GitBranch branch)
         {
             Task.Run(() => {
-                VerifyPath(_gitInfo.SavedRepository?.FilePath);
+                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
                 var options = new PullOptions
                 {
-                    FetchOptions = new FetchOptions()
+                    FetchOptions = new FetchOptions
+                    {
+                        CredentialsProvider = new CredentialsHandler((url, username, types) => new UsernamePasswordCredentials
+                        {
+                            Username = _gitInfo?.Username,
+                            Password = _gitInfo?.PersonalToken
+                        })
+                    }
                 };
-                options.FetchOptions.CredentialsProvider = new CredentialsHandler((url, username, types) => new UsernamePasswordCredentials
-                {
-                    Username = _gitInfo?.Username,
-                    Password = _gitInfo?.PersonalToken
-                });
 
                 options.MergeOptions = new MergeOptions
                 {
@@ -236,7 +239,7 @@ namespace BananaGit.Services
                     CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict
                 };
 
-                using (var repo = new Repository(_gitInfo.SavedRepository?.FilePath))
+                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
                 {
                     //Create signature and pull
                     Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
@@ -281,7 +284,7 @@ namespace BananaGit.Services
                 //Check if directory is empty
                 if (!Directory.EnumerateFiles(selectedFilePath).Any())
                 {
-                    _gitInfo.SetPath(dialog.FolderName);
+                    _gitInfo?.SetPath(dialog.FolderName);
                 }
                 else
                 {
@@ -289,11 +292,11 @@ namespace BananaGit.Services
                     using (var repo = new Repository(selectedFilePath))
                     {
                         //Set active repo as locally opened repo
-                        _gitInfo.SetPath(dialog.FolderName);
+                        _gitInfo?.SetPath(dialog.FolderName);
                         var remote = repo.Network.Remotes.FirstOrDefault();
                         if (remote != null)
                         {
-                            _gitInfo.SetUrl(remote.Url);
+                            _gitInfo?.SetUrl(remote.Url);
                         }
                         else
                         {
@@ -317,7 +320,7 @@ namespace BananaGit.Services
             {
                 FetchOptions =
                 {
-                    CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
+                    CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials
                     {
                         Username = _gitInfo?.Username,
                         Password = _gitInfo?.PersonalToken
