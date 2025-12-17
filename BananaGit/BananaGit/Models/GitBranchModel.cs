@@ -61,7 +61,7 @@ namespace BananaGit.Models
             };
 
             //Get the name of the HEAD branch
-            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.URL, options);
+            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.Url, options);
 
             if (branchName == null)
             {

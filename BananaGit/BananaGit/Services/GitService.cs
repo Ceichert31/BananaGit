@@ -165,7 +165,7 @@ namespace BananaGit.Services
                         repo.Network.Remotes.Remove(branch.Name);
                     }
 
-                    repo.Network.Remotes.Add(branch.Name, _gitInfo?.SavedRepository?.URL);
+                    repo.Network.Remotes.Add(branch.Name, _gitInfo?.SavedRepository?.Url);
                     remote = repo.Network.Remotes[branch.Name];
 
                     if (remote == null) 

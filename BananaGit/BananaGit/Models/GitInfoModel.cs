@@ -1,34 +1,31 @@
 ﻿namespace BananaGit.Models
 {
+    /// <summary>
+    /// Holds all the users GitHub and repository information
+    /// </summary>
     public class GitInfoModel
     {
-        public string? Username { get; set; } = string.Empty;
+        public string? Username { get; set; }
         public string? Email { get; set; }
-        public string? PersonalToken { get; set; } = string.Empty;
-        public SaveableRepository? SavedRepository { get; set; } = new(string.Empty, string.Empty);
+        public string? PersonalToken { get; set; } 
+        public SavableRepository? SavedRepository { get; set; }
         
         public void SetPath(string path) => SavedRepository?.FilePath = path;
-        public void SetUrl(string url) => SavedRepository?.URL = url;
+        public void SetUrl(string url) => SavedRepository?.Url = url;
     }
-    public class SaveableRepository(string path, string url)
+    /// <summary>
+    /// Holds repository information
+    /// </summary>
+    /// <param name="path">The path to the saved repository</param>
+    /// <param name="url">The url for the saved repository</param>
+    public class SavableRepository(string path, string url)
     {
         public string FilePath { get; set; } = path;
-        public string URL { get; set; } = url;
-
-        /// <summary>
-        /// Returns whether the repo has actual data or is just empty
-        /// </summary>
-        /// <returns></returns>
-        public bool IsValidRepository()
-        {
-            if (FilePath == null || URL == null)
-                return false;
-            if (FilePath.Equals(string.Empty) || URL.Equals(string.Empty))
-                return false;
-
-            return true;
-        }
+        public string Url { get; set; } = url;
     }
+    /// <summary>
+    /// Move this to its own model
+    /// </summary>
     public class GitCommitInfo
     {
         public string? Author { get; set; }

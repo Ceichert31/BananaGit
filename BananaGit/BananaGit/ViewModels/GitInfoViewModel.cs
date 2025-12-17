@@ -103,7 +103,7 @@ namespace BananaGit.ViewModels
 
                 //Load current repo data if there is an already opened repo
                 LocalRepoFilePath = githubUserInfo.SavedRepository.FilePath;
-                RepoURL = githubUserInfo.SavedRepository.URL;
+                RepoURL = githubUserInfo.SavedRepository.Url;
 
                 //Update that we succesfully initialized the repository
                 NoRepoCloned = false;
@@ -137,7 +137,7 @@ namespace BananaGit.ViewModels
 
             if (e.PropertyName == nameof(RepoURL))
             {
-                githubUserInfo.SavedRepository.URL = RepoURL;
+                githubUserInfo.SavedRepository.Url = RepoURL;
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             }
             else if (e.PropertyName == nameof(LocalRepoFilePath))
