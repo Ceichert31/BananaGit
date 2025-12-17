@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Threading;
 using BananaGit.Exceptions;
 using BananaGit.Models;
+using BananaGit.Services;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;

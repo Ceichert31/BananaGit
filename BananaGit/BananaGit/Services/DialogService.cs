@@ -2,7 +2,7 @@
 using BananaGit.Views;
 using BananaGit.Views.DialogueViews;
 
-namespace BananaGit.Utilities
+namespace BananaGit.Services
 {
     /// <summary>
     /// Manages views and creates dialogs
@@ -16,7 +16,7 @@ namespace BananaGit.Utilities
         /// </summary>
         public void ShowCloneRepoDialog()
         {
-            CloneRepoView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            CloneRepoView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
             view.ShowDialog();
         }
 
@@ -34,7 +34,7 @@ namespace BananaGit.Utilities
         /// </summary>
         public void ShowRemoteBranchesDialog()
         {
-            RemoteBranchView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            RemoteBranchView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
             view.Show();
         }
         /// <summary>
@@ -42,7 +42,7 @@ namespace BananaGit.Utilities
         /// </summary>
         public void ShowSettingsDialog()
         {
-            SettingsView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            SettingsView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
             view.Show();
         }
         /// <summary>
@@ -50,7 +50,7 @@ namespace BananaGit.Utilities
         /// </summary>
         public void ShowConsoleDialog()
         {
-            TerminalView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            TerminalView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
             view.Show();
         }
     }
