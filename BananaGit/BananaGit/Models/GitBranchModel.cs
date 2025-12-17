@@ -1,5 +1,4 @@
 ﻿using System.Diagnostics;
-using System.Windows.Controls;
 using BananaGit.Exceptions;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
