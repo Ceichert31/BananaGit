@@ -23,7 +23,6 @@ namespace BananaGit.Services
             }
         }
 
-
         #region Helper Methods
 
         /// <summary>
@@ -38,7 +37,7 @@ namespace BananaGit.Services
                 throw new RepoLocationException("Local repository file path is empty!");
             }
 
-            if (!Directory.Exists(LocalRepoFilePath))
+            if (!Directory.Exists(_gitInfo.SavedRepository.FilePath))
             {
                 throw new RepoLocationException("Local repository file path is missing!");
             }
@@ -47,10 +46,10 @@ namespace BananaGit.Services
 
         #region Stage/Commit
         /// <summary>
-        /// Commits all staged files off of the main thread
+        /// Commits all staged files
         /// </summary>
         /// <param name="commitMessage">The message for this commit</param>
-        public void CommitStagedFilesAsync(string commitMessage)
+        public void CommitStagedFiles(string commitMessage)
         {
             Task.Run(() =>
             {
@@ -66,30 +65,20 @@ namespace BananaGit.Services
             });
         }
 
-        public void StageFilesAsync()
-        {
-            Task.Run(() =>
-            {
-
-            });
-        }
-
-       
-
-        [RelayCommand]
+        /// <summary>
+        /// Stages all changed files in the working directory
+        /// </summary>
         public void StageFiles()
         {
             Task.Run(() =>
             {
-                try
+                VerifyPath(_gitInfo.SavedRepository?.FilePath);
+
+                using (var repo = new Repository(_gitInfo.SavedRepository?.FilePath))
                 {
-                    VerifyPath(LocalRepoFilePath);
-
-                    using var repo = new Repository(LocalRepoFilePath);
-
+                    //Get status and return if no changes have been made
                     var status = repo.RetrieveStatus();
                     if (!status.IsDirty) return;
-
 
                     foreach (var file in status)
                     {
@@ -98,66 +87,47 @@ namespace BananaGit.Services
                         Commands.Stage(repo, file.FilePath);
                     }
                 }
-                catch (LibGit2SharpException ex)
+            });
+        }
+
+        /// <summary>
+        /// Stages a specific file
+        /// </summary>
+        /// <param name="fileToStage">The file that is going to be staged</param>
+        public void StageFile(ChangedFile fileToStage)
+        {
+            Task.Run(() =>
+            {
+                VerifyPath(_gitInfo.SavedRepository?.FilePath);
+
+                using (var repo = new Repository(_gitInfo.SavedRepository.FilePath))
                 {
-                    OutputError($"Failed to stage {ex.Message}");
-                    throw;
-                }
-                catch (Exception ex)
-                {
-                    OutputError(ex.Message);
+                    var status = repo.RetrieveStatus();
+                    if (!status.IsDirty) return;
+
+                    Commands.Stage(repo, fileToStage.FilePath);
                 }
             });
         }
 
-        [RelayCommand]
-        public void StageFile(ChangedFile file)
+        /// <summary>
+        /// Unstages a specific file
+        /// </summary>
+        /// <param name="fileToUnstage">The file that is going to be unstaged</param>
+        public void UnstageFile(ChangedFile fileToUnstage)
         {
-            try
+            Task.Run(() =>
             {
-                VerifyPath(LocalRepoFilePath);
+                VerifyPath(_gitInfo.SavedRepository?.FilePath);
 
-                using var repo = new Repository(LocalRepoFilePath);
+                using (var repo = new Repository(_gitInfo.SavedRepository.FilePath))
+                {
+                    var status = repo.RetrieveStatus();
+                    if (!status.IsDirty) return;
 
-                var status = repo.RetrieveStatus();
-                if (!status.IsDirty) return;
-
-                Commands.Stage(repo, file.FilePath);
-            }
-            catch (LibGit2SharpException ex)
-            {
-                OutputError($"Failed to stage {ex.Message}");
-                throw;
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
-        }
-
-        [RelayCommand]
-        public void UnstageFile(ChangedFile file)
-        {
-            try
-            {
-                VerifyPath(LocalRepoFilePath);
-
-                using var repo = new Repository(LocalRepoFilePath);
-
-                var status = repo.RetrieveStatus();
-                if (!status.IsDirty) return;
-
-                Commands.Unstage(repo, file.FilePath);
-            }
-            catch (LibGit2SharpException ex)
-            {
-                OutputError($"Failed to stage {ex.Message}");
-                throw;
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
+                    Commands.Unstage(repo, fileToStage.FilePath);
+                }
+            });
         }
         #endregion
     }
