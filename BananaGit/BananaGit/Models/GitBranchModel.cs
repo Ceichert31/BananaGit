@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using BananaGit.Exceptions;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -23,14 +24,17 @@ namespace BananaGit.Models
                 if (gitInfo != null)
                 {
                     //Check if saved repository exists
-                    //Check here if file path and url exist, throw error that gets caught by GitInfoViewModel
-                    //If no repos are cloned, display clone repo text
                     if (gitInfo.SavedRepository == null)
                     {
-                        //NoRepoCloned = true;
                         throw new InvalidRepoException("No saved repository after loading!");
                     }
-                    
+
+                    //Check if repo location exists
+                    if (!Directory.Exists(LocalRepoFilePath))
+                    {
+                        throw new RepoLocationException("Local repository file location missing!");
+                    }
+
                     //Check if file path is still valid
                     if (!Repository.IsValid(gitInfo.SavedRepository?.FilePath))
                     {

@@ -3,6 +3,9 @@ using LibGit2Sharp;
 
 namespace BananaGit.Utilities;
 
+/// <summary>
+/// Helper methods for Lib2GitSharp
+/// </summary>
 public static class Lib2GitSharpExt
 {
     /// <summary>
