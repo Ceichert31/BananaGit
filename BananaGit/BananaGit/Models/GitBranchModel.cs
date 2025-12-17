@@ -14,81 +14,64 @@ namespace BananaGit.Models
         public bool IsRemote { get; set; }
         public Branch Branch { get; set; }
 
+        /// <summary>
+        /// Default constructor creates branch from HEAD
+        /// </summary>
+        /// <exception cref="RepoLocationException"> The repository saved no longer exists at that location </exception>
+        /// <exception cref="LoadDataException"> Thrown if the user info is missing or can't be loaded </exception>
+        /// <exception cref="GitException"> 
+        /// An overarching git exception, if thrown something 
+        /// relating to git operations or repositories has gone wrong 
+        /// </exception>
         public GitBranch()
         {
             GitInfoModel? gitInfo = new();
             JsonDataManager.LoadUserInfo(ref gitInfo);
 
-            try
+            if (gitInfo == null)
             {
-                if (gitInfo != null)
-                {
-                    //Check if saved repository exists
-                    if (gitInfo.SavedRepository == null)
-                    {
-                        throw new InvalidRepoException("No saved repository after loading!");
-                    }
-
-                    //Check if repo location exists
-                    if (!Directory.Exists(LocalRepoFilePath))
-                    {
-                        throw new RepoLocationException("Local repository file location missing!");
-                    }
-
-                    //Check if file path is still valid
-                    if (!Repository.IsValid(gitInfo.SavedRepository?.FilePath))
-                    {
-                        throw new InvalidRepoException("Saved file path is an invalid repo");
-                    }
-
-                    //Update info
-                    using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-                    
-                    var options = new FetchOptions();
-
-                    options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
-                    {
-                        Username = gitInfo.Username,
-                        Password = gitInfo.PersonalToken
-                    };
-                    
-                    string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.URL, options);
-
-                    if (branchName == null)
-                    {
-                        throw new InvalidRepoException("Couldn't find default branch name");
-                    }
-                    
-                    Branch = repo.Branches[branchName];
-                    Name = Branch.FriendlyName;
-                    IsRemote = Branch.IsRemote;
-                }
-                else
-                {
-                    throw new NullReferenceException("Couldn't load user info");
-                }
+                throw new LoadDataException("Couldn't load user info");
             }
-            catch (InvalidRepoException ex)
+
+            //Check if saved repository exists
+            if (gitInfo.SavedRepository == null)
             {
-                //If file path isn't a valid repo, clear file path
+                throw new InvalidRepoException("No saved repository after loading!");
+            }
 
-                /*f (gitInfo?.SavedRepository != null)
-                {
-                    gitInfo.SavedRepository.FilePath = string.Empty;
-                }
-                else
-                {
-                    if (gitInfo != null)
-                        gitInfo.SavedRepository = new(string.Empty,string.Empty);
-                }*/
-                
-                //JsonDataManager.SaveUserInfo(gitInfo);
-                throw new GitException("No git repository saved or cloned");
-            }
-            catch (Exception ex)
+            //Check if repo location exists
+            if (!Directory.Exists(LocalRepoFilePath))
             {
-                Trace.WriteLine(ex.Message);
+                throw new RepoLocationException("Local repository file location missing!");
             }
+
+            //Check if file path is still valid
+            if (!Repository.IsValid(gitInfo.SavedRepository?.FilePath))
+            {
+                throw new InvalidRepoException("Saved file path is an invalid repo");
+            }
+
+            //Update info
+            using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
+
+            var options = new FetchOptions();
+
+            options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
+            {
+                Username = gitInfo.Username,
+                Password = gitInfo.PersonalToken
+            };
+
+            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.URL, options);
+
+            if (branchName == null)
+            {
+                throw new InvalidRepoException("Couldn't find default branch name");
+            }
+
+            Branch = repo.Branches[branchName];
+            Name = Branch.FriendlyName;
+            IsRemote = Branch.IsRemote;
         }
         public GitBranch(Branch branch)
         {
