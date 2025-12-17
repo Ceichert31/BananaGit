@@ -26,10 +26,12 @@ namespace BananaGit.ViewModels
             //Load user info
             JsonDataManager.LoadUserInfo(ref _userInfo);
             
-            _gitInfoViewModel = new();
-            //GitService gitService = new();
+            GitService gitService = new GitService();
+            
+            _gitInfoViewModel = new GitInfoViewModel(gitService);
+            
             //Passed into DialogService for dialog creation
-            DialogService? dialogService = new(_gitInfoViewModel);
+            DialogService dialogService = new DialogService(_gitInfoViewModel, gitService);
 
             //If no user info is loaded, display login dialog
             if (_userInfo == null)

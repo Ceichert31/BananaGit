@@ -9,7 +9,7 @@ namespace BananaGit.Services
     /// </summary>
     /// <param name="vm">The <see cref="GitInfoViewModel"/>
     /// that is currently being used by the main window </param>
-    class DialogService(GitInfoViewModel? vm)
+    class DialogService(GitInfoViewModel? vm, GitService gitService)
     {
         /// <summary>
         /// Opens a dialog for cloning a new repository 
