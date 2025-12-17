@@ -41,7 +41,7 @@ namespace BananaGit.Models
             }
 
             //Check if repo location exists
-            if (!Directory.Exists(LocalRepoFilePath))
+            if (!Directory.Exists(gitInfo.SavedRepository?.FilePath))
             {
                 throw new RepoLocationException("Local repository file location missing!");
             }
