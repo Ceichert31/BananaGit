@@ -17,10 +17,6 @@
     </ItemGroup>
 
     <ItemGroup>
-        <KnownFrameworkReference Update="Microsoft.WindowsDesktop.App.WPF" IsWindowsOnly="false" />
-    </ItemGroup>
-
-    <ItemGroup>
         <Using Include="NUnit.Framework"/>
     </ItemGroup>
 
