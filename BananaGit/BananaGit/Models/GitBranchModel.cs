@@ -23,6 +23,15 @@ namespace BananaGit.Models
             {
                 if (gitInfo != null)
                 {
+                    //Check if saved repository exists
+                    //Check here if file path and url exist, throw error that gets caught by GitInfoViewModel
+                    //If no repos are cloned, display clone repo text
+                    if (gitInfo.SavedRepository == null)
+                    {
+                        //NoRepoCloned = true;
+                        throw new InvalidRepoException("No saved repository after loading!");
+                    }
+                    
                     //Check if file path is still valid
                     if (!Repository.IsValid(gitInfo.SavedRepository?.FilePath))
                     {
@@ -31,7 +40,16 @@ namespace BananaGit.Models
 
                     //Update info
                     using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-                    string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.URL);
+                    
+                    var options = new FetchOptions();
+
+                    options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
+                    {
+                        Username = gitInfo.Username,
+                        Password = gitInfo.PersonalToken
+                    };
+                    
+                    string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.URL, options);
 
                     if (branchName == null)
                     {
@@ -47,11 +65,22 @@ namespace BananaGit.Models
                     throw new NullReferenceException("Couldn't load user info");
                 }
             }
-            catch (InvalidRepoException)
+            catch (InvalidRepoException ex)
             {
                 //If file path isn't a valid repo, clear file path
-                gitInfo.SavedRepository.FilePath = string.Empty;
+
+                if (gitInfo?.SavedRepository != null)
+                {
+                    gitInfo.SavedRepository.FilePath = string.Empty;
+                }
+                else
+                {
+                    if (gitInfo != null)
+                        gitInfo.SavedRepository = new(string.Empty,string.Empty);
+                }
+                
                 JsonDataManager.SaveUserInfo(gitInfo);
+                throw new GitException("No git repository saved or cloned");
             }
             catch (Exception ex)
             {

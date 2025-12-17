@@ -45,7 +45,7 @@ namespace BananaGit.ViewModels
         private ObservableCollection<GitBranch> _remoteBranches = [];
 
         [ObservableProperty]
-        private GitBranch _currentBranch = new();
+        private GitBranch? _currentBranch;
 
         [ObservableProperty]
         private ObservableCollection<GitCommitInfo> _commitHistory = [];
@@ -73,10 +73,12 @@ namespace BananaGit.ViewModels
 
         private int _commitHistoryLength = 30;
 
-        private DialogService _dialogService;
+        private readonly DialogService _dialogService;
 
-        public GitInfoViewModel() 
+        public GitInfoViewModel()
         {
+            _dialogService = new DialogService(this);
+            
             _updateGitInfoTimer.Tick += UpdateRepoStatus;
             _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);
             _updateGitInfoTimer.Start();
@@ -95,6 +97,9 @@ namespace BananaGit.ViewModels
         {
             try
             {
+                //Create new git branch
+                CurrentBranch = new GitBranch();
+                
                 //Save data missing
                 if (githubUserInfo == null)
                 {

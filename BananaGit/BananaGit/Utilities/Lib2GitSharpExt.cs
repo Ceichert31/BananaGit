@@ -10,14 +10,12 @@ public static class Lib2GitSharpExt
     /// </summary>
     /// <param name="repoUrl">The repositories URL</param>
     /// <returns>The name of the default branch head</returns>
-    public static string? GetDefaultRepoName(string repoUrl)
+    public static string? GetDefaultRepoName(string repoUrl, FetchOptions options)
     {
         try
         {
-            using var repo = new Repository(repoUrl);
-
             //Get list of remote branches
-            var remotes = Repository.ListRemoteReferences(repoUrl);
+            var remotes = Repository.ListRemoteReferences(repoUrl, options.CredentialsProvider);
             
             //Cache the first instance of /HEAD
             var headReference = remotes.FirstOrDefault(x => x.CanonicalName.EndsWith("/HEAD"));
