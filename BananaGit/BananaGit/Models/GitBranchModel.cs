@@ -27,7 +27,8 @@ namespace BananaGit.Models
         {
             GitInfoModel? gitInfo = new();
             JsonDataManager.LoadUserInfo(ref gitInfo);
-
+            
+            //Check user info has loaded
             if (gitInfo == null)
             {
                 throw new LoadDataException("Couldn't load user info");
@@ -51,17 +52,15 @@ namespace BananaGit.Models
                 throw new InvalidRepoException("Saved file path is an invalid repo");
             }
 
-            //Update info
-            using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-
+            //Setup credentials for accesing remote branch info
             var options = new FetchOptions();
-
             options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
             {
                 Username = gitInfo.Username,
                 Password = gitInfo.PersonalToken
             };
 
+            //Get the name of the HEAD branch
             string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.URL, options);
 
             if (branchName == null)
@@ -69,10 +68,19 @@ namespace BananaGit.Models
                 throw new InvalidRepoException("Couldn't find default branch name");
             }
 
-            Branch = repo.Branches[branchName];
-            Name = Branch.FriendlyName;
-            IsRemote = Branch.IsRemote;
+            //Update branch info
+            using (var repo = new Repository(gitInfo.SavedRepository?.FilePath))
+            {
+                Branch = repo.Branches[branchName];
+                Name = Branch.FriendlyName;
+                IsRemote = Branch.IsRemote;
+            }
         }
+
+        /// <summary>
+        /// Caches a branch into a model
+        /// </summary>
+        /// <param name="branch">The branch to cache</param>
         public GitBranch(Branch branch)
         {
             Name = branch.FriendlyName;
