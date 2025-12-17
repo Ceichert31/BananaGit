@@ -5,6 +5,7 @@ using BananaGit.Models;
 using BananaGit.Utilities;
 using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
+using Microsoft.Win32;
 
 namespace BananaGit.Services
 {
@@ -256,6 +257,74 @@ namespace BananaGit.Services
                 return "Pulled Successfully";
             });
             return "Pulled Successfully";
+        }
+        #endregion
+        
+        #region Clone
+        /// <summary>
+        /// Prompts the user with a windows dialog to choose the clone directory (Can be moved to view model after refactor)
+        /// </summary>
+        /// <exception cref="NullReferenceException"></exception>
+        public void ChooseCloneDirectory()
+        {
+              //Open file select dialogue
+                OpenFolderDialog dialog = new OpenFolderDialog
+                {
+                    Multiselect = false,
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
+                };
+
+                if (dialog.ShowDialog() != true) return;
+                
+                string selectedFilePath = dialog.FolderName;
+
+                //Check if directory is empty
+                if (!Directory.EnumerateFiles(selectedFilePath).Any())
+                {
+                    _gitInfo.SetPath(dialog.FolderName);
+                }
+                else
+                {
+                    //Check if file location is local repo
+                    using (var repo = new Repository(selectedFilePath))
+                    {
+                        //Set active repo as locally opened repo
+                        _gitInfo.SetPath(dialog.FolderName);
+                        var remote = repo.Network.Remotes.FirstOrDefault();
+                        if (remote != null)
+                        {
+                            _gitInfo.SetUrl(remote.Url);
+                        }
+                        else
+                        {
+                            throw new NullReferenceException("Couldn't find any remotes!");
+                        }
+                        
+                        //Save updated repository information
+                        JsonDataManager.SaveUserInfo(_gitInfo);
+                    }
+                }
+        }
+
+        /// <summary>
+        /// Clones a repository at the specified file location
+        /// </summary>
+        /// <param name="url">The URL for the repository</param>
+        /// <param name="cloneLocation">The location to clone to</param>
+        public void CloneRepository(string url, string cloneLocation)
+        {
+            var options = new CloneOptions
+            {
+                FetchOptions =
+                {
+                    CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
+                    {
+                        Username = _gitInfo?.Username,
+                        Password = _gitInfo?.PersonalToken
+                    }
+                }
+            };
+            Repository.Clone(url, cloneLocation, options);
         }
         #endregion
     }

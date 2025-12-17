@@ -417,7 +417,7 @@ namespace BananaGit.ViewModels
         }
         #endregion
 
-        #region Push/Pull
+        #region Push/Pull (Moved to gitservice)
         /// <summary>
         /// Pushes files to current branch (Only main for right now)
         /// </summary>
