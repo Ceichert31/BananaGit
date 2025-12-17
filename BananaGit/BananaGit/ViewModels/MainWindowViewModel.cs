@@ -10,22 +10,21 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private GitInfoViewModel? _gitInfoViewModel;
 
-        private readonly GitInfoModel? userInfo;
-
-        private readonly DialogService _dialogService = new();
+        private readonly GitInfoModel? _userInfo;
 
         public MainWindowViewModel() 
         {
             //Load user info
-            JsonDataManager.LoadUserInfo(ref userInfo);
+            JsonDataManager.LoadUserInfo(ref _userInfo);
+            
+            _gitInfoViewModel = new();
+            DialogService? dialogService = new(_gitInfoViewModel);
 
-            //If no user info could be loaded
-            if (userInfo == null)
+            //If no user info is loaded, display login dialog
+            if (_userInfo == null)
             {
-                _dialogService.ShowCredentialsDialog(_gitInfoViewModel);
+                dialogService.ShowCredentialsDialog();
             }
-
-            _gitInfoViewModel = new(_dialogService);
         }
     }
 }

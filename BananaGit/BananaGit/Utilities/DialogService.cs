@@ -4,39 +4,54 @@ using BananaGit.Views.DialogueViews;
 
 namespace BananaGit.Utilities
 {
-    class DialogService
+    /// <summary>
+    /// Manages views and creates dialogs
+    /// </summary>
+    /// <param name="vm">The <see cref="GitInfoViewModel"/>
+    /// that is currently being used by the main window </param>
+    class DialogService(GitInfoViewModel? vm)
     {
-        public bool ShowCloneRepoDialog(GitInfoViewModel? vm)
+        /// <summary>
+        /// Opens a dialog for cloning a new repository 
+        /// </summary>
+        public void ShowCloneRepoDialog()
         {
             CloneRepoView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
-
-            return view.ShowDialog() ?? false;
+            view.ShowDialog();
         }
 
-        public bool ShowCredentialsDialog(GitInfoViewModel? vm)
+        /// <summary>
+        /// Opens a dialog for entering github credentials
+        /// </summary>
+        public void ShowCredentialsDialog()
         {
             EnterCredentialsView view = new() { DataContext = vm };
-
-            return view.ShowDialog() ?? false;
+            view.ShowDialog();
         }
 
-        public bool ShowRemoteBranchesDialog(GitInfoViewModel? vm)
+        /// <summary>
+        /// Opens a dialog that shows all the remote git branches
+        /// </summary>
+        public void ShowRemoteBranchesDialog()
         {
             RemoteBranchView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
             view.Show();
-            return true;
         }
-        public bool ShowSettingsDialog(GitInfoViewModel? vm)
+        /// <summary>
+        /// Opens a dialog that shows all the user settings
+        /// </summary>
+        public void ShowSettingsDialog()
         {
             SettingsView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
             view.Show();
-            return true;
         }
-        public bool ShowConsoleDialog(GitInfoViewModel? vm)
+        /// <summary>
+        /// Opens a dialog with a debug console
+        /// </summary>
+        public void ShowConsoleDialog()
         {
             TerminalView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
             view.Show();
-            return true;
         }
     }
 }

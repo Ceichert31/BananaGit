@@ -75,10 +75,8 @@ namespace BananaGit.ViewModels
 
         private DialogService _dialogService;
 
-        public GitInfoViewModel(DialogService dialogService) 
+        public GitInfoViewModel() 
         {
-            _dialogService = dialogService;
-
             _updateGitInfoTimer.Tick += UpdateRepoStatus;
             _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);
             _updateGitInfoTimer.Start();
@@ -696,12 +694,12 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void OpenCloneWindow()
         {
-            _dialogService.ShowCloneRepoDialog(this);
+            _dialogService.ShowCloneRepoDialog();
         }
         [RelayCommand]
         public void OpenRemoteWindow()
         {
-            _dialogService.ShowRemoteBranchesDialog(this);
+            _dialogService.ShowRemoteBranchesDialog();
         }
 
         [RelayCommand]
@@ -713,13 +711,13 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         public void OpenSettingsWindow()
         {
-            _dialogService.ShowSettingsDialog(this);
+            _dialogService.ShowSettingsDialog();
         }
 
         [RelayCommand]
         public void OpenConsoleWindow()
         {
-            _dialogService.ShowConsoleDialog(this);
+            _dialogService.ShowConsoleDialog();
         }
         #endregion
 

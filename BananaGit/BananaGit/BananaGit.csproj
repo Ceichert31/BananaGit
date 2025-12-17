@@ -26,6 +26,7 @@
 	  <Content Include="Assets\ExampleStagedFileImage.png">
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
+      <InternalsVisibleTo Include="BananaGit.Test" />
   </ItemGroup>
 
   <ItemGroup>
