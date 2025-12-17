@@ -25,7 +25,7 @@ namespace BananaGit.Utilities
         /// </summary>
         public void ShowCredentialsDialog()
         {
-            EnterCredentialsView view = new() { DataContext = vm };
+            EnterCredentialsView view = new();
             view.ShowDialog();
         }
 

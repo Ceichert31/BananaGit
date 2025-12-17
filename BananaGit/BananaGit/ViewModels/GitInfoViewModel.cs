@@ -99,58 +99,25 @@ namespace BananaGit.ViewModels
             {
                 //Create new git branch
                 CurrentBranch = new GitBranch();
-                
-                //Save data missing
-                if (githubUserInfo == null)
-                {
-                    throw new LoadDataException("ERROR: Data couldn't be loaded!");
-                }
 
-                //If no repos are cloned, display clone repo text
-                if (githubUserInfo.SavedRepository == null)
-                {
-                    NoRepoCloned = true;
-                    throw new InvalidRepoException("No saved repository after loading!");
-                }
-                else
-                {
-                    //Check if repo data is empty
-                    if (!Repository.IsValid(githubUserInfo.SavedRepository.FilePath))
-                    {
-                        throw new InvalidRepoException("Saved repository is empty!");
-                    }
+                //Load current repo data if there is an already opened repo
+                LocalRepoFilePath = githubUserInfo.SavedRepository.FilePath;
+                RepoURL = githubUserInfo.SavedRepository.URL;
 
-                    //Load current repo data if there is an already opened repo
-                    LocalRepoFilePath = githubUserInfo.SavedRepository.FilePath;
-                    RepoURL = githubUserInfo.SavedRepository.URL;
-                }
-
-                //Check if repo location exists
-                if (!Directory.Exists(LocalRepoFilePath))
-                {
-                    NoRepoCloned = true;
-                    throw new RepoLocationException("Local repository file location missing!");
-                }
-
-                //Mark that we successfully cloned the repo
+                //Update that we succesfully initialized the repository
                 NoRepoCloned = false;
 
-                //Add main on first run
-                CurrentBranch = new();
-                LocalBranches.Add(CurrentBranch);
                 UpdateBranches(new Repository(LocalRepoFilePath), CurrentBranch);
             }
             catch (GitException ex)
             {
-                githubUserInfo.SavedRepository = null;
-                //Output to debug console
                 OutputError(ex.Message);
                 NoRepoCloned = true;
-                JsonDataManager.SaveUserInfo(githubUserInfo);
             }
             catch (Exception ex)
             {
                 OutputError(ex.Message);
+                NoRepoCloned = true;
             }
         }
 
@@ -256,20 +223,26 @@ namespace BananaGit.ViewModels
         {
             try
             {
+                LocalBranches.Add(currentBranch);
+
+                //Set fetch options to prune any old remote branches
                 var fetchOptions = new FetchOptions { Prune = true };
+
+                //Cache first remote
                 var remote = repo.Network.Remotes.FirstOrDefault();
 
-
+                //Prune remote branches
                 if (remote != null)
                 {
                     Commands.Fetch(repo, remote.Name, new string[0], fetchOptions, "");
                 }
                 else
                 {
-                    throw new NullReferenceException("Couldn't retrieve remote!");
+                    throw new NullReferenceException("Couldn't prune remote branches!");
                 }
 
-                Application.Current.Dispatcher.Invoke((Action)(() =>
+                //Update branch data on a seperate thread
+                Application.Current.Dispatcher.Invoke((() =>
                 {
                     //Update branches
                     foreach (var branch in repo.Branches)
@@ -297,6 +270,7 @@ namespace BananaGit.ViewModels
                         LocalBranches.Add(new GitBranch(branch));
                     }
                 }));
+                //Update current branch
                 CurrentBranch = currentBranch;
             }
             catch (Exception ex)
@@ -588,7 +562,7 @@ namespace BananaGit.ViewModels
         /// Opens a windows prompt to select the desired file directory
         /// </summary>
         [RelayCommand]
-        public void ChooseCloneDirectory()
+        private void ChooseCloneDirectory()
         {
             try
             {
@@ -598,10 +572,11 @@ namespace BananaGit.ViewModels
                 }
 
                 //Open file select dialogue
-                OpenFolderDialog dialog = new OpenFolderDialog();
-                dialog.Multiselect = false;
-
-                dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
+                OpenFolderDialog dialog = new OpenFolderDialog
+                {
+                    Multiselect = false,
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
+                };
 
                 if (dialog.ShowDialog() == true)
                 {
@@ -631,17 +606,17 @@ namespace BananaGit.ViewModels
                             throw new NullReferenceException("Couldn't find any remotes!");
                         }
 
-                        ResetBranches();
-                        UpdateBranches(repo, new());
-
                         //Save to user info
                         githubUserInfo.SavedRepository = new(LocalRepoFilePath, RepoURL);
                         JsonDataManager.SaveUserInfo(githubUserInfo);
-
+                        
                         //Set flags
                         CanClone = true;
                         DirectoryHasFiles = false;
                         NoRepoCloned = false;
+                        
+                        ResetBranches();
+                        UpdateBranches(repo, new GitBranch());
                     }
                 }
             }
@@ -773,8 +748,6 @@ namespace BananaGit.ViewModels
         {
             LocalBranches.Clear();
             RemoteBranches.Clear();
-            CurrentBranch = new();
-            LocalBranches.Add(CurrentBranch);
         }
         #endregion
     }
