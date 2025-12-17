@@ -8,7 +8,7 @@ using LibGit2Sharp;
 
 namespace BananaGit.Models
 {
-    partial class GitBranch : ObservableObject
+    public partial class GitBranch : ObservableObject
     {
         public string Name { get; set; }
         public bool IsRemote { get; set; }

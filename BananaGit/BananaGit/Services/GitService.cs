@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Diagnostics;
 using System.IO;
-using System.Text;
 using BananaGit.Exceptions;
 using BananaGit.Models;
 using BananaGit.Utilities;
-using CommunityToolkit.Mvvm.Input;
 using LibGit2Sharp;
+using LibGit2Sharp.Handlers;
 
 namespace BananaGit.Services
 {
@@ -41,6 +39,21 @@ namespace BananaGit.Services
             {
                 throw new RepoLocationException("Local repository file path is missing!");
             }
+        }
+        
+        /// <summary>
+        /// The callback for conflicts
+        /// </summary>
+        /// <param name="path">The file that conflicted</param>
+        /// <param name="notifyFlags">The checkout notify flag</param>
+        /// <returns></returns>
+        private bool ShowConflict(string path, CheckoutNotifyFlags notifyFlags)
+        {
+            if (notifyFlags == CheckoutNotifyFlags.Conflict)
+            {
+                Trace.WriteLine($"Conflict found in file {path}");
+            }
+            return true;
         }
         #endregion
 
@@ -125,9 +138,124 @@ namespace BananaGit.Services
                     var status = repo.RetrieveStatus();
                     if (!status.IsDirty) return;
 
-                    Commands.Unstage(repo, fileToStage.FilePath);
+                    Commands.Unstage(repo, fileToUnstage.FilePath);
                 }
             });
+        }
+        #endregion
+
+        #region Push/Pull
+        /// <summary>
+        /// Pushes files that are commited to the repository on the specified branch
+        /// </summary>
+        /// <param name="branch">The branch that files will be pushed to</param>
+        public void PushFiles(GitBranch branch)
+        {
+            Task.Run(() =>
+            {
+                VerifyPath(_gitInfo.SavedRepository?.FilePath);
+
+                using (var repo = new Repository(_gitInfo.SavedRepository?.FilePath))
+                {
+                    var remote = repo.Network.Remotes[branch.Name];
+                    if (remote != null)
+                    {
+                        repo.Network.Remotes.Remove(branch.Name);
+                    }
+
+                    repo.Network.Remotes.Add(branch.Name, _gitInfo.SavedRepository.URL);
+                    remote = repo.Network.Remotes[branch.Name];
+
+                    if (remote == null) 
+                        throw new InvalidBranchException("Invalid branch inputted! Cannot push files!");
+
+                    //User credentials
+                    FetchOptions options = new FetchOptions
+                    {
+                        CredentialsProvider = (url, username, types) =>
+                        new UsernamePasswordCredentials
+                        {
+                            Username = _gitInfo?.Username,
+                            Password = _gitInfo?.PersonalToken
+                        }
+                    };
+
+                    var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
+                    Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
+
+                    var localBranchName = string.IsNullOrEmpty(branch.Name) ? repo.Head.FriendlyName : branch.Name;
+                    var localBranch = repo.Branches[localBranchName];
+
+                    if (localBranch == null) return;
+
+                    repo.Branches.Update(localBranch,
+                        b => b.Remote = remote.Name,
+                        b => b.UpstreamBranch = localBranch.CanonicalName);
+
+                    var pushOptions = new PushOptions
+                    {
+                        CredentialsProvider = (url, username, types) =>
+                        new UsernamePasswordCredentials
+                        {
+                            Username = _gitInfo?.Username,
+                            Password = _gitInfo?.PersonalToken
+                        }
+                    };
+
+                    repo.Network.Push(localBranch, pushOptions);
+                }
+            });
+        }
+
+        /// <summary>
+        /// Pulls changes from the selected branch 
+        /// and updates the local repository
+        /// </summary>
+        /// <param name="branch">The branch changes will be pulled from</param>
+        /// <returns></returns>
+        public string PullFiles(GitBranch branch)
+        {
+            Task.Run(() => {
+                VerifyPath(_gitInfo.SavedRepository?.FilePath);
+
+                var options = new PullOptions
+                {
+                    FetchOptions = new FetchOptions()
+                };
+                options.FetchOptions.CredentialsProvider = new CredentialsHandler((url, username, types) => new UsernamePasswordCredentials
+                {
+                    Username = _gitInfo?.Username,
+                    Password = _gitInfo?.PersonalToken
+                });
+
+                options.MergeOptions = new MergeOptions
+                {
+                    FastForwardStrategy = FastForwardStrategy.Default,
+                    OnCheckoutNotify = new CheckoutNotifyHandler(ShowConflict),
+                    CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict
+                };
+
+                using (var repo = new Repository(_gitInfo.SavedRepository?.FilePath))
+                {
+                    //Create signature and pull
+                    Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
+                    var result = Commands.Pull(repo, signature, options);
+
+                    //Check for merge conflicts
+                    if (result.Status == MergeStatus.Conflicts)
+                    {
+                        //Display in front end eventually
+                        return "Conflict detected";
+                    }
+                    else if (result.Status == MergeStatus.UpToDate)
+                    {
+                        //Display in front end eventually
+                        return "Up to date";
+                    }
+                }
+                return "Pulled Successfully";
+            });
+            return "Pulled Successfully";
         }
         #endregion
     }

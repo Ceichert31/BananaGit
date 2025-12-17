@@ -297,7 +297,7 @@ namespace BananaGit.ViewModels
 
         #endregion
 
-        #region Stage/Commit
+        #region Stage/Commit (Moved to gitservice)
         /// <summary>
         /// Commits all staged files and makes them ready to push
         /// </summary>

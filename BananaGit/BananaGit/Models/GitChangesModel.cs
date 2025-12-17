@@ -1,9 +1,10 @@
 ﻿using BananaGit.Utilities;
+using CommunityToolkit.Mvvm.ComponentModel;
 using LibGit2Sharp;
 
 namespace BananaGit.Models
 {
-    class ChangedFile
+    public class ChangedFile : ObservableObject
     {
         public string Name { get; set; }
         public string FilePath { get; set; }
