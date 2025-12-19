@@ -468,8 +468,8 @@ namespace BananaGit.ViewModels
             try
             {
                 //Clone repo using git service
-                _gitService.CloneRepository(LocalRepoFilePath,
-                    RepoURL);
+                _gitService.CloneRepository(RepoURL,
+                    LocalRepoFilePath);
 
                 //Open after cloning
                 OpenLocalRepository(LocalRepoFilePath);
@@ -557,7 +557,7 @@ namespace BananaGit.ViewModels
             }
 
             //Save to user info
-            githubUserInfo?.SavedRepository = new SavableRepository(LocalRepoFilePath, RepoURL);
+            githubUserInfo.SavedRepository = new SavableRepository(LocalRepoFilePath, RepoURL);
             JsonDataManager.SaveUserInfo(githubUserInfo);
             
             //Set flags

@@ -5,7 +5,6 @@ using BananaGit.Models;
 using BananaGit.Utilities;
 using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
-using Microsoft.Win32;
 
 namespace BananaGit.Services
 {

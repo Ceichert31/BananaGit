@@ -18,8 +18,8 @@
         {
             return SavedRepository?.Url;
         }
-        public void SetPath(string path) => SavedRepository?.FilePath = path;
-        public void SetUrl(string url) => SavedRepository?.Url = url;
+        public void SetPath(string path) => SavedRepository.FilePath = path;
+        public void SetUrl(string url) => SavedRepository.Url = url;
 
         /// <summary>
         /// Verifies the saved repo is not null
