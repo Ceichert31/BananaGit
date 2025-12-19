@@ -104,10 +104,10 @@ namespace BananaGit.ViewModels
                 CurrentBranch = new GitBranch();
 
                 //Load current repo data if there is an already opened repo
-                LocalRepoFilePath = githubUserInfo.SavedRepository.FilePath;
-                RepoURL = githubUserInfo.SavedRepository.Url;
+                LocalRepoFilePath = githubUserInfo?.GetPath() ?? throw  new NullReferenceException("Repo path is null");
+                RepoURL = githubUserInfo?.GetPath() ?? throw new NullReferenceException("Repo URL is null");
 
-                //Update that we succesfully initialized the repository
+                //Update that we successfully initialized the repository
                 NoRepoCloned = false;
 
                 UpdateBranches(CurrentBranch);
@@ -467,9 +467,12 @@ namespace BananaGit.ViewModels
         {
             try
             {
+                //Clone repo using git service
                 _gitService.CloneRepository(LocalRepoFilePath,
                     RepoURL);
-                NoRepoCloned = false;
+
+                //Open after cloning
+                OpenLocalRepository(LocalRepoFilePath);
             }
             catch (LibGit2SharpException ex)
             {
@@ -505,41 +508,17 @@ namespace BananaGit.ViewModels
                 {
                     string selectedFilePath = dialog.FolderName;
 
-                    //Check if directory is empty
+                    //Check if directory is empty and mark as cloneable
                     if (!Directory.EnumerateFiles(selectedFilePath).Any())
                     {
                         CanClone = true;
-                        LocalRepoFilePath = dialog.FolderName;
+                        LocalRepoFilePath = selectedFilePath;
                         DirectoryHasFiles = false;
                     }
+                    //Otherwise open if a repository already exists there
                     else
                     {
-                        //Check if file location is local repo
-                        var repo = new Repository(selectedFilePath);
-
-                        //Set active repo as locally opened repo
-                        LocalRepoFilePath = dialog.FolderName;
-                        var remote = repo.Network.Remotes.FirstOrDefault();
-                        if (remote != null)
-                        {
-                            RepoURL = remote.Url;
-                        }
-                        else
-                        {
-                            throw new NullReferenceException("Couldn't find any remotes!");
-                        }
-
-                        //Save to user info
-                        githubUserInfo.SavedRepository = new(LocalRepoFilePath, RepoURL);
-                        JsonDataManager.SaveUserInfo(githubUserInfo);
-                        
-                        //Set flags
-                        CanClone = true;
-                        DirectoryHasFiles = false;
-                        NoRepoCloned = false;
-                        
-                        ResetBranches();
-                        UpdateBranches(new GitBranch());
+                        OpenLocalRepository(selectedFilePath);
                     }
                 }
             }
@@ -550,6 +529,44 @@ namespace BananaGit.ViewModels
                 DirectoryHasFiles = true;
                 Trace.WriteLine(ex.Message);
             }
+        }
+        
+        /// <summary>
+        /// Opens a saved local repository
+        /// </summary>
+        /// <param name="filePath">The file path to the local repository</param>
+        /// <exception cref="NullReferenceException"></exception>
+        private void OpenLocalRepository(string filePath)
+        {
+            //Check if file location is local repo
+            if (!Repository.IsValid(filePath)) 
+                throw new RepositoryNotFoundException($"Repository not found at {filePath}!");
+            
+            var repo = new Repository(filePath);
+
+            //Set active repo as locally opened repo
+            LocalRepoFilePath = filePath;
+            var remote = repo.Network.Remotes.FirstOrDefault();
+            if (remote != null)
+            {
+                RepoURL = remote.Url;
+            }
+            else
+            {
+                throw new NullReferenceException("Couldn't find any remotes!");
+            }
+
+            //Save to user info
+            githubUserInfo?.SavedRepository = new SavableRepository(LocalRepoFilePath, RepoURL);
+            JsonDataManager.SaveUserInfo(githubUserInfo);
+            
+            //Set flags
+            CanClone = true;
+            DirectoryHasFiles = false;
+            NoRepoCloned = false;
+                        
+            ResetBranches();
+            UpdateBranches(new GitBranch());
         }
         #endregion
 
