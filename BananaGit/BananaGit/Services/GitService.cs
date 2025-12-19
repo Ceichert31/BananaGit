@@ -215,7 +215,7 @@ namespace BananaGit.Services
         /// </summary>
         /// <param name="branch">The branch changes will be pulled from</param>
         /// <returns></returns>
-        public string PullFiles(GitBranch branch)
+        public MergeStatus PullFiles(GitBranch branch)
         {
             Task.Run(() => {
                 VerifyPath(_gitInfo?.SavedRepository?.FilePath);
@@ -245,21 +245,20 @@ namespace BananaGit.Services
                     Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
                     var result = Commands.Pull(repo, signature, options);
 
-                    //Check for merge conflicts
-                    if (result.Status == MergeStatus.Conflicts)
+                    switch (result.Status)
                     {
-                        //Display in front end eventually
-                        return "Conflict detected";
-                    }
-                    else if (result.Status == MergeStatus.UpToDate)
-                    {
-                        //Display in front end eventually
-                        return "Up to date";
+                        //Check for merge conflicts
+                        case MergeStatus.Conflicts:
+                            //Display in front end eventually
+                            return "Conflict detected";
+                        case MergeStatus.UpToDate:
+                            //Display in front end eventually
+                            return "Up to date";
                     }
                 }
                 return "Pulled Successfully";
             });
-            return "Pulled Successfully";
+            return MergeStatus.UpToDate;
         }
         #endregion
         
