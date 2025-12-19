@@ -263,11 +263,13 @@ namespace BananaGit.Services
         #endregion
         
         #region Clone
-        /// <summary>
-        /// Prompts the user with a windows dialog to choose the clone directory (Can be moved to view model after refactor)
+        /*/// <summary>
+        /// Prompts the user with a windows dialog to select a directory
         /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         /// <exception cref="NullReferenceException"></exception>
-        public void ChooseCloneDirectory()
+        public Tuple<string,string> ChooseCloneDirectory()
         {
               //Open file select dialogue
                 OpenFolderDialog dialog = new OpenFolderDialog
@@ -276,7 +278,11 @@ namespace BananaGit.Services
                     InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
                 };
 
-                if (dialog.ShowDialog() != true) return;
+                if (dialog.ShowDialog() != true)
+                    throw new Exception("Please select a folder!");
+                
+                string path;
+                string url = string.Empty;
                 
                 string selectedFilePath = dialog.FolderName;
 
@@ -284,6 +290,7 @@ namespace BananaGit.Services
                 if (!Directory.EnumerateFiles(selectedFilePath).Any())
                 {
                     _gitInfo?.SetPath(dialog.FolderName);
+                    path = dialog.FolderName;
                 }
                 else
                 {
@@ -292,10 +299,12 @@ namespace BananaGit.Services
                     {
                         //Set active repo as locally opened repo
                         _gitInfo?.SetPath(dialog.FolderName);
+                        path = dialog.FolderName;
                         var remote = repo.Network.Remotes.FirstOrDefault();
                         if (remote != null)
                         {
                             _gitInfo?.SetUrl(remote.Url);
+                            url = remote.Url;
                         }
                         else
                         {
@@ -306,7 +315,8 @@ namespace BananaGit.Services
                         JsonDataManager.SaveUserInfo(_gitInfo);
                     }
                 }
-        }
+                return new Tuple<string, string>(path, url);
+        }*/
 
         /// <summary>
         /// Clones a repository at the specified file location

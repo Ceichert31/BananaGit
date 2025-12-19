@@ -457,24 +457,19 @@ namespace BananaGit.ViewModels
 
         #region Clone 
 
+        /// <summary>
+        /// Calls GitService to clone repo, handles any errors
+        /// </summary>
+        /// <exception cref="LoadDataException"></exception>
+        /// <exception cref="NullReferenceException"></exception>
         [RelayCommand]
         private void CloneRepo()
         {
-           
-
             try
             {
-                if (githubUserInfo == null) 
-                    throw new LoadDataException("No Loaded data! Data was null when loaded!");
-
-                if (!githubUserInfo.IsSavedRepositoryValid())
-                    throw new NullReferenceException("Saved repository is null!");
-                
-                //Add null checks and add getters for file path and url
-                //Nullable warning suppressed because IsSavedRepositoryValid
-                //also checks if URL and path are null 
-                _gitService.CloneRepository(githubUserInfo.GetUrl()!,
-                    githubUserInfo?.GetPath()!);
+                _gitService.CloneRepository(LocalRepoFilePath,
+                    RepoURL);
+                NoRepoCloned = false;
             }
             catch (LibGit2SharpException ex)
             {
@@ -556,74 +551,34 @@ namespace BananaGit.ViewModels
                 Trace.WriteLine(ex.Message);
             }
         }
-
-        /// <summary>
-        /// Clone a repository
-        /// </summary>
-        /// <param name="repoURL">The repositories URL</param>
-        /// <param name="repoPath">Where the repository should be cloned to</param>
-        /// <param name="username">The username of the user</param>
-        /// <param name="token">The personal access token</param>
-        /// <returns></returns>
-        private void CloneRepo(GitInfoModel userInfo)
-        {
-            try
-            {
-                var options = new CloneOptions
-                {
-                    FetchOptions =
-                    {
-                        CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
-                            {
-                                Username = userInfo.Username,
-                                Password = userInfo.PersonalToken
-                            }
-                    }
-                };
-
-                //Save repo to github user info
-                userInfo.SavedRepository = new(LocalRepoFilePath, RepoURL);
-                JsonDataManager.SaveUserInfo(userInfo);
-                Repository.Clone(RepoURL, LocalRepoFilePath, options);
-                NoRepoCloned = false;
-            }
-            catch (LibGit2SharpException ex)
-            {
-                Trace.WriteLine($"Failed to Clone {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message);
-            }
-        }
         #endregion
 
         #region Dialog Commands
         [RelayCommand]
-        public void OpenCloneWindow()
+        private void OpenCloneWindow()
         {
             _dialogService.ShowCloneRepoDialog();
         }
         [RelayCommand]
-        public void OpenRemoteWindow()
+        private void OpenRemoteWindow()
         {
             _dialogService.ShowRemoteBranchesDialog();
         }
 
         [RelayCommand]
-        public void OpenTutorialPage()
+        private void OpenTutorialPage()
         {
             IsTutorialOpen = !IsTutorialOpen;
         }
 
         [RelayCommand]
-        public void OpenSettingsWindow()
+        private void OpenSettingsWindow()
         {
             _dialogService.ShowSettingsDialog();
         }
 
         [RelayCommand]
-        public void OpenConsoleWindow()
+        private void OpenConsoleWindow()
         {
             _dialogService.ShowConsoleDialog();
         }
@@ -672,7 +627,7 @@ namespace BananaGit.ViewModels
         /// <summary>
         /// Resets collection of local branches and re-initializes the lists
         /// </summary>
-        public void ResetBranches()
+        private void ResetBranches()
         {
             LocalBranches.Clear();
             RemoteBranches.Clear();
