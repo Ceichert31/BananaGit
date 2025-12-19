@@ -152,7 +152,7 @@ namespace BananaGit.ViewModels
         /// <summary>
         /// Update the current unstaged changes
         /// </summary>
-        public void UpdateRepoStatus(object? sender, EventArgs e)
+        private void UpdateRepoStatus(object? sender, EventArgs e)
         {
             if (NoRepoCloned) return;
             try
@@ -263,7 +263,7 @@ namespace BananaGit.ViewModels
                                 continue;
 
                             //Check if branch already exists
-                            if (RemoteBranches.Where(x => x.Branch == branch).Any())
+                            if (RemoteBranches.Any(x => x.Branch == branch))
                                 continue;
 
                             RemoteBranches.Add(new GitBranch(branch));
@@ -271,7 +271,7 @@ namespace BananaGit.ViewModels
                         }
 
                         //Check if local branch already exists
-                        if (LocalBranches.Where(x => x.Branch == branch).Any())
+                        if (LocalBranches.Any(x => x.Branch == branch))
                             continue;
 
                         LocalBranches.Add(new GitBranch(branch));
@@ -284,21 +284,6 @@ namespace BananaGit.ViewModels
             {
                 OutputError(ex.Message);
             }
-        }
-
-        /// <summary>
-        /// The callback for conflicts
-        /// </summary>
-        /// <param name="path">The file that conflicted</param>
-        /// <param name="notifyFlags">The checkout notify flag</param>
-        /// <returns></returns>
-        private bool ShowConflict(string path, CheckoutNotifyFlags notifyFlags)
-        {
-            if (notifyFlags == CheckoutNotifyFlags.Conflict)
-            {
-                Trace.WriteLine($"Conflict found in file {path}");
-            }
-            return true;
         }
 
         #endregion
@@ -437,6 +422,7 @@ namespace BananaGit.ViewModels
                     
                     MergeStatus status = _gitService.PullFiles(CurrentBranch);
                    
+                    //Updates the branch list
                     UpdateBranches(CurrentBranch);
 
                     switch (status)
@@ -450,6 +436,12 @@ namespace BananaGit.ViewModels
                             //Display in front end eventually
                             OutputError("Up to date");
                             return;
+                        case MergeStatus.FastForward:
+                            OutputError("Fast Forward");
+                            break;
+                        case MergeStatus.NonFastForward:
+                            OutputError("Non-Fast Forward");
+                            break;
                         default:
                             OutputError("Pulled Successfully");
                             break;
@@ -466,13 +458,32 @@ namespace BananaGit.ViewModels
         #region Clone 
 
         [RelayCommand]
-        public void CloneRepo()
+        private void CloneRepo()
         {
-            if (githubUserInfo == null) return;
+           
 
-            VerifyPath(LocalRepoFilePath);
+            try
+            {
+                if (githubUserInfo == null) 
+                    throw new LoadDataException("No Loaded data! Data was null when loaded!");
 
-            CloneRepo(githubUserInfo);
+                if (!githubUserInfo.IsSavedRepositoryValid())
+                    throw new NullReferenceException("Saved repository is null!");
+                
+                //Add null checks and add getters for file path and url
+                //Nullable warning suppressed because IsSavedRepositoryValid
+                //also checks if URL and path are null 
+                _gitService.CloneRepository(githubUserInfo.GetUrl()!,
+                    githubUserInfo?.GetPath()!);
+            }
+            catch (LibGit2SharpException ex)
+            {
+                OutputError($"Failed to clone repo {githubUserInfo?.SavedRepository?.Url}");
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
         }
 
         /// <summary>

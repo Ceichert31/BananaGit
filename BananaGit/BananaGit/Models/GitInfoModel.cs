@@ -9,9 +9,28 @@
         public string? Email { get; set; }
         public string? PersonalToken { get; set; } 
         public SavableRepository? SavedRepository { get; set; }
-        
+
+        public string? GetPath()
+        {
+            return SavedRepository?.FilePath;
+        }
+        public string? GetUrl()
+        {
+            return SavedRepository?.Url;
+        }
         public void SetPath(string path) => SavedRepository?.FilePath = path;
         public void SetUrl(string url) => SavedRepository?.Url = url;
+
+        /// <summary>
+        /// Verifies the saved repo is not null
+        /// </summary>
+        /// <returns>Whether repo is null</returns>
+        public bool IsSavedRepositoryValid()
+        {
+            return SavedRepository != null && 
+                   SavedRepository.FilePath != null &&  
+                   SavedRepository.Url != null;
+        }
     }
     /// <summary>
     /// Holds repository information
