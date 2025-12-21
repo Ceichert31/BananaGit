@@ -24,8 +24,47 @@ namespace BananaGit.Services
             }
         }
 
+        #region Getters
+
+        /// <summary>
+        /// Checks if the current repo has files commited but not pushed
+        /// </summary>
+        /// <returns>Whether localally commited files have been pushed</returns>
+        public bool HasLocalCommitedFiles()
+        {
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            //Check if branch has a remote tracking branch
+            if (repo.Head.TrackedBranch == null)
+            {
+                return false; 
+            }
+            
+            //Start at local head tip and query until remote head tip
+            var localCommits = repo.Commits.QueryBy(new CommitFilter
+            {
+                IncludeReachableFrom = repo.Head.Tip.Id,
+                ExcludeReachableFrom = repo.Head.TrackedBranch.Tip.Id
+            });
+            
+            return localCommits.Any();
+        }
+        #endregion
+        
         #region Helper Methods
 
+        /// <summary>
+        /// Removes all local commits and reverts to the remotes last commit
+        /// (Aka deletes all unpushed commits)
+        /// </summary>
+        public void ResetLocalCommits()
+        {
+            using var repo = new Repository(_gitInfo?.GetPath());
+            
+            //Move HEAD to remotes last commit
+            repo.Reset(ResetMode.Hard, repo.Head.TrackedBranch.Tip);
+        }
+        
         /// <summary>
         /// Checks current repositories file location before using it
         /// </summary>
