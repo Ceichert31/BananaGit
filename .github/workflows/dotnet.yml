@@ -29,3 +29,8 @@ jobs:
       run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore 
     - name: Test
       run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
+      env: 
+        GIT_TEST_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
+        GIT_TEST_USERNAME: ${{ secrets.GIT_TEST_USERNAME }}
+        GIT_TEST_EMAIL: ${{ secrets.GIT_TEST_EMAIL }}
+        

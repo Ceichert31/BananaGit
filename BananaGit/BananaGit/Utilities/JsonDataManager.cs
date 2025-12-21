@@ -11,6 +11,8 @@ namespace BananaGit.Utilities
         private const string USER_DATA_LOCATION = "C:\\BananaGit/";
         private const string USER_DATA_NAME = "UserInfo.json";
 
+        public static EventHandler? UserInfoChanged;
+
         /// <summary>
         /// Saves the users personal github token to a local folder
         /// </summary>
@@ -36,6 +38,7 @@ namespace BananaGit.Utilities
             finally
             {
                 writer?.Close();
+                UserInfoChanged?.Invoke(nameof(JsonDataManager), EventArgs.Empty);
             }
         }
 

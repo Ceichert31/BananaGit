@@ -297,7 +297,7 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                _gitService.CommitStagedFiles($"{SelectedCommitHeader} {CommitMessage}");
+                _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader} {CommitMessage}");
                 //Clear commit message
                 CommitMessage = string.Empty;
                 HasCommitedFiles = true;
@@ -323,7 +323,7 @@ namespace BananaGit.ViewModels
             {
                 try
                 {
-                    _gitService.StageFiles();
+                    _gitService.StageFilesAsync();
                 }
                 catch (LibGit2SharpException ex)
                 {
@@ -346,7 +346,7 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                _gitService.StageFile(file);
+                _gitService.StageFileAsync(file);
             }
             catch (LibGit2SharpException ex)
             {
@@ -367,7 +367,7 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                _gitService.UnstageFile(file);
+                _gitService.UnstageFileAsync(file);
             }
             catch (LibGit2SharpException ex)
             {
@@ -394,7 +394,7 @@ namespace BananaGit.ViewModels
                     if (CurrentBranch == null) 
                         throw new NullReferenceException("No Branch selected! Branch is null!");
                     
-                    _gitService.PushFiles(CurrentBranch);
+                    _gitService.PushFilesAsync(CurrentBranch);
                     HasCommitedFiles = false;
                 }
                 catch (LibGit2SharpException ex)
@@ -412,7 +412,7 @@ namespace BananaGit.ViewModels
         /// Pulls changes from the repo and merges them into the local repository
         /// </summary>
         [RelayCommand]
-        private void PullChanges()
+        private async void PullChanges()
         {
             Task.Run(() => {
                 try
@@ -420,7 +420,7 @@ namespace BananaGit.ViewModels
                     if (CurrentBranch == null)
                         throw new NullReferenceException("No Branch selected! Branch is null!");
                     
-                    MergeStatus status = _gitService.PullFiles(CurrentBranch);
+                    MergeStatus status = _gitService.PullFilesAsync(CurrentBranch).Result;
                    
                     //Updates the branch list
                     UpdateBranches(CurrentBranch);
@@ -468,7 +468,7 @@ namespace BananaGit.ViewModels
             try
             {
                 //Clone repo using git service
-                _gitService.CloneRepository(RepoURL,
+                _gitService.CloneRepositoryAsync(RepoURL,
                     LocalRepoFilePath);
 
                 //Open after cloning

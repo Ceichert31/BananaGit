@@ -10,6 +10,13 @@
         public string? PersonalToken { get; set; } 
         public SavableRepository? SavedRepository { get; set; }
 
+        public void CopyContents(GitInfoModel gitInfo)
+        {
+            Username = gitInfo.Username;
+            Email = gitInfo.Email;
+            PersonalToken = gitInfo.PersonalToken;
+            SavedRepository = gitInfo.SavedRepository;
+        }
         public string? GetPath()
         {
             return SavedRepository?.FilePath;

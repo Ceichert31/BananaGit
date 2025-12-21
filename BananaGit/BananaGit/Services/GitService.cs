@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using BananaGit.Exceptions;
 using BananaGit.Models;
@@ -13,10 +14,11 @@ namespace BananaGit.Services
     /// </summary>
     public class GitService
     {
-        private readonly GitInfoModel? _gitInfo;
-        public GitService() 
+        private GitInfoModel? _gitInfo;
+        public GitService(GitInfoModel? gitInfo) 
         {
-            JsonDataManager.LoadUserInfo(ref _gitInfo);
+            _gitInfo = gitInfo;
+            JsonDataManager.UserInfoChanged += OnUserDataChange;
 
             if (_gitInfo == null)
             {
@@ -24,8 +26,62 @@ namespace BananaGit.Services
             }
         }
 
+        /// <summary>
+        /// Updates the current user info
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnUserDataChange(object? sender, EventArgs e)
+        {
+            JsonDataManager.LoadUserInfo(ref _gitInfo);
+        }
+
+        #region Getters
+
+        /// <summary>
+        /// Checks if the current repo has files commited but not pushed
+        /// </summary>
+        /// <returns>Whether localally commited files have been pushed</returns>
+        public bool HasLocalCommitedFiles()
+        {
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            //Check if branch has a remote tracking branch
+            if (repo.Head.TrackedBranch == null)
+            {
+                return false; 
+            }
+            
+            //Start at local head tip and query until remote head tip
+            var localCommits = repo.Commits.QueryBy(new CommitFilter
+            {
+                IncludeReachableFrom = repo.Head.Tip.Id,
+                ExcludeReachableFrom = repo.Head.TrackedBranch.Tip.Id
+            });
+            
+            bool i = localCommits.Any();
+            
+            return localCommits.Any();
+        }
+        #endregion
+        
         #region Helper Methods
 
+        /// <summary>
+        /// Removes all local commits and reverts to the remotes last commit
+        /// (Aka deletes all unpushed commits)
+        /// </summary>
+        public async Task ResetLocalCommitsAsync()
+        {
+            await Task.Run(() =>
+            {
+                using var repo = new Repository(_gitInfo?.GetPath());
+
+                //Move HEAD to remotes last commit
+                repo.Reset(ResetMode.Hard, repo.Head.TrackedBranch.Tip);
+            });
+        }
+        
         /// <summary>
         /// Checks current repositories file location before using it
         /// </summary>
@@ -65,9 +121,9 @@ namespace BananaGit.Services
         /// Commits all staged files
         /// </summary>
         /// <param name="commitMessage">The message for this commit</param>
-        public void CommitStagedFiles(string commitMessage)
+        public async Task CommitStagedFilesAsync(string commitMessage)
         {
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
@@ -82,9 +138,9 @@ namespace BananaGit.Services
         /// <summary>
         /// Stages all changed files in the working directory
         /// </summary>
-        public void StageFiles()
+        public async Task StageFilesAsync()
         {
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
@@ -108,19 +164,35 @@ namespace BananaGit.Services
         /// Stages a specific file
         /// </summary>
         /// <param name="fileToStage">The file that is going to be staged</param>
-        public void StageFile(ChangedFile fileToStage)
+        public async Task StageFileAsync(ChangedFile fileToStage)
         {
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
-                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
-                {
-                    var status = repo.RetrieveStatus();
-                    if (!status.IsDirty) return;
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty) return;
 
-                    Commands.Stage(repo, fileToStage.FilePath);
-                }
+                Commands.Stage(repo, fileToStage.FilePath);
+            });
+        }
+
+        /// <summary>
+        /// Stages a specific file
+        /// </summary>
+        /// <param name="fileToStage">The file that is going to be staged</param>
+        /// <param name="repo">A pre-existing repository</param>
+        public async Task StageFileAsync(ChangedFile fileToStage, Repository repo)
+        {
+            await Task.Run(() =>
+            {
+                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty) return;
+
+                Commands.Stage(repo, fileToStage.FilePath);
             });
         }
 
@@ -128,9 +200,9 @@ namespace BananaGit.Services
         /// Unstages a specific file
         /// </summary>
         /// <param name="fileToUnstage">The file that is going to be unstaged</param>
-        public void UnstageFile(ChangedFile fileToUnstage)
+        public async Task UnstageFileAsync(ChangedFile fileToUnstage)
         {
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
@@ -150,9 +222,9 @@ namespace BananaGit.Services
         /// Pushes files that are commited to the repository on the specified branch
         /// </summary>
         /// <param name="branch">The branch that files will be pushed to</param>
-        public void PushFiles(GitBranch branch)
+        public async Task PushFilesAsync(GitBranch branch)
         {
-            Task.Run(() =>
+            await Task.Run(() =>
             {
                 VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
@@ -214,9 +286,9 @@ namespace BananaGit.Services
         /// </summary>
         /// <param name="branch">The branch changes will be pulled from</param>
         /// <returns></returns>
-        public MergeStatus PullFiles(GitBranch branch)
+        public async Task<MergeStatus> PullFilesAsync(GitBranch branch)
         {
-            Task.Run(() => {
+            await Task.Run(() => {
                 VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
                 var options = new PullOptions
@@ -262,80 +334,28 @@ namespace BananaGit.Services
         #endregion
         
         #region Clone
-        /*/// <summary>
-        /// Prompts the user with a windows dialog to select a directory
-        /// </summary>
-        /// <returns></returns>
-        /// <exception cref="Exception"></exception>
-        /// <exception cref="NullReferenceException"></exception>
-        public Tuple<string,string> ChooseCloneDirectory()
-        {
-              //Open file select dialogue
-                OpenFolderDialog dialog = new OpenFolderDialog
-                {
-                    Multiselect = false,
-                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
-                };
-
-                if (dialog.ShowDialog() != true)
-                    throw new Exception("Please select a folder!");
-                
-                string path;
-                string url = string.Empty;
-                
-                string selectedFilePath = dialog.FolderName;
-
-                //Check if directory is empty
-                if (!Directory.EnumerateFiles(selectedFilePath).Any())
-                {
-                    _gitInfo?.SetPath(dialog.FolderName);
-                    path = dialog.FolderName;
-                }
-                else
-                {
-                    //Check if file location is local repo
-                    using (var repo = new Repository(selectedFilePath))
-                    {
-                        //Set active repo as locally opened repo
-                        _gitInfo?.SetPath(dialog.FolderName);
-                        path = dialog.FolderName;
-                        var remote = repo.Network.Remotes.FirstOrDefault();
-                        if (remote != null)
-                        {
-                            _gitInfo?.SetUrl(remote.Url);
-                            url = remote.Url;
-                        }
-                        else
-                        {
-                            throw new NullReferenceException("Couldn't find any remotes!");
-                        }
-                        
-                        //Save updated repository information
-                        JsonDataManager.SaveUserInfo(_gitInfo);
-                    }
-                }
-                return new Tuple<string, string>(path, url);
-        }*/
-
         /// <summary>
         /// Clones a repository at the specified file location
         /// </summary>
         /// <param name="url">The URL for the repository</param>
         /// <param name="cloneLocation">The location to clone to</param>
-        public void CloneRepository(string url, string cloneLocation)
+        public async Task CloneRepositoryAsync(string url, string cloneLocation)
         {
-            var options = new CloneOptions
+            await Task.Run(() =>
             {
-                FetchOptions =
+                var options = new CloneOptions
                 {
-                    CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials
+                    FetchOptions =
                     {
-                        Username = _gitInfo?.Username,
-                        Password = _gitInfo?.PersonalToken
+                        CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials
+                        {
+                            Username = _gitInfo?.Username,
+                            Password = _gitInfo?.PersonalToken
+                        }
                     }
-                }
-            };
-            Repository.Clone(url, cloneLocation, options);
+                };
+                Repository.Clone(url, cloneLocation, options);
+            });
         }
         #endregion
     }
