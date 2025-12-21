@@ -9,6 +9,8 @@ public class GitServiceTests
     private const string TEST_REPO = "https://github.com/Ceichert31/test-repo.git";
     private const string TEST_PATH = "C:/TestRepo/";
     
+    //Need clone test b4 commit test so we can clone repo for testing
+    
     [TestMethod]
     public async Task TestCommitFiles_ReturnsTrue()
     {
@@ -21,18 +23,12 @@ public class GitServiceTests
                 Name = "test.txt",
                 FilePath = "C:/TestRepo/"
             };
-            File.Create(file.FilePath + file.Name).Dispose();
+            await File.Create(file.FilePath + file.Name).DisposeAsync();
             
-            await Task.Run(() => Thread.Sleep(1000));
-            
-            gitService.StageFile(file);
-            
-            await Task.Run(() => Thread.Sleep(1000));
+            await gitService.StageFileAsync(file);
             
             //Act
-            gitService.CommitStagedFiles("Test commit");
-            
-            await Task.Run(() => Thread.Sleep(1000));
+            await gitService.CommitStagedFilesAsync("Test commit");
 
             //Assert
             Assert.IsTrue(gitService.HasLocalCommitedFiles());
@@ -40,7 +36,7 @@ public class GitServiceTests
         finally
         {
             //Cleanup
-            gitService.ResetLocalCommits();
+            _ = gitService.ResetLocalCommitsAsync();
         }
     }
 }
