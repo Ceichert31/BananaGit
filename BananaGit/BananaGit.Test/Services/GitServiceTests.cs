@@ -11,22 +11,33 @@ public class GitServiceTests
     private const string TEST_REPO = "https://github.com/Ceichert31/test-repo.git";
     private const string TEST_PATH = "C:/TestRepo/";
     
-    //Need clone test b4 commit test so we can clone repo for testing
-
-    [TestMethod]
-    public void TestCloneRepository_ReturnsTrue()
-    {
+    //For writing tests for the git service, this is the general setup:
+    /*
+      //Arrange
         GitService gitService = new GitService();
         try
         {
+            //Act
             
+            //Assert
         }
         finally
         {
-            
+            //Cleanup
         }
+     */
+
+    [TestMethod]
+    public async Task TestCloneRepository_ReturnsTrue()
+    {
+        //Arrange
+        GitService gitService = new GitService();
         
-        
+        //Act
+        await gitService.CloneRepositoryAsync(TEST_REPO, TEST_PATH);
+            
+        //Assert
+        Assert.IsTrue(File.Exists(TEST_PATH));
     }
     
     [TestMethod]
