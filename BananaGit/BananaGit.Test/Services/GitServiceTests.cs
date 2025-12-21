@@ -10,6 +10,12 @@ public class GitServiceTests
     private const string TEST_PATH = "C:/TestRepo/";
     
     //Need clone test b4 commit test so we can clone repo for testing
+
+    [TestMethod]
+    public void TestCloneRepository_ReturnsTrue()
+    {
+        
+    }
     
     [TestMethod]
     public async Task TestCommitFiles_ReturnsTrue()

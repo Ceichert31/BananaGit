@@ -412,7 +412,7 @@ namespace BananaGit.ViewModels
         /// Pulls changes from the repo and merges them into the local repository
         /// </summary>
         [RelayCommand]
-        private void PullChanges()
+        private async void PullChanges()
         {
             Task.Run(() => {
                 try
@@ -420,7 +420,7 @@ namespace BananaGit.ViewModels
                     if (CurrentBranch == null)
                         throw new NullReferenceException("No Branch selected! Branch is null!");
                     
-                    MergeStatus status = _gitService.PullFilesAsync(CurrentBranch);
+                    MergeStatus status = _gitService.PullFilesAsync(CurrentBranch).Result;
                    
                     //Updates the branch list
                     UpdateBranches(CurrentBranch);
