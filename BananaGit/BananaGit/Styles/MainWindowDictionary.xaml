@@ -105,7 +105,7 @@
     </DataTemplate>
 
     <DataTemplate x:Key="CommitHistoryTemplate">
-        <views:CommitHistoryView x:Name="CommitHistory" DataContext="{Binding GitInfoViewModel}" />
+        <views:CommitHistoryView x:Name="CommitHistory" DataContext="{Binding CommitHistoryViewModel}" />
     </DataTemplate>
 
     <DataTemplate x:Key="TutorialTemplate">

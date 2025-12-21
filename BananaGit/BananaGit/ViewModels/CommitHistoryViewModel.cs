@@ -62,7 +62,7 @@ public partial class CommitHistoryViewModel : ObservableObject
 
         using var repo = new Repository(_loadedRepositoryInfo?.FilePath);
         
-        var branch = repo.Branches[_loadedRepositoryInfo?.CurrentBranch.Name];
+        var branch = repo.Branches[_loadedRepositoryInfo?.CurrentBranch?.Name];
         
         var commits = branch.Commits.ToList();
 

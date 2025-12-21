@@ -65,7 +65,7 @@ namespace BananaGit.Models
         /// <summary>
         /// The current branch that changes will be made to
         /// </summary>
-        public GitBranch CurrentBranch
+        public GitBranch? CurrentBranch
         {
             get => _currentBranch;
             set
@@ -74,7 +74,8 @@ namespace BananaGit.Models
                 OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
             }
         }
-        private GitBranch _currentBranch = new GitBranch();
+        //Causing stack overflow
+        private GitBranch? _currentBranch;
 
         /// <summary>
         /// The file path to the local repository

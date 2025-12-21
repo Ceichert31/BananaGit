@@ -1,6 +1,5 @@
 ﻿using BananaGit.Models;
 using BananaGit.Services;
-using BananaGit.Utilities;
 using LibGit2Sharp;
 using Microsoft.Extensions.Configuration;
 

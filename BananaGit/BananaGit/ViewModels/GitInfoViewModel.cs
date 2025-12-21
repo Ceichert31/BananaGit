@@ -48,9 +48,6 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private GitBranch? _currentBranch;
 
-        [ObservableProperty]
-        private ObservableCollection<GitCommitInfo> _commitHistory = [];
-
         //Flags
         [ObservableProperty]
         private bool _canClone = false;
@@ -111,16 +108,25 @@ namespace BananaGit.ViewModels
                 NoRepoCloned = false;
 
                 UpdateBranches(CurrentBranch);
+                
+                githubUserInfo.SavedRepository.IsRepositoryCloned = NoRepoCloned;
+                githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch();
             }
             catch (GitException ex)
             {
                 OutputError(ex.Message);
                 NoRepoCloned = true;
+                
+                githubUserInfo.SavedRepository.IsRepositoryCloned = NoRepoCloned;
+                githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch();
             }
             catch (Exception ex)
             {
                 OutputError(ex.Message);
                 NoRepoCloned = true;
+                
+                githubUserInfo.SavedRepository.IsRepositoryCloned = NoRepoCloned;
+                githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch();
             }
         }
 
@@ -155,6 +161,10 @@ namespace BananaGit.ViewModels
         private void UpdateRepoStatus(object? sender, EventArgs e)
         {
             if (NoRepoCloned) return;
+
+            githubUserInfo.SavedRepository.IsRepositoryCloned = NoRepoCloned;
+            githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch();
+            
             try
             {
                 VerifyPath(LocalRepoFilePath);
@@ -164,29 +174,9 @@ namespace BananaGit.ViewModels
 
                 using var repo = new Repository(LocalRepoFilePath);
                 var stats = repo.RetrieveStatus(new StatusOptions());
-
-                CommitHistory.Clear();
+                
                 //Update list of all commits
                 if (CurrentBranch == null || CurrentBranch.Name == "") throw new NullReferenceException("Current branch isn't set");
-
-                var currentBranch = repo.Branches[CurrentBranch.Name] ?? throw new NullReferenceException("Current branch isn't set");
-
-                var commits = currentBranch.Commits.ToList();
-
-                //Limits commit history to a certain length
-                for (int i = 0; i < _commitHistoryLength; ++i)
-                {
-                    var item = commits[i];
-                    GitCommitInfo commitInfo = new()
-                    {
-                        Author = item.Author.ToString(),
-                        Date =
-                       $"{item.Author.When.DateTime.ToShortTimeString()} {item.Author.When.DateTime.ToShortDateString()}",
-                        Message = item.Message,
-                        Commit = item.Id.ToString()
-                    };
-                    CommitHistory.Add(commitInfo);
-                }
 
                 //If no changes have been made, don't do anything
                 if (!stats.IsDirty) return;
