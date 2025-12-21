@@ -37,10 +37,7 @@ public class GitServiceTests
             //Repository exists
             if (Directory.Exists(TEST_PATH))
             {
-                if (Directory.EnumerateFiles(TEST_PATH).Any())
-                {
-                    Directory.Delete(TEST_PATH, true);
-                }
+                DeleteDirectory(TEST_PATH);
             }
             
             //Act
@@ -52,18 +49,26 @@ public class GitServiceTests
         }
         finally
         {
-            /*var directory = new DirectoryInfo(TEST_PATH)
-            {
-                Attributes = FileAttributes.Normal
-            };
-            foreach (var file in directory.GetFileSystemInfos("*", SearchOption.AllDirectories))
-            {
-                var fileInfo = new FileInfo(file.FullName);
-                fileInfo.Attributes = FileAttributes.Normal;
-                file.Delete();  
-            }
-            directory.Delete(true);*/
+            DeleteDirectory(TEST_PATH);
         }
+    }
+
+    /// <summary>
+    /// Deletes a directory completely including read-only and hidden items
+    /// </summary>
+    /// <param name="path"></param>
+    private void DeleteDirectory(string path)
+    {
+        if (!Directory.Exists(path)) return;
+        
+        var directory = new DirectoryInfo(path);
+
+        foreach (var file in directory.GetFileSystemInfos("*", SearchOption.AllDirectories))
+        {
+            file.Attributes = FileAttributes.Normal;
+        }
+        directory.Attributes = FileAttributes.Normal;
+        directory.Delete(true);
     }
     
     [TestMethod]
