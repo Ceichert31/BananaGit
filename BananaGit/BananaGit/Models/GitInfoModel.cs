@@ -105,7 +105,7 @@
         /// <summary>
         /// Invoked when LoadedRepository properties are changed
         /// </summary>
-        public EventHandler OnRepositoryChanged { get; }
+        public EventHandler? OnRepositoryChanged { get; set; }
     }
     /// <summary>
     /// Move this to its own model

@@ -26,14 +26,20 @@ public partial class CommitHistoryViewModel : ObservableObject
         //How will we update repository info 
         _loadedRepositoryInfo = loadedRepositoryInfo;
         
-        JsonDataManager.UserInfoChanged += OnUserInfoChanged;
+        loadedRepositoryInfo.OnRepositoryChanged += OnUserInfoChanged;
     }
 
+    /// <summary>
+    /// Updates repository information
+    /// </summary>
+    /// <param name="sender">The new repository information</param>
+    /// <param name="e">Event arguments</param>
     private void OnUserInfoChanged(object? sender, EventArgs e)
     {
-        GitInfoModel? userInfo = new();
-        JsonDataManager.LoadUserInfo(ref userInfo);
-        _loadedRepositoryInfo = userInfo?.SavedRepository;
+        if (sender is not LoadedRepositoryInfo loadedRepositoryInfo) return;
+        
+        _loadedRepositoryInfo = loadedRepositoryInfo;
+        UpdateCommitHistory(_loadedRepositoryInfo, EventArgs.Empty);
     }
 
     /// <summary>
@@ -44,7 +50,7 @@ public partial class CommitHistoryViewModel : ObservableObject
     private void UpdateCommitHistory(object? sender, EventArgs e)
     {
         //Check if commit needs to be updated or is same
-        
+
         /*var commits = currentBranch.Commits.ToList();
 
         //Limits commit history to a certain length
@@ -61,6 +67,7 @@ public partial class CommitHistoryViewModel : ObservableObject
             };
             CommitHistory.Add(commitInfo);
         }
-    }*/
+    */
+    }
 
 }
