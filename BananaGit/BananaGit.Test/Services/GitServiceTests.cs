@@ -3,9 +3,10 @@ using BananaGit.Services;
 
 namespace BananaGit.Test.Services;
 
+[TestClass]
 public class GitServiceTests
 {
-    [Test]
+    [TestMethod]
     public void TestCommitFiles_ReturnsTrue()
     {
         //Arrange
@@ -13,16 +14,16 @@ public class GitServiceTests
         ChangedFile file = new ChangedFile
         {
             Name = "test.txt",
-            FilePath = "testFolder/"  
+            FilePath = "testFolder/"
         };
         gitService.StageFile(file);
-        
+
         //Act
         gitService.CommitStagedFiles("Test commit");
-        
+
         //Assert
-        Assert.Equals(gitService.HasLocalCommitedFiles(), true);
-        
+        Assert.IsTrue(gitService.HasLocalCommitedFiles());
+
         //Cleanup
         gitService.ResetLocalCommits();
     }
