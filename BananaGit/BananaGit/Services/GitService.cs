@@ -15,10 +15,9 @@ namespace BananaGit.Services
     public class GitService
     {
         private GitInfoModel? _gitInfo;
-        public GitService() 
+        public GitService(GitInfoModel? gitInfo) 
         {
-            JsonDataManager.LoadUserInfo(ref _gitInfo);
-            
+            _gitInfo = gitInfo;
             JsonDataManager.UserInfoChanged += OnUserDataChange;
 
             if (_gitInfo == null)

@@ -26,7 +26,7 @@ namespace BananaGit.ViewModels
             //Load user info
             JsonDataManager.LoadUserInfo(ref _userInfo);
             
-            GitService gitService = new GitService();
+            GitService gitService = new GitService(_userInfo);
             
             _gitInfoViewModel = new GitInfoViewModel(gitService);
             

@@ -5,34 +5,49 @@ using LibGit2Sharp;
 
 namespace BananaGit.Test.Services;
 
+//For writing tests for the git service, this is the general setup:
+/*
+  //Arrange
+    GitService gitService = new GitService();
+    try
+    {
+        //Act
+
+        //Assert
+    }
+    finally
+    {
+        //Cleanup
+    }
+ */
+
 [TestClass]
 public class GitServiceTests
 {
     private const string TEST_REPO = "https://github.com/Ceichert31/test-repo.git";
     private const string TEST_PATH_BASE = "C:/UnitTestRepositories/";
     
-    //For writing tests for the git service, this is the general setup:
-    /*
-      //Arrange
-        GitService gitService = new GitService();
-        try
+    private static GitInfoModel? _userInfo;
+
+    [ClassInitialize]
+    public static void Initialize(TestContext testContext)
+    {
+        _userInfo = new GitInfoModel()
         {
-            //Act
-            
-            //Assert
-        }
-        finally
-        {
-            //Cleanup
-        }
-     */
+            Username = Environment.GetEnvironmentVariable("GIT_TEST_USERNAME"),
+            Email = Environment.GetEnvironmentVariable("GIT_TEST_EMAIL"),
+            PersonalToken =  Environment.GetEnvironmentVariable("GIT_TEST_TOKEN"),
+            SavedRepository = new("", TEST_REPO)
+        };
+    }
 
     [TestMethod]
     public async Task TestCloneRepository_ReturnsTrue()
     {
         //Arrange
-        GitService gitService = new GitService();
         string testPath = Path.Combine(TEST_PATH_BASE, "TestCloneRepository");
+        _userInfo?.SetPath(testPath);
+        GitService gitService = new GitService(_userInfo);
         try
         {
             //Repository exists
@@ -57,18 +72,10 @@ public class GitServiceTests
     [TestMethod]
     public async Task TestCommitFiles_ReturnsTrue()
     {
-        GitService gitService = new GitService();
         string testPath = Path.Combine(TEST_PATH_BASE, "TestCommitFiles");
+        _userInfo?.SetPath(testPath);
+        GitService gitService = new GitService(_userInfo);
         
-        //Cache old info
-        GitInfoModel? oldUserInfo = new GitInfoModel();
-        GitInfoModel newUserInfo = new GitInfoModel();
-        JsonDataManager.LoadUserInfo(ref oldUserInfo);        
-        
-        //Set testing info
-        newUserInfo.CopyContents(oldUserInfo);
-        newUserInfo.SavedRepository = new SavableRepository(testPath, TEST_REPO);
-        JsonDataManager.SaveUserInfo(newUserInfo);
         try
         {
             //Arrange
@@ -98,9 +105,6 @@ public class GitServiceTests
             //Cleanup
             await gitService.ResetLocalCommitsAsync();
             DeleteDirectory(testPath);
-            
-            //Reset back to non-test repository info
-            JsonDataManager.SaveUserInfo(oldUserInfo);
         }
     }
     
