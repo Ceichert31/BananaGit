@@ -9,7 +9,7 @@ namespace BananaGit.Test.Services;
 public class GitServiceTests
 {
     private const string TEST_REPO = "https://github.com/Ceichert31/test-repo.git";
-    private const string TEST_PATH = "C:/TestRepo/";
+    private const string TEST_PATH_BASE = "C:/UnitTestRepositories/";
     
     //For writing tests for the git service, this is the general setup:
     /*
@@ -32,27 +32,78 @@ public class GitServiceTests
     {
         //Arrange
         GitService gitService = new GitService();
+        string testPath = TEST_PATH_BASE + "TestCloneRepository/";
         try
         {
             //Repository exists
-            if (Directory.Exists(TEST_PATH))
+            if (Directory.Exists(testPath))
             {
-                DeleteDirectory(TEST_PATH);
+                DeleteDirectory(testPath);
             }
             
             //Act
-            await gitService.CloneRepositoryAsync(TEST_REPO, TEST_PATH);
+            await gitService.CloneRepositoryAsync(TEST_REPO, testPath);
             
             //Assert
-            Assert.IsTrue(Directory.Exists(TEST_PATH));
-            Assert.IsTrue(Directory.EnumerateFiles(TEST_PATH).Any());
+            Assert.IsTrue(Directory.Exists(testPath));
+            Assert.IsTrue(Directory.EnumerateFiles(testPath).Any());
         }
         finally
         {
-            DeleteDirectory(TEST_PATH);
+            DeleteDirectory(testPath);
         }
     }
-
+    
+    [TestMethod]
+    public async Task TestCommitFiles_ReturnsTrue()
+    {
+        GitService gitService = new GitService();
+        string testPath = TEST_PATH_BASE + "TestCommitFiles/";
+        
+        //Cache old info
+        GitInfoModel? oldUserInfo = new GitInfoModel();
+        GitInfoModel newUserInfo = new GitInfoModel();
+        JsonDataManager.LoadUserInfo(ref oldUserInfo);        
+        
+        //Set testing info
+        newUserInfo.CopyContents(oldUserInfo);
+        newUserInfo.SavedRepository = new SavableRepository(testPath, TEST_REPO);
+        JsonDataManager.SaveUserInfo(newUserInfo);
+        try
+        {
+            //Arrange
+            DeleteDirectory(testPath);
+            await gitService.CloneRepositoryAsync(TEST_REPO, testPath);
+            
+            //Create and add file to stage
+            ChangedFile file = new ChangedFile
+            {
+                Name = "test.txt",
+                FilePath = testPath
+            };
+            await File.Create(file.FilePath + file.Name).DisposeAsync();
+            using Repository repo = new Repository(testPath);
+            
+            //Stage file
+            await gitService.StageFileAsync(file, repo);
+            
+            //Act
+            await gitService.CommitStagedFilesAsync("Test commit");
+            
+            //Assert
+            Assert.IsTrue(gitService.HasLocalCommitedFiles());
+        }
+        finally
+        {
+            //Cleanup
+            await gitService.ResetLocalCommitsAsync();
+            DeleteDirectory(testPath);
+            
+            //Reset back to non-test repository info
+            JsonDataManager.SaveUserInfo(oldUserInfo);
+        }
+    }
+    
     /// <summary>
     /// Deletes a directory completely including read-only and hidden items
     /// </summary>
@@ -69,56 +120,5 @@ public class GitServiceTests
         }
         directory.Attributes = FileAttributes.Normal;
         directory.Delete(true);
-    }
-    
-    [TestMethod]
-    public async Task TestCommitFiles_ReturnsTrue()
-    {
-        GitService gitService = new GitService();
-        
-        //Cache old info
-        GitInfoModel? oldUserInfo = new GitInfoModel();
-        GitInfoModel newUserInfo = new GitInfoModel();
-        JsonDataManager.LoadUserInfo(ref oldUserInfo);        
-        
-        //Set testing info
-        newUserInfo.CopyContents(oldUserInfo);
-        newUserInfo.SavedRepository = new SavableRepository(TEST_PATH, TEST_REPO);
-        JsonDataManager.SaveUserInfo(newUserInfo);
-        try
-        {
-            //Arrange
-            //Clone test repo if it doesn't already exist
-            if (!Directory.EnumerateFiles(TEST_PATH).Any())
-            {
-                await gitService.CloneRepositoryAsync(TEST_REPO, TEST_PATH);
-            }
-            
-            //Create and add file to stage
-            ChangedFile file = new ChangedFile
-            {
-                Name = "test.txt",
-                FilePath = "C:/TestRepo/"
-            };
-            await File.Create(file.FilePath + file.Name).DisposeAsync();
-            Repository repo = new Repository(TEST_PATH);
-            
-            //Stage file
-            await gitService.StageFileAsync(file, repo);
-            
-            //Act
-            await gitService.CommitStagedFilesAsync("Test commit");
-
-            //Assert
-            Assert.IsTrue(gitService.HasLocalCommitedFiles());
-        }
-        finally
-        {
-            //Cleanup
-            await gitService.ResetLocalCommitsAsync();
-            
-            //Reset back to non-test repository info
-            JsonDataManager.SaveUserInfo(oldUserInfo);
-        }
     }
 }
