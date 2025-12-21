@@ -8,7 +8,7 @@ using LibGit2Sharp;
 
 namespace BananaGit.Models
 {
-    partial class GitBranch : ObservableObject
+    public partial class GitBranch : ObservableObject
     {
         public string Name { get; set; }
         public bool IsRemote { get; set; }
@@ -61,7 +61,7 @@ namespace BananaGit.Models
             };
 
             //Get the name of the HEAD branch
-            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.URL, options);
+            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.Url, options);
 
             if (branchName == null)
             {

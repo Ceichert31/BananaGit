@@ -43,4 +43,19 @@
         {
         }
     }
+
+    internal class InvalidBranchException : GitException
+    {
+        public InvalidBranchException()
+        {
+        }
+
+        public InvalidBranchException(string? message) : base(message)
+        {
+        }
+
+        public InvalidBranchException(string? message, Exception? innerException) : base(message, innerException)
+        {
+        }
+    }
 }

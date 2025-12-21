@@ -2,21 +2,21 @@
 using BananaGit.Views;
 using BananaGit.Views.DialogueViews;
 
-namespace BananaGit.Utilities
+namespace BananaGit.Services
 {
     /// <summary>
     /// Manages views and creates dialogs
     /// </summary>
     /// <param name="vm">The <see cref="GitInfoViewModel"/>
     /// that is currently being used by the main window </param>
-    class DialogService(GitInfoViewModel? vm)
+    class DialogService(GitInfoViewModel? vm, GitService gitService)
     {
         /// <summary>
         /// Opens a dialog for cloning a new repository 
         /// </summary>
         public void ShowCloneRepoDialog()
         {
-            CloneRepoView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            CloneRepoView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
             view.ShowDialog();
         }
 
@@ -34,7 +34,7 @@ namespace BananaGit.Utilities
         /// </summary>
         public void ShowRemoteBranchesDialog()
         {
-            RemoteBranchView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            RemoteBranchView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
             view.Show();
         }
         /// <summary>
@@ -42,7 +42,7 @@ namespace BananaGit.Utilities
         /// </summary>
         public void ShowSettingsDialog()
         {
-            SettingsView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            SettingsView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
             view.Show();
         }
         /// <summary>
@@ -50,7 +50,7 @@ namespace BananaGit.Utilities
         /// </summary>
         public void ShowConsoleDialog()
         {
-            TerminalView view = new() { DataContext = vm, Owner = App.Current.MainWindow };
+            TerminalView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
             view.Show();
         }
     }
