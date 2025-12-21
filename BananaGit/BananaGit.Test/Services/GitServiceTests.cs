@@ -2,6 +2,7 @@
 using BananaGit.Services;
 using BananaGit.Utilities;
 using LibGit2Sharp;
+using Microsoft.Extensions.Configuration;
 
 namespace BananaGit.Test.Services;
 
@@ -28,16 +29,26 @@ public class GitServiceTests
     private const string TEST_PATH_BASE = "C:/UnitTestRepositories/";
     
     private static GitInfoModel? _userInfo;
-
+    
+    /// <summary>
+    /// Loads GitHub secrets user data
+    /// </summary>
+    /// <param name="testContext"></param>
     [ClassInitialize]
     public static void Initialize(TestContext testContext)
     {
+        //Attempt to get user info from local dev, then CI/CD
+        var config = new ConfigurationBuilder()
+            .AddUserSecrets<GitServiceTests>()
+            .AddEnvironmentVariables()
+            .Build();
+        
         _userInfo = new GitInfoModel()
         {
-            Username = Environment.GetEnvironmentVariable("GIT_TEST_USERNAME"),
-            Email = Environment.GetEnvironmentVariable("GIT_TEST_EMAIL"),
-            PersonalToken =  Environment.GetEnvironmentVariable("GIT_TEST_TOKEN"),
-            SavedRepository = new("", TEST_REPO)
+            Username = config["GIT_TEST_USERNAME"],
+            Email = config["GIT_TEST_EMAIL"],
+            PersonalToken =  config["GIT_TEST_TOKEN"],
+            SavedRepository = new SavableRepository("", TEST_REPO)
         };
     }
 
