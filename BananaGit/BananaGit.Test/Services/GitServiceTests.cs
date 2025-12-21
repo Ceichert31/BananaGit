@@ -32,12 +32,38 @@ public class GitServiceTests
     {
         //Arrange
         GitService gitService = new GitService();
-        
-        //Act
-        await gitService.CloneRepositoryAsync(TEST_REPO, TEST_PATH);
+        try
+        {
+            //Repository exists
+            if (Directory.Exists(TEST_PATH))
+            {
+                if (Directory.EnumerateFiles(TEST_PATH).Any())
+                {
+                    Directory.Delete(TEST_PATH, true);
+                }
+            }
             
-        //Assert
-        Assert.IsTrue(File.Exists(TEST_PATH));
+            //Act
+            await gitService.CloneRepositoryAsync(TEST_REPO, TEST_PATH);
+            
+            //Assert
+            Assert.IsTrue(Directory.Exists(TEST_PATH));
+            Assert.IsTrue(Directory.EnumerateFiles(TEST_PATH).Any());
+        }
+        finally
+        {
+            /*var directory = new DirectoryInfo(TEST_PATH)
+            {
+                Attributes = FileAttributes.Normal
+            };
+            foreach (var file in directory.GetFileSystemInfos("*", SearchOption.AllDirectories))
+            {
+                var fileInfo = new FileInfo(file.FullName);
+                fileInfo.Attributes = FileAttributes.Normal;
+                file.Delete();  
+            }
+            directory.Delete(true);*/
+        }
     }
     
     [TestMethod]
@@ -51,12 +77,19 @@ public class GitServiceTests
         JsonDataManager.LoadUserInfo(ref oldUserInfo);        
         
         //Set testing info
-        newUserInfo.SetPath(TEST_PATH);
-        newUserInfo.SetUrl(TEST_REPO);
+        newUserInfo.CopyContents(oldUserInfo);
+        newUserInfo.SavedRepository = new SavableRepository(TEST_PATH, TEST_REPO);
         JsonDataManager.SaveUserInfo(newUserInfo);
         try
         {
             //Arrange
+            //Clone test repo if it doesn't already exist
+            if (!Directory.EnumerateFiles(TEST_PATH).Any())
+            {
+                await gitService.CloneRepositoryAsync(TEST_REPO, TEST_PATH);
+            }
+            
+            //Create and add file to stage
             ChangedFile file = new ChangedFile
             {
                 Name = "test.txt",
@@ -65,6 +98,7 @@ public class GitServiceTests
             await File.Create(file.FilePath + file.Name).DisposeAsync();
             Repository repo = new Repository(TEST_PATH);
             
+            //Stage file
             await gitService.StageFileAsync(file, repo);
             
             //Act
