@@ -6,25 +6,41 @@ namespace BananaGit.Test.Services;
 [TestClass]
 public class GitServiceTests
 {
+    private const string TEST_REPO = "https://github.com/Ceichert31/test-repo.git";
+    private const string TEST_PATH = "C:/TestRepo/";
+    
     [TestMethod]
-    public void TestCommitFiles_ReturnsTrue()
+    public async Task TestCommitFiles_ReturnsTrue()
     {
-        //Arrange
         GitService gitService = new GitService();
-        ChangedFile file = new ChangedFile
+        try
         {
-            Name = "test.txt",
-            FilePath = "testFolder/"
-        };
-        gitService.StageFile(file);
+            //Arrange
+            ChangedFile file = new ChangedFile
+            {
+                Name = "test.txt",
+                FilePath = "C:/TestRepo/"
+            };
+            File.Create(file.FilePath + file.Name).Dispose();
+            
+            await Task.Run(() => Thread.Sleep(1000));
+            
+            gitService.StageFile(file);
+            
+            await Task.Run(() => Thread.Sleep(1000));
+            
+            //Act
+            gitService.CommitStagedFiles("Test commit");
+            
+            await Task.Run(() => Thread.Sleep(1000));
 
-        //Act
-        gitService.CommitStagedFiles("Test commit");
-
-        //Assert
-        Assert.IsTrue(gitService.HasLocalCommitedFiles());
-
-        //Cleanup
-        gitService.ResetLocalCommits();
+            //Assert
+            Assert.IsTrue(gitService.HasLocalCommitedFiles());
+        }
+        finally
+        {
+            //Cleanup
+            gitService.ResetLocalCommits();
+        }
     }
 }

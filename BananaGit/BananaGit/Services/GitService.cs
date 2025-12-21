@@ -47,6 +47,8 @@ namespace BananaGit.Services
                 ExcludeReachableFrom = repo.Head.TrackedBranch.Tip.Id
             });
             
+            bool i = localCommits.Any();
+            
             return localCommits.Any();
         }
         #endregion
@@ -156,7 +158,7 @@ namespace BananaGit.Services
                 using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
                 {
                     var status = repo.RetrieveStatus();
-                    if (!status.IsDirty) return;
+                    //if (!status.IsDirty) return;
 
                     Commands.Stage(repo, fileToStage.FilePath);
                 }
