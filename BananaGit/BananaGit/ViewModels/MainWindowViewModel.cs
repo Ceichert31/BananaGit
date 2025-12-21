@@ -20,11 +20,15 @@ namespace BananaGit.ViewModels
         //dialog's that use git commands can DI the service
 
         private readonly GitInfoModel? _userInfo;
+        
+        private readonly LoadedRepositoryInfo? _loadedRepositoryInfo;
 
         public MainWindowViewModel() 
         {
             //Load user info
             JsonDataManager.LoadUserInfo(ref _userInfo);
+            
+            _loadedRepositoryInfo = _userInfo?.SavedRepository;
             
             GitService gitService = new GitService(_userInfo);
             

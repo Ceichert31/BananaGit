@@ -8,7 +8,7 @@
         public string? Username { get; set; }
         public string? Email { get; set; }
         public string? PersonalToken { get; set; } 
-        public SavableRepository? SavedRepository { get; set; }
+        public LoadedRepositoryInfo? SavedRepository { get; set; }
 
         public void CopyContents(GitInfoModel gitInfo)
         {
@@ -44,8 +44,10 @@
     /// </summary>
     /// <param name="path">The path to the saved repository</param>
     /// <param name="url">The url for the saved repository</param>
-    public class SavableRepository(string path, string url)
+    public class LoadedRepositoryInfo(string path, string url)
     {
+        public bool IsRepositoryCloned { get; set; } = false;
+        public GitBranch CurrentBranch { get; set; } = new GitBranch();
         public string FilePath { get; set; } = path;
         public string Url { get; set; } = url;
     }

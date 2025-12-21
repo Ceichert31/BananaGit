@@ -48,7 +48,7 @@ public class GitServiceTests
             Username = config["GIT_TEST_USERNAME"],
             Email = config["GIT_TEST_EMAIL"],
             PersonalToken =  config["GIT_TEST_TOKEN"],
-            SavedRepository = new SavableRepository("", TEST_REPO)
+            SavedRepository = new LoadedRepositoryInfo("", TEST_REPO)
         };
     }
 

@@ -559,7 +559,7 @@ namespace BananaGit.ViewModels
                 }
 
                 //Save to user info
-                githubUserInfo.SavedRepository = new SavableRepository(LocalRepoFilePath, RepoURL);
+                githubUserInfo.SavedRepository = new LoadedRepositoryInfo(LocalRepoFilePath, RepoURL);
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             
                 //Set flags
