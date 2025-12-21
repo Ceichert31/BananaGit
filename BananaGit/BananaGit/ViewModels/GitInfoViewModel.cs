@@ -538,35 +538,38 @@ namespace BananaGit.ViewModels
         /// <exception cref="NullReferenceException"></exception>
         private void OpenLocalRepository(string filePath)
         {
-            //Check if file location is local repo
-            if (!Repository.IsValid(filePath)) 
-                throw new RepositoryNotFoundException($"Repository not found at {filePath}!");
-            
-            var repo = new Repository(filePath);
-
-            //Set active repo as locally opened repo
-            LocalRepoFilePath = filePath;
-            var remote = repo.Network.Remotes.FirstOrDefault();
-            if (remote != null)
+            Task.Run(() =>
             {
-                RepoURL = remote.Url;
-            }
-            else
-            {
-                throw new NullReferenceException("Couldn't find any remotes!");
-            }
-
-            //Save to user info
-            githubUserInfo.SavedRepository = new SavableRepository(LocalRepoFilePath, RepoURL);
-            JsonDataManager.SaveUserInfo(githubUserInfo);
+                //Check if file location is local repo
+                if (!Repository.IsValid(filePath)) 
+                    throw new RepositoryNotFoundException($"Repository not found at {filePath}!");
             
-            //Set flags
-            CanClone = true;
-            DirectoryHasFiles = false;
-            NoRepoCloned = false;
+                var repo = new Repository(filePath);
+
+                //Set active repo as locally opened repo
+                LocalRepoFilePath = filePath;
+                var remote = repo.Network.Remotes.FirstOrDefault();
+                if (remote != null)
+                {
+                    RepoURL = remote.Url;
+                }
+                else
+                {
+                    throw new NullReferenceException("Couldn't find any remotes!");
+                }
+
+                //Save to user info
+                githubUserInfo.SavedRepository = new SavableRepository(LocalRepoFilePath, RepoURL);
+                JsonDataManager.SaveUserInfo(githubUserInfo);
+            
+                //Set flags
+                CanClone = true;
+                DirectoryHasFiles = false;
+                NoRepoCloned = false;
                         
-            ResetBranches();
-            UpdateBranches(new GitBranch());
+                ResetBranches();
+                UpdateBranches(new GitBranch());
+            });
         }
         #endregion
 
