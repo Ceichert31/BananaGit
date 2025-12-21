@@ -32,7 +32,7 @@ public class GitServiceTests
     {
         //Arrange
         GitService gitService = new GitService();
-        string testPath = TEST_PATH_BASE + "TestCloneRepository/";
+        string testPath = Path.Combine(TEST_PATH_BASE, "TestCloneRepository");
         try
         {
             //Repository exists
@@ -58,7 +58,7 @@ public class GitServiceTests
     public async Task TestCommitFiles_ReturnsTrue()
     {
         GitService gitService = new GitService();
-        string testPath = TEST_PATH_BASE + "TestCommitFiles/";
+        string testPath = Path.Combine(TEST_PATH_BASE, "TestCommitFiles");
         
         //Cache old info
         GitInfoModel? oldUserInfo = new GitInfoModel();
@@ -79,9 +79,9 @@ public class GitServiceTests
             ChangedFile file = new ChangedFile
             {
                 Name = "test.txt",
-                FilePath = testPath
+                FilePath = Path.Combine(testPath, "test.txt")
             };
-            await File.Create(file.FilePath + file.Name).DisposeAsync();
+            await File.Create(file.FilePath).DisposeAsync();
             using Repository repo = new Repository(testPath);
             
             //Stage file
