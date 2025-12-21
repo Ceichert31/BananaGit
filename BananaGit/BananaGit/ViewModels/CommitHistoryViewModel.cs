@@ -1,7 +1,9 @@
 ﻿using System.Collections.ObjectModel;
+using System.Windows.Threading;
 using BananaGit.Models;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
+using LibGit2Sharp;
 
 namespace BananaGit.ViewModels;
 
@@ -18,8 +20,11 @@ public partial class CommitHistoryViewModel : ObservableObject
     private ObservableCollection<GitCommitInfo> _commitHistory = [];
     
     private const int CommitHistoryLength = 50;
+    private const int CommitHistoryUpdateTime = 500;
     
     private LoadedRepositoryInfo? _loadedRepositoryInfo;
+    
+    private readonly DispatcherTimer _updateGitInfoTimer = new();
     
     public CommitHistoryViewModel(LoadedRepositoryInfo loadedRepositoryInfo)
     {
@@ -27,6 +32,10 @@ public partial class CommitHistoryViewModel : ObservableObject
         _loadedRepositoryInfo = loadedRepositoryInfo;
         
         loadedRepositoryInfo.OnRepositoryChanged += OnUserInfoChanged;
+        
+        _updateGitInfoTimer.Tick += UpdateCommitHistory;
+        _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(CommitHistoryUpdateTime);
+        _updateGitInfoTimer.Start();
     }
 
     /// <summary>
@@ -51,10 +60,14 @@ public partial class CommitHistoryViewModel : ObservableObject
     {
         //Check if commit needs to be updated or is same
 
-        /*var commits = currentBranch.Commits.ToList();
+        using var repo = new Repository(_loadedRepositoryInfo?.FilePath);
+        
+        var branch = repo.Branches[_loadedRepositoryInfo?.CurrentBranch.Name];
+        
+        var commits = branch.Commits.ToList();
 
         //Limits commit history to a certain length
-        for (int i = 0; i < _commitHistoryLength; ++i)
+        for (int i = 0; i < CommitHistoryLength; ++i)
         {
             var item = commits[i];
             GitCommitInfo commitInfo = new()
@@ -67,7 +80,5 @@ public partial class CommitHistoryViewModel : ObservableObject
             };
             CommitHistory.Add(commitInfo);
         }
-    */
     }
-
 }

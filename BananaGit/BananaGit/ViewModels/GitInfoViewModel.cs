@@ -67,8 +67,8 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private bool _isTutorialOpen;
         #endregion
-
-        private readonly DispatcherTimer _updateGitInfoTimer = new();
+        
+        private DispatcherTimer _updateGitInfoTimer = new();
 
         private GitInfoModel? githubUserInfo;
 

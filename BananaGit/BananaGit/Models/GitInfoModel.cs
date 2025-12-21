@@ -1,4 +1,6 @@
-﻿namespace BananaGit.Models
+﻿using System.Windows.Threading;
+
+namespace BananaGit.Models
 {
     /// <summary>
     /// Holds all the users GitHub and repository information

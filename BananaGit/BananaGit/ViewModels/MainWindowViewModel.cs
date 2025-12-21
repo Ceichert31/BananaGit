@@ -10,6 +10,9 @@ namespace BananaGit.ViewModels
     {
         [ObservableProperty]
         private GitInfoViewModel? _gitInfoViewModel;
+        
+        [ObservableProperty]
+        private CommitHistoryViewModel _commitHistoryViewModel;
 
         //Refactor for user controls!
         //Create an observable property for each view model here
@@ -42,6 +45,12 @@ namespace BananaGit.ViewModels
             {
                 dialogService.ShowCredentialsDialog();
             }
+
+            if (_loadedRepositoryInfo == null)
+            {
+                dialogService.ShowCloneRepoDialog();
+            }
+            _commitHistoryViewModel = new CommitHistoryViewModel(_loadedRepositoryInfo);
         }
     }
 }
