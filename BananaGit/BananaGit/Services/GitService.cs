@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using BananaGit.Exceptions;
 using BananaGit.Models;
@@ -13,15 +14,27 @@ namespace BananaGit.Services
     /// </summary>
     public class GitService
     {
-        private readonly GitInfoModel? _gitInfo;
+        private GitInfoModel? _gitInfo;
         public GitService() 
         {
             JsonDataManager.LoadUserInfo(ref _gitInfo);
+            
+            JsonDataManager.UserInfoChanged += OnUserDataChange;
 
             if (_gitInfo == null)
             {
                 throw new LoadDataException("ERROR: Couldn't load user info!");
             }
+        }
+
+        /// <summary>
+        /// Updates the current user info
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OnUserDataChange(object? sender, EventArgs e)
+        {
+            JsonDataManager.LoadUserInfo(ref _gitInfo);
         }
 
         #region Getters
@@ -158,13 +171,29 @@ namespace BananaGit.Services
             {
                 VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
-                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
-                {
-                    var status = repo.RetrieveStatus();
-                    //if (!status.IsDirty) return;
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty) return;
 
-                    Commands.Stage(repo, fileToStage.FilePath);
-                }
+                Commands.Stage(repo, fileToStage.FilePath);
+            });
+        }
+
+        /// <summary>
+        /// Stages a specific file
+        /// </summary>
+        /// <param name="fileToStage">The file that is going to be staged</param>
+        /// <param name="repo">A pre-existing repository</param>
+        public async Task StageFileAsync(ChangedFile fileToStage, Repository repo)
+        {
+            await Task.Run(() =>
+            {
+                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty) return;
+
+                Commands.Stage(repo, fileToStage.FilePath);
             });
         }
 

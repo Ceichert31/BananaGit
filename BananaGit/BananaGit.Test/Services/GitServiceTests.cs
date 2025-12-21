@@ -1,5 +1,7 @@
 ﻿using BananaGit.Models;
 using BananaGit.Services;
+using BananaGit.Utilities;
+using LibGit2Sharp;
 
 namespace BananaGit.Test.Services;
 
@@ -14,6 +16,16 @@ public class GitServiceTests
     [TestMethod]
     public void TestCloneRepository_ReturnsTrue()
     {
+        GitService gitService = new GitService();
+        try
+        {
+            
+        }
+        finally
+        {
+            
+        }
+        
         
     }
     
@@ -21,6 +33,16 @@ public class GitServiceTests
     public async Task TestCommitFiles_ReturnsTrue()
     {
         GitService gitService = new GitService();
+        
+        //Cache old info
+        GitInfoModel? oldUserInfo = new GitInfoModel();
+        GitInfoModel newUserInfo = new GitInfoModel();
+        JsonDataManager.LoadUserInfo(ref oldUserInfo);        
+        
+        //Set testing info
+        newUserInfo.SetPath(TEST_PATH);
+        newUserInfo.SetUrl(TEST_REPO);
+        JsonDataManager.SaveUserInfo(newUserInfo);
         try
         {
             //Arrange
@@ -30,8 +52,9 @@ public class GitServiceTests
                 FilePath = "C:/TestRepo/"
             };
             await File.Create(file.FilePath + file.Name).DisposeAsync();
+            Repository repo = new Repository(TEST_PATH);
             
-            await gitService.StageFileAsync(file);
+            await gitService.StageFileAsync(file, repo);
             
             //Act
             await gitService.CommitStagedFilesAsync("Test commit");
@@ -42,7 +65,10 @@ public class GitServiceTests
         finally
         {
             //Cleanup
-            _ = gitService.ResetLocalCommitsAsync();
+            await gitService.ResetLocalCommitsAsync();
+            
+            //Reset back to non-test repository info
+            JsonDataManager.SaveUserInfo(oldUserInfo);
         }
     }
 }
