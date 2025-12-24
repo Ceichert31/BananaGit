@@ -7,6 +7,7 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
     d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
+    Background="{StaticResource BananaLight}"
     d:DesignHeight="450"
     d:DesignWidth="400"
     mc:Ignorable="d"
@@ -22,7 +23,6 @@
         </Grid.ColumnDefinitions>
 
         <ScrollViewer
-            Grid.Row="1"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CanContentScroll="True"
@@ -32,8 +32,8 @@
             <ItemsControl ItemsSource="{Binding CommitHistory}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="Black" BorderThickness="3">
-                            <StackPanel Background="{StaticResource BananaYellow}" Orientation="Vertical">
+                        <Border x:Name="GitHistoryItemBorder" BorderBrush="{StaticResource BananaGradient}" BorderThickness="0,3,0,0">
+                            <StackPanel Orientation="Vertical">
                                 <Label
                                     Content="{Binding Message}"
                                     FontSize="12"
@@ -54,6 +54,11 @@
                                 </StackPanel>
                             </StackPanel>
                         </Border>
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding RelativeSource={RelativeSource PreviousData}}" Value="{x:Null}">
+                                <Setter TargetName="GitHistoryItemBorder" Property="BorderThickness" Value="0,0,0,0"/>
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
