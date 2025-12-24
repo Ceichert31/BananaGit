@@ -25,6 +25,8 @@
             
             <Label Content="Summary" FontSize="15" />
             <TextBox
+                MinHeight="25"
+                Margin="6,0,0,0"
                 Background="{StaticResource BananaLight}"
                 HorizontalAlignment="Stretch"
                 VerticalContentAlignment="Center"
@@ -33,7 +35,7 @@
             
             
             <Label Content="Conventional Commit" FontSize="12" />
-            <ComboBox HorizontalAlignment="Left" Width="70" Text="{Binding SelectedCommitHeader, Mode=TwoWay}">
+            <ComboBox Margin="6,0,0,0" HorizontalAlignment="Left" Width="70" Text="{Binding SelectedCommitHeader, Mode=TwoWay}">
                 <ComboBoxItem Content="" IsSelected="true" />
                 <ComboBoxItem Content="feat:" />
                 <ComboBoxItem Content="fix:" />
