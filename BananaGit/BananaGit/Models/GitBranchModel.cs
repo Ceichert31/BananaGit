@@ -23,31 +23,28 @@ namespace BananaGit.Models
         /// An overarching git exception, if thrown something 
         /// relating to git operations or repositories has gone wrong 
         /// </exception>
-        public GitBranch()
+        public GitBranch(GitInfoModel? userInfo)
         {
-            GitInfoModel? gitInfo = new();
-            JsonDataManager.LoadUserInfo(ref gitInfo);
-            
             //Check user info has loaded
-            if (gitInfo == null)
+            if (userInfo == null)
             {
                 throw new LoadDataException("Couldn't load user info");
             }
 
             //Check if saved repository exists
-            if (gitInfo.SavedRepository == null)
+            if (userInfo.SavedRepository == null)
             {
                 throw new InvalidRepoException("No saved repository after loading!");
             }
 
             //Check if repo location exists
-            if (!Directory.Exists(gitInfo.SavedRepository?.FilePath))
+            if (!Directory.Exists(userInfo.SavedRepository?.FilePath))
             {
                 throw new RepoLocationException("Local repository file location missing!");
             }
 
             //Check if file path is still valid
-            if (!Repository.IsValid(gitInfo.SavedRepository?.FilePath))
+            if (!Repository.IsValid(userInfo.SavedRepository?.FilePath))
             {
                 throw new InvalidRepoException("Saved file path is an invalid repo");
             }
@@ -56,12 +53,12 @@ namespace BananaGit.Models
             var options = new FetchOptions();
             options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
             {
-                Username = gitInfo.Username,
-                Password = gitInfo.PersonalToken
+                Username = userInfo.Username,
+                Password = userInfo.PersonalToken
             };
 
             //Get the name of the HEAD branch
-            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.Url, options);
+            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(userInfo.SavedRepository?.Url, options);
 
             if (branchName == null)
             {
@@ -69,7 +66,7 @@ namespace BananaGit.Models
             }
 
             //Update branch info
-            using (var repo = new Repository(gitInfo.SavedRepository?.FilePath))
+            using (var repo = new Repository(userInfo.SavedRepository?.FilePath))
             {
                 Branch = repo.Branches[branchName];
                 Name = Branch.FriendlyName;

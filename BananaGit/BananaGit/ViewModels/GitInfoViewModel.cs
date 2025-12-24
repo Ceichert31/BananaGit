@@ -98,7 +98,7 @@ namespace BananaGit.ViewModels
             try
             {
                 //Create new git branch
-                CurrentBranch = new GitBranch();
+                CurrentBranch = new GitBranch(githubUserInfo);
 
                 //Load current repo data if there is an already opened repo
                 LocalRepoFilePath = githubUserInfo?.GetPath() ?? throw  new NullReferenceException("Repo path is null");
@@ -110,7 +110,8 @@ namespace BananaGit.ViewModels
                 UpdateBranches(CurrentBranch);
                 
                 githubUserInfo.SavedRepository.IsRepositoryCloned = NoRepoCloned;
-                githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch();
+                githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch(githubUserInfo);
+                JsonDataManager.SaveUserInfo(githubUserInfo);
             }
             catch (GitException ex)
             {
@@ -118,7 +119,8 @@ namespace BananaGit.ViewModels
                 NoRepoCloned = true;
                 
                 githubUserInfo.SavedRepository.IsRepositoryCloned = NoRepoCloned;
-                githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch();
+                githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch(githubUserInfo);
+                JsonDataManager.SaveUserInfo(githubUserInfo);
             }
             catch (Exception ex)
             {
@@ -126,7 +128,8 @@ namespace BananaGit.ViewModels
                 NoRepoCloned = true;
                 
                 githubUserInfo.SavedRepository.IsRepositoryCloned = NoRepoCloned;
-                githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch();
+                githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch(githubUserInfo);
+                JsonDataManager.SaveUserInfo(githubUserInfo);
             }
         }
 
@@ -163,7 +166,7 @@ namespace BananaGit.ViewModels
             if (NoRepoCloned) return;
 
             githubUserInfo.SavedRepository.IsRepositoryCloned = NoRepoCloned;
-            githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch();
+            githubUserInfo.SavedRepository.CurrentBranch = CurrentBranch ?? new GitBranch(githubUserInfo);
             
             try
             {
@@ -549,7 +552,7 @@ namespace BananaGit.ViewModels
                 }
 
                 //Save to user info
-                githubUserInfo.SavedRepository = new LoadedRepositoryInfo(LocalRepoFilePath, RepoURL);
+                githubUserInfo.SavedRepository = new LoadedRepositoryInfo(NoRepoCloned, CurrentBranch, LocalRepoFilePath, RepoURL);
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             
                 //Set flags
@@ -558,7 +561,7 @@ namespace BananaGit.ViewModels
                 NoRepoCloned = false;
                         
                 ResetBranches();
-                UpdateBranches(new GitBranch());
+                UpdateBranches(new GitBranch(githubUserInfo));
             });
         }
         #endregion

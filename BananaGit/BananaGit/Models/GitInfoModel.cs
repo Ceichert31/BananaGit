@@ -46,7 +46,7 @@ namespace BananaGit.Models
     /// </summary>
     /// <param name="path">The path to the saved repository</param>
     /// <param name="url">The url for the saved repository</param>
-    public class LoadedRepositoryInfo(string path, string url)
+    public class LoadedRepositoryInfo(bool isRepoCloned, GitBranch current, string path, string url)
     {
         /// <summary>
         /// Whether a repository is cloned or not
@@ -60,7 +60,7 @@ namespace BananaGit.Models
                 OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
             }
         }
-        private bool _isRepositoryCloned = false;
+        private bool _isRepositoryCloned = isRepoCloned;
 
         /// <summary>
         /// The current branch that changes will be made to
@@ -75,7 +75,7 @@ namespace BananaGit.Models
             }
         }
         //Causing stack overflow
-        private GitBranch? _currentBranch;
+        private GitBranch? _currentBranch = current;
 
         /// <summary>
         /// The file path to the local repository
