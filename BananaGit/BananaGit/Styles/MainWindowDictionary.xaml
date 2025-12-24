@@ -3,17 +3,32 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:views="clr-namespace:BananaGit.Views"
     >
-
+    
+    <SolidColorBrush x:Key="BananaYellow" Color="#FFEA78" />
+    <SolidColorBrush x:Key="FlowerPurple" Color="#788DFF" />
+    <SolidColorBrush x:Key="DarkGold" Color="#debc00" />
+    
+    <SolidColorBrush x:Key="BananaPrimary" Color="#FFD93D"/>
+    <SolidColorBrush x:Key="BananaSecondary" Color="#FFC93D"/>
+    <SolidColorBrush x:Key="BananaAccent" Color="#FFB520"/>
+    <SolidColorBrush x:Key="BananaDark" Color="#CC8800"/>
+    <SolidColorBrush x:Key="BananaBold" Color="#8B5E00"/>
+    <SolidColorBrush x:Key="BananaLight" Color="#FFF6D4"/>
+    <LinearGradientBrush x:Key="BananaGradient">
+        <GradientStop Color="#FFB520" Offset="0"/>
+        <GradientStop Color="#FFD93D" Offset="1"/>
+    </LinearGradientBrush>
+    
     <Style x:Key="GenericButton" TargetType="{x:Type Button}">
-        <Setter Property="Background" Value="#788DFF" />
-        <Setter Property="Foreground" Value="White" />
+        <Setter Property="Background" Value="{StaticResource BananaGradient}" />
+        <Setter Property="Foreground" Value="Black" />
         <Setter Property="BorderThickness" Value="2" />
         <Setter Property="BorderBrush" Value="White" />
         <Setter Property="Cursor" Value="Hand" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Cursor" Value="Hand" />
-                <Setter Property="Background" Value="#96a1df" />
+                <Setter Property="Background" Value="{StaticResource BananaLight}" />
             </Trigger>
         </Style.Triggers>
         <Style.Resources>
@@ -22,54 +37,6 @@
             </Style>
         </Style.Resources>
     </Style>
-
-    <SolidColorBrush x:Key="BananaYellow" Color="#FFEA78" />
-    <SolidColorBrush x:Key="FlowerPurple" Color="#788DFF" />
-    <SolidColorBrush x:Key="DarkGold" Color="#debc00" />
-
-    <DataTemplate x:Key="CloneRepoTemplate">
-        <!--  Clone Section  -->
-        <StackPanel Grid.Row="2" Grid.Column="1">
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Username" />
-                <TextBox
-                    Width="150"
-                    Foreground="Black"
-                    Text="{Binding UsernameInput}"
-                    />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Repo URL" />
-                <TextBox
-                    Width="150"
-                    Foreground="Black"
-                    Text="{Binding RepoURL}"
-                    />
-            </StackPanel>
-            <StackPanel Orientation="Horizontal">
-                <Label Content="Location" />
-                <TextBox
-                    Width="100"
-                    Foreground="Black"
-                    Text="{Binding CloneLocation}"
-                    />
-                <Button
-                    Padding="3"
-                    HorizontalAlignment="Center"
-                    Command="{Binding ChooseCloneDirectoryCommand}"
-                    Content="Directory"
-                    />
-            </StackPanel>
-
-            <Button
-                Padding="3"
-                HorizontalAlignment="Center"
-                Command="{Binding CloneRepoCommand}"
-                Content="Clone"
-                IsEnabled="{Binding CanClone}"
-                />
-        </StackPanel>
-    </DataTemplate>
 
     <DataTemplate x:Key="CommitRepoTemplate">
         <StackPanel Grid.Column="1" HorizontalAlignment="Stretch">
