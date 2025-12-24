@@ -46,7 +46,30 @@
                     </InlineUIContainer>
                 </TextBlock>
             </TabItem>
-            <TabItem Header="Commiting" Style="{StaticResource TabStyle}" />
+            <TabItem Header="Pulling" Style="{StaticResource TabStyle}">
+                <TextBlock TextWrapping="WrapWithOverflow">
+                    If you want to receive changed files from others, 
+                    make sure to pull the changes by pressing the pull button in the toolbar <LineBreak/><LineBreak/>
+                    Remember to pull frequently, as pulling often will reduce the chance of file conflicts. 
+                    If you have a file conflict, reference the merge conflicts section. 
+                    <LineBreak/><LineBreak/>
+                    Pull Button:<InlineUIContainer>
+                        <Image Source="pack://application:,,,/Assets/PullExample.png" />
+                    </InlineUIContainer>
+                </TextBlock>
+            </TabItem>
+            <TabItem Header="Commiting" Style="{StaticResource TabStyle}" >
+                <TextBlock TextWrapping="WrapWithOverflow">
+                    Commiting and pushing files is one of the most important
+                    parts of version control. 
+                    When you commit your changes, you are
+                    updating your changes to your local repository on your computer.
+                    Then in order to upload those changed files, you push those commited changes.
+                    
+                    <LineBreak/><LineBreak/>
+                    INSERT EXAMPLE IMAGE HERE
+                </TextBlock>
+            </TabItem>
             <TabItem Header="The Workflow" Style="{StaticResource TabStyle}" />
             <TabItem Header="Branches" Style="{StaticResource TabStyle}" />
             <TabItem Header="Merge Conflicts" Style="{StaticResource TabStyle}" />
