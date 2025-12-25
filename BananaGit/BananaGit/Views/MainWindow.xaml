@@ -33,7 +33,7 @@
             <ColumnDefinition Width="1.5*" />
         </Grid.ColumnDefinitions>
 
-        <!--  Tool bar  -->
+        <!--  Toolbar  -->
         <local:ToolbarView
             Grid.Row="0"
             Grid.ColumnSpan="4"
