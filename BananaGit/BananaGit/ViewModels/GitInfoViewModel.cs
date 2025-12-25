@@ -297,7 +297,14 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader} {CommitMessage}");
+                using var repo = new Repository(githubUserInfo?.GetPath());
+                
+                //Prevent commiting nothing
+                if (!repo.RetrieveStatus().Staged.Any()) return;
+                
+                //Discard return value
+                _ = _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader} {CommitMessage}");
+                
                 //Clear commit message
                 CommitMessage = string.Empty;
                 HasCommitedFiles = true;
