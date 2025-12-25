@@ -38,7 +38,6 @@
                                     <Image 
                                         VerticalAlignment="Center"
                                         HorizontalAlignment="Center"
-                                        Margin="0,-10,0,0" 
                                         Style="{StaticResource GitBananaIconStyle}"/>
                                     <Label
                                         Content="{Binding Message}"
@@ -47,7 +46,7 @@
                                         Foreground="Black"
                                     />
                                 </StackPanel>
-                                <StackPanel Margin="0,-15,0,0" Orientation="Horizontal">
+                                <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
                                     <Label
                                         Content="{Binding Author}"
                                         FontSize="12"
