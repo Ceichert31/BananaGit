@@ -91,7 +91,7 @@ namespace BananaGit.Models
         [RelayCommand]
         public void RemoveRemoteBranch()
         {
-            if (!IsRemote) return;
+            /*if (!IsRemote) return;
 
             try
             {
@@ -108,13 +108,13 @@ namespace BananaGit.Models
             catch (Exception ex)
             {
                 Trace.WriteLine(ex.Message);
-            }
+            }*/
         }
 
         [RelayCommand]
-        public void RemoveLocalBranch()
+        private void RemoveLocalBranch()
         {
-            if (IsRemote) return;
+            /*if (IsRemote) return;
 
             try
             {
@@ -131,11 +131,11 @@ namespace BananaGit.Models
             catch (Exception ex)
             {
                 Trace.WriteLine(ex.Message);
-            }
+            }*/
         }
 
         [RelayCommand]
-        public void CheckoutBranch()
+        private void CheckoutBranch()
         {
             if (!IsRemote) return;
 
