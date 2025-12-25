@@ -34,12 +34,19 @@
                     <DataTemplate>
                         <Border x:Name="GitHistoryItemBorder" BorderBrush="{StaticResource BananaGradient}" BorderThickness="0,3,0,0">
                             <StackPanel Orientation="Vertical">
-                                <Label
-                                    Content="{Binding Message}"
-                                    FontSize="12"
-                                    FontWeight="Bold"
-                                    Foreground="Black"
+                                <StackPanel Orientation="Horizontal">
+                                    <Image 
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Margin="0,-10,0,0" 
+                                        Style="{StaticResource GitBananaIconStyle}"/>
+                                    <Label
+                                        Content="{Binding Message}"
+                                        FontSize="12"
+                                        FontWeight="Bold"
+                                        Foreground="Black"
                                     />
+                                </StackPanel>
                                 <StackPanel Margin="0,-15,0,0" Orientation="Horizontal">
                                     <Label
                                         Content="{Binding Author}"

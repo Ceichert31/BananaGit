@@ -183,7 +183,9 @@ namespace BananaGit.ViewModels
                         Date =
                        $"{item.Author.When.DateTime.ToShortTimeString()} {item.Author.When.DateTime.ToShortDateString()}",
                         Message = item.Message,
-                        Commit = item.Id.ToString()
+                        Commit = item.Id.ToString(),
+                        //Check if more than one parent, then it is a merge commit
+                        IsMergeCommit = item.Parents.Count() > 1
                     };
                     CommitHistory.Add(commitInfo);
                 }
