@@ -58,5 +58,6 @@
         public string? Date { get; set; }
         public string? Message { get; set; }
         public string? Commit { get; set; }
+        public bool IsMergeCommit { get; set; }
     }
 }

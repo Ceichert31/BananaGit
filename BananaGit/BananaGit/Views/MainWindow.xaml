@@ -8,8 +8,8 @@
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
     xmlns:views="clr-namespace:BananaGit.Views"
     Title="BananaGit"
-    Width="1000"
-    Height="500"
+    Width="1200"
+    Height="700"
     MinWidth="450"
     MinHeight="450"
     d:DataContext="{d:DesignInstance Type=viewmodels:MainWindowViewModel}"
@@ -33,7 +33,7 @@
             <ColumnDefinition Width="1.5*" />
         </Grid.ColumnDefinitions>
 
-        <!--  Tool bar  -->
+        <!--  Toolbar  -->
         <local:ToolbarView
             Grid.Row="0"
             Grid.ColumnSpan="4"

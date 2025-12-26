@@ -24,45 +24,46 @@
             VerticalAlignment="Stretch"
             VerticalScrollBarVisibility="Auto"
             >
-            <ItemsControl
-                Background="Black"
-                Foreground="White"
-                ItemsSource="{Binding CurrentChanges}"
+            <StackPanel Background="Black">
+                <Label Content="Unstaged Changes" FontWeight="DemiBold" Background="Black" Foreground="White" />
+                <Separator Height="1" Background="White"></Separator>
+                <ItemsControl
+                    Foreground="White"
+                    ItemsSource="{Binding CurrentChanges}"
                 >
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderBrush="{StaticResource FlowerPurple}" BorderThickness="2">
-                            <StackPanel Background="{StaticResource BananaYellow}" Orientation="Horizontal">
-                                <Button
-                                    Width="20"
-                                    HorizontalAlignment="Left"
-                                    Background="{StaticResource FlowerPurple}"
-                                    Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}"
-                                    Content="+"
-                                    Foreground="White"
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource FlowerPurple}" BorderThickness="2">
+                                <StackPanel Background="{StaticResource BananaYellow}" Orientation="Horizontal">
+                                    <Button
+                                        Width="20"
+                                        HorizontalAlignment="Left"
+                                        Background="{StaticResource FlowerPurple}"
+                                        Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"
+                                        Content="+"
+                                        Foreground="White"
                                     />
-                                <Label Content="{Binding Name}" Foreground="Black" />
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                                    <Label Content="{Binding Name}" Foreground="Black" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
 
         <GridSplitter
             Grid.Row="0"
-            Grid.Column="3"
-            Height="2"
+            Height="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
-            Background="{StaticResource BananaYellow}"
+            Background="{StaticResource BananaPrimary}"
             IsEnabled="False"
             />
 
         <Button
             Grid.Row="0"
-            Grid.Column="2"
             Margin="0,0,5,5"
             Padding="3"
             HorizontalAlignment="Right"
@@ -73,36 +74,38 @@
             />
 
         <ScrollViewer
-            Grid.Row="2"
-            Grid.Column="3"
+            Grid.Row="1"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             VerticalScrollBarVisibility="Auto"
             >
-            <ItemsControl
-                Background="Black"
-                Foreground="White"
-                ItemsSource="{Binding StagedChanges}"
+            <StackPanel Background="Black">
+                <Label Content="Unstaged Changes" FontWeight="DemiBold" Background="Black" Foreground="White" />
+                <ItemsControl
+                    Background="Black"
+                    Foreground="White"
+                    ItemsSource="{Binding StagedChanges}"
                 >
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderBrush="{StaticResource FlowerPurple}" BorderThickness="2">
-                            <StackPanel Background="{StaticResource BananaYellow}" Orientation="Horizontal">
-                                <Button
-                                    Width="20"
-                                    HorizontalAlignment="Left"
-                                    Background="{StaticResource FlowerPurple}"
-                                    Command="{Binding DataContext.UnstageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}"
-                                    Content="-"
-                                    Foreground="White"
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource FlowerPurple}" BorderThickness="2">
+                                <StackPanel Background="{StaticResource BananaYellow}" Orientation="Horizontal">
+                                    <Button
+                                        Width="20"
+                                        HorizontalAlignment="Left"
+                                        Background="{StaticResource FlowerPurple}"
+                                        Command="{Binding DataContext.UnstageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                        CommandParameter="{Binding}"
+                                        Content="-"
+                                        Foreground="White"
                                     />
-                                <Label Content="{Binding Name}" Foreground="Black" />
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+                                    <Label Content="{Binding Name}" Foreground="Black" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
     </Grid>
 </UserControl>

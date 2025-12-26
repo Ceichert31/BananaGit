@@ -128,7 +128,7 @@ namespace BananaGit.Services
                 VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
                 using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
-
+                
                 //Set author for commiting
                 Signature author = new(_gitInfo?.Username, _gitInfo?.Email, DateTime.Now);
                 repo.Commit(commitMessage, author, author);

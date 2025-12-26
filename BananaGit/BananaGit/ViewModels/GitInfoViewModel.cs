@@ -183,7 +183,9 @@ namespace BananaGit.ViewModels
                         Date =
                        $"{item.Author.When.DateTime.ToShortTimeString()} {item.Author.When.DateTime.ToShortDateString()}",
                         Message = item.Message,
-                        Commit = item.Id.ToString()
+                        Commit = item.Id.ToString(),
+                        //Check if more than one parent, then it is a merge commit
+                        IsMergeCommit = item.Parents.Count() > 1
                     };
                     CommitHistory.Add(commitInfo);
                 }
@@ -297,7 +299,18 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader} {CommitMessage}");
+                using var repo = new Repository(githubUserInfo?.GetPath());
+
+                var staged = repo.RetrieveStatus().Staged;
+                var added = repo.RetrieveStatus().Added;
+                var removed = repo.RetrieveStatus().Removed;
+                
+                if (!staged.Any() && !added.Any() && !removed.Any()) return;
+                
+                //Discard return value
+                _ = _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader} {CommitMessage}");
+                
+                SelectedCommitHeader = string.Empty;
                 //Clear commit message
                 CommitMessage = string.Empty;
                 HasCommitedFiles = true;
