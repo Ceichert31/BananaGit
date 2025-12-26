@@ -351,6 +351,30 @@ namespace BananaGit.ViewModels
         }
 
         /// <summary>
+        /// Calls GitService to unstage all staged files, handles any errors
+        /// </summary>
+        [RelayCommand]
+        private void UnstageFiles()
+        {
+            Task.Run(() =>
+            {
+                try
+                {
+                    _gitService.UnstageFilesAsync();
+                }
+                catch (LibGit2SharpException ex)
+                {
+                    OutputError($"Failed to stage {ex.Message}");
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    OutputError(ex.Message);
+                }
+            });
+        }
+
+        /// <summary>
         /// Calls GitService to stage a specific file, handles any errors
         /// </summary>
         /// <param name="file">The file to stage</param>
