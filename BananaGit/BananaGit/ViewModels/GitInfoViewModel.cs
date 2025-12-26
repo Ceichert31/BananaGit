@@ -253,6 +253,8 @@ namespace BananaGit.ViewModels
                 //Update branch data on a seperate thread
                 Application.Current.Dispatcher.Invoke((() =>
                 {
+                    RepoName = Path.GetDirectoryName(githubUserInfo?.GetPath()) ?? "N/A";
+                    
                     //Update branches
                     foreach (var branch in repo.Branches)
                     {
@@ -575,6 +577,7 @@ namespace BananaGit.ViewModels
         /// <exception cref="NullReferenceException"></exception>
         private void OpenLocalRepository(string filePath)
         {
+            RepoName = Path.GetDirectoryName(githubUserInfo?.GetPath()) ?? "N/A";
             Task.Run(() =>
             {
                 //Check if file location is local repo

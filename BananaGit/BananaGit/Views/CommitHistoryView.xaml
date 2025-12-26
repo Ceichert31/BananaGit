@@ -15,6 +15,7 @@
     <Grid>
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -22,7 +23,10 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
+        <Label Content="{Binding RepoName}" VerticalAlignment="Stretch" Background="{StaticResource BananaAccent}"/>
+        
         <ScrollViewer
+            Grid.Row="1"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CanContentScroll="True"
