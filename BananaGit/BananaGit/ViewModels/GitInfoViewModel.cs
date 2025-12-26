@@ -243,17 +243,17 @@ namespace BananaGit.ViewModels
                 //Prune remote branches
                 if (remote != null)
                 {
-                    Commands.Fetch(repo, remote.Name, new string[0], fetchOptions, "");
+                    Commands.Fetch(repo, remote.Name, Array.Empty<string>(), fetchOptions, "");
                 }
                 else
                 {
                     throw new NullReferenceException("Couldn't prune remote branches!");
                 }
 
-                //Update branch data on a seperate thread
+                //Update branch data on a separate thread
                 Application.Current.Dispatcher.Invoke((() =>
                 {
-                    RepoName = Path.GetDirectoryName(githubUserInfo?.GetPath()) ?? "N/A";
+                    RepoName = new DirectoryInfo(githubUserInfo.GetPath()).Name ?? "N/A";
                     
                     //Update branches
                     foreach (var branch in repo.Branches)
@@ -577,7 +577,7 @@ namespace BananaGit.ViewModels
         /// <exception cref="NullReferenceException"></exception>
         private void OpenLocalRepository(string filePath)
         {
-            RepoName = Path.GetDirectoryName(githubUserInfo?.GetPath()) ?? "N/A";
+            RepoName = new DirectoryInfo(filePath).Name ?? "N/A";
             Task.Run(() =>
             {
                 //Check if file location is local repo
@@ -689,8 +689,11 @@ namespace BananaGit.ViewModels
         /// </summary>
         private void ResetBranches()
         {
-            LocalBranches.Clear();
-            RemoteBranches.Clear();
+            Application.Current.Dispatcher.Invoke(() =>
+            {      
+                LocalBranches.Clear();
+                RemoteBranches.Clear();
+            });
         }
         #endregion
     }
