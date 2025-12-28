@@ -66,6 +66,9 @@ namespace BananaGit.ViewModels
 
         [ObservableProperty]
         private bool _isTutorialOpen;
+        
+        [ObservableProperty]
+        private TerminalViewModel _terminalViewModel = new();
         #endregion
 
         private readonly DispatcherTimer _updateGitInfoTimer = new();
@@ -228,6 +231,8 @@ namespace BananaGit.ViewModels
         {
             try
             {
+                LocalBranches.Add(currentBranch);
+                
                 //Set fetch options to prune any old remote branches
                 var fetchOptions = new FetchOptions { Prune = true };
 
@@ -251,8 +256,6 @@ namespace BananaGit.ViewModels
                 //Update UI properties on the UI thread
                 Application.Current.Dispatcher.Invoke((() =>
                 {
-                    LocalBranches.Add(currentBranch);
-                    
                     RepoName = new DirectoryInfo(githubUserInfo.GetPath()).Name ?? "N/A";
                     
                     //Update branches
@@ -263,7 +266,7 @@ namespace BananaGit.ViewModels
                         if (branch.IsRemote)
                         {
                             //Filter out all remotes with ref in the name
-                            if (branch.FriendlyName.Contains("refs"))
+                            if (branch.FriendlyName.StartsWith("refs"))
                                 continue;
 
                             //Check if branch already exists
@@ -640,7 +643,7 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         private void OpenConsoleWindow()
         {
-            _dialogService.ShowConsoleDialog();
+            _dialogService.ShowConsoleDialog(TerminalViewModel);
         }
         #endregion
 

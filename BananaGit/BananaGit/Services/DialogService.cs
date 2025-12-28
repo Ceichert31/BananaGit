@@ -48,9 +48,9 @@ namespace BananaGit.Services
         /// <summary>
         /// Opens a dialog with a debug console
         /// </summary>
-        public void ShowConsoleDialog()
+        public void ShowConsoleDialog(TerminalViewModel terminalViewModel)
         {
-            TerminalView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
+            TerminalView view = new() { DataContext = terminalViewModel, Owner = System.Windows.Application.Current.MainWindow };
             view.Show();
         }
     }

@@ -21,17 +21,11 @@ public static class Lib2GitSharpExt
             var remotes = Repository.ListRemoteReferences(repoUrl, options.CredentialsProvider);
             
             //Cache the first instance of /HEAD
-            var headReference = remotes.FirstOrDefault(x => x.CanonicalName == "HEAD");
+            var headReference = remotes.FirstOrDefault(x => x.CanonicalName == "HEAD" && x.CanonicalName.StartsWith("refs/remotes"));
 
             if (headReference != null)
             {
                 var targetRef = headReference.TargetIdentifier;
-
-                //Get name after refs/heads/
-                if (targetRef.StartsWith("refs/heads/"))
-                {
-                    return targetRef.Substring("refs/heads/".Length);
-                }
                 
                 //Return last element of target ref as fallback
                 return targetRef.Split('/').Last();
