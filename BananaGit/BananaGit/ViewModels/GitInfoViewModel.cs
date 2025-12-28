@@ -228,8 +228,6 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                LocalBranches.Add(currentBranch);
-
                 //Set fetch options to prune any old remote branches
                 var fetchOptions = new FetchOptions { Prune = true };
 
@@ -250,9 +248,11 @@ namespace BananaGit.ViewModels
                     throw new NullReferenceException("Couldn't prune remote branches!");
                 }
 
-                //Update branch data on a separate thread
+                //Update UI properties on the UI thread
                 Application.Current.Dispatcher.Invoke((() =>
                 {
+                    LocalBranches.Add(currentBranch);
+                    
                     RepoName = new DirectoryInfo(githubUserInfo.GetPath()).Name ?? "N/A";
                     
                     //Update branches
