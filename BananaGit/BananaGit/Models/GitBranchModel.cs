@@ -68,26 +68,11 @@ namespace BananaGit.Models
                 throw new InvalidRepoException("Couldn't find default branch name");
             }
             
-            //Checkout remote branch
-       
-            
-            
-
             //Update branch info
             using (var repo = new Repository(gitInfo.SavedRepository?.FilePath))
             {
-                //Goal, initialize empty branch with the main branch
-                
                 //Fetch and pull remote
                 Commands.Fetch(repo, "origin", ["+refs/heads/*:refs/remotes/origin/*"], options, null);
-
-                /*
-                string trackedBranchName = $"refs/remotes/{remote.Name}/{branchName}";
-                Branch trackedBranch = repo.Branches[trackedBranchName];
-                Branch localBranch = repo.CreateBranch(trackedBranch.FriendlyName, trackedBranch.Tip);
-                repo.Branches.Update(localBranch, b => b.UpstreamBranch = trackedBranch.CanonicalName);
-                Commands.Checkout(repo, localBranch);*/
-                
                 
                 //If branch is a remote we need to make it a local branch here
                 Branch = repo.Branches[branchName];
