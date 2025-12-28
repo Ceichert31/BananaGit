@@ -27,6 +27,14 @@
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
       <InternalsVisibleTo Include="BananaGit.Test" />
+      <None Remove="Assets\BananaMerge.png" />
+      <Content Include="Assets\BananaMerge.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\BananaCurrent.png" />
+      <Content Include="Assets\BananaCurrent.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
   </ItemGroup>
 
   <ItemGroup>

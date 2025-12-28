@@ -15,6 +15,7 @@
     <Grid>
 
         <Grid.RowDefinitions>
+            <RowDefinition Height="25" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
@@ -22,7 +23,10 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
+        <Label Content="{Binding RepoName}" VerticalAlignment="Stretch" Background="{StaticResource BananaAccent}"/>
+        
         <ScrollViewer
+            Grid.Row="1"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             CanContentScroll="True"
@@ -34,13 +38,19 @@
                     <DataTemplate>
                         <Border x:Name="GitHistoryItemBorder" BorderBrush="{StaticResource BananaGradient}" BorderThickness="0,3,0,0">
                             <StackPanel Orientation="Vertical">
-                                <Label
-                                    Content="{Binding Message}"
-                                    FontSize="12"
-                                    FontWeight="Bold"
-                                    Foreground="Black"
+                                <StackPanel Orientation="Horizontal">
+                                    <Image 
+                                        VerticalAlignment="Center"
+                                        HorizontalAlignment="Center"
+                                        Style="{StaticResource GitBananaIconStyle}"/>
+                                    <Label
+                                        Content="{Binding Message}"
+                                        FontSize="12"
+                                        FontWeight="Bold"
+                                        Foreground="Black"
                                     />
-                                <StackPanel Margin="0,-15,0,0" Orientation="Horizontal">
+                                </StackPanel>
+                                <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
                                     <Label
                                         Content="{Binding Author}"
                                         FontSize="12"

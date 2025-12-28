@@ -25,8 +25,16 @@ public static class Lib2GitSharpExt
 
             if (headReference != null)
             {
-                //Splits the target identifier by / and takes the actual name
-                return headReference.TargetIdentifier.Split('/').Last();
+                var targetRef = headReference.TargetIdentifier;
+
+                //Get name after refs/heads/
+                if (targetRef.StartsWith("refs/heads/"))
+                {
+                    return targetRef.Substring("refs/heads/".Length);
+                }
+                
+                //Return last element of target ref as fallback
+                return targetRef.Split('/').Last();
             }
         }
         catch (LibGit2SharpException e)
