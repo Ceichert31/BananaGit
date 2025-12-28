@@ -144,18 +144,39 @@ namespace BananaGit.Services
             {
                 VerifyPath(_gitInfo?.SavedRepository?.FilePath);
 
-                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+                //Get status and return if no changes have been made
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty) return;
+
+                foreach (var file in status)
                 {
-                    //Get status and return if no changes have been made
-                    var status = repo.RetrieveStatus();
-                    if (!status.IsDirty) return;
+                    if (file.State == FileStatus.Ignored) continue;
 
-                    foreach (var file in status)
-                    {
-                        if (file.State == FileStatus.Ignored) continue;
+                    Commands.Stage(repo, file.FilePath);
+                }
+            });
+        }
 
-                        Commands.Stage(repo, file.FilePath);
-                    }
+        /// <summary>
+        /// Unstages all files in the working directory
+        /// </summary>
+        public async Task UnstageFilesAsync()
+        {
+            await Task.Run(() =>
+            {
+                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+                //Get status and return if no changes have been made
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty) return;
+
+                foreach (var file in status)
+                {
+                    if (file.State == FileStatus.Ignored) continue;
+
+                    Commands.Unstage(repo, file.FilePath);
                 }
             });
         }
