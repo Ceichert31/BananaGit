@@ -66,13 +66,16 @@ namespace BananaGit.ViewModels
 
         [ObservableProperty]
         private bool _isTutorialOpen;
+        
+        [ObservableProperty]
+        private TerminalViewModel _terminalViewModel = new();
         #endregion
+
+        private int _maxCommitHistoryLength = 30;
 
         private readonly DispatcherTimer _updateGitInfoTimer = new();
 
         private GitInfoModel? githubUserInfo;
-
-        private int _commitHistoryLength = 30;
 
         private readonly DialogService _dialogService;
         private readonly GitService _gitService;
@@ -105,7 +108,7 @@ namespace BananaGit.ViewModels
 
                 //Load current repo data if there is an already opened repo
                 LocalRepoFilePath = githubUserInfo?.GetPath() ?? throw  new NullReferenceException("Repo path is null");
-                RepoURL = githubUserInfo?.GetPath() ?? throw new NullReferenceException("Repo URL is null");
+                RepoURL = githubUserInfo?.GetUrl() ?? throw new NullReferenceException("Repo URL is null");
 
                 //Update that we successfully initialized the repository
                 NoRepoCloned = false;
@@ -159,6 +162,7 @@ namespace BananaGit.ViewModels
             {
                 VerifyPath(LocalRepoFilePath);
 
+                //Refactor commit history to not update constantly
                 CurrentChanges.Clear();
                 StagedChanges.Clear();
 
@@ -173,19 +177,23 @@ namespace BananaGit.ViewModels
 
                 var commits = currentBranch.Commits.ToList();
 
-                //Limits commit history to a certain length
-                for (int i = 0; i < _commitHistoryLength; ++i)
+                int commitCount = 0;
+                foreach (var commit in commits)
                 {
-                    var item = commits[i];
+                    //Break out if commit history is too long
+                    if (commitCount > _maxCommitHistoryLength)
+                        break;
+                    commitCount++;
+                    
                     GitCommitInfo commitInfo = new()
                     {
-                        Author = item.Author.ToString(),
+                        Author = commit.Author.ToString(),
                         Date =
-                       $"{item.Author.When.DateTime.ToShortTimeString()} {item.Author.When.DateTime.ToShortDateString()}",
-                        Message = item.Message,
-                        Commit = item.Id.ToString(),
+                            $"{commit.Author.When.DateTime.ToShortTimeString()} {commit.Author.When.DateTime.ToShortDateString()}",
+                        Message = commit.Message,
+                        Commit = commit.Id.ToString(),
                         //Check if more than one parent, then it is a merge commit
-                        IsMergeCommit = item.Parents.Count() > 1
+                        IsMergeCommit = commit.Parents.Count() > 1
                     };
                     CommitHistory.Add(commitInfo);
                 }
@@ -228,31 +236,16 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                //Set fetch options to prune any old remote branches
-                var fetchOptions = new FetchOptions { Prune = true };
-
                 VerifyPath(LocalRepoFilePath);
 
                 using var repo = new Repository(LocalRepoFilePath);
 
-                //Cache first remote
-                var remote = repo.Network.Remotes.FirstOrDefault();
-
-                //Prune remote branches
-                if (remote != null)
-                {
-                    Commands.Fetch(repo, remote.Name, Array.Empty<string>(), fetchOptions, "");
-                }
-                else
-                {
-                    throw new NullReferenceException("Couldn't prune remote branches!");
-                }
-
                 //Update UI properties on the UI thread
                 Application.Current.Dispatcher.Invoke((() =>
                 {
+                    LocalBranches.Clear();
+                    CurrentBranch = currentBranch;
                     LocalBranches.Add(currentBranch);
-                    
                     RepoName = new DirectoryInfo(githubUserInfo.GetPath()).Name ?? "N/A";
                     
                     //Update branches
@@ -263,7 +256,7 @@ namespace BananaGit.ViewModels
                         if (branch.IsRemote)
                         {
                             //Filter out all remotes with ref in the name
-                            if (branch.FriendlyName.Contains("refs"))
+                            if (branch.FriendlyName.StartsWith("refs"))
                                 continue;
 
                             //Check if branch already exists
@@ -281,8 +274,6 @@ namespace BananaGit.ViewModels
                         LocalBranches.Add(new GitBranch(branch));
                     }
                 }));
-                //Update current branch
-                CurrentBranch = currentBranch;
             }
             catch (Exception ex)
             {
@@ -588,7 +579,7 @@ namespace BananaGit.ViewModels
 
                 //Set active repo as locally opened repo
                 LocalRepoFilePath = filePath;
-                var remote = repo.Network.Remotes.FirstOrDefault();
+                var remote = repo.Network.Remotes["origin"];
                 if (remote != null)
                 {
                     RepoURL = remote.Url;
@@ -603,8 +594,8 @@ namespace BananaGit.ViewModels
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             
                 //Set flags
-                CanClone = true;
-                DirectoryHasFiles = false;
+                /*CanClone = false;
+                DirectoryHasFiles = true;*/
                 NoRepoCloned = false;
                         
                 ResetBranches();
@@ -640,7 +631,7 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         private void OpenConsoleWindow()
         {
-            _dialogService.ShowConsoleDialog();
+            _dialogService.ShowConsoleDialog(TerminalViewModel);
         }
         #endregion
 

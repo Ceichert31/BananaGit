@@ -13,29 +13,36 @@ public static class Lib2GitSharpExt
     /// </summary>
     /// <param name="repoUrl">The repositories URL</param>
     /// <returns>The name of the default branch head</returns>
-    public static string? GetDefaultRepoName(string repoUrl, FetchOptions options)
+    public static string? GetDefaultRepoName(string repoUrl)
     {
         try
         {
-            //Get list of remote branches
-            var remotes = Repository.ListRemoteReferences(repoUrl, options.CredentialsProvider);
-            
-            //Cache the first instance of /HEAD
-            var headReference = remotes.FirstOrDefault(x => x.CanonicalName == "HEAD");
-
-            if (headReference != null)
+            var gitProcessInfo = new ProcessStartInfo
             {
-                var targetRef = headReference.TargetIdentifier;
+                FileName = "git",
+                Arguments = $"ls-remote --symref \"{repoUrl}\" HEAD",
+                RedirectStandardOutput = true,
+                RedirectStandardError = true,
+                UseShellExecute = false,
+                CreateNoWindow = true,
+            };
+            
+            using var process = Process.Start(gitProcessInfo);
+            if (process == null) throw new NullReferenceException("Git info process couldn't start!");
+            
+            var output = process.StandardOutput.ReadToEnd();
+            process.WaitForExit();
 
-                //Get name after refs/heads/
-                if (targetRef.StartsWith("refs/heads/"))
-                {
-                    return targetRef.Substring("refs/heads/".Length);
-                }
-                
-                //Return last element of target ref as fallback
-                return targetRef.Split('/').Last();
+            if (process.ExitCode != 0) throw new NullReferenceException("Process didn't return anything!");
+
+            if (output.StartsWith($"refs/remotes/origin/"))
+            {
+                return output.Substring($"refs/remotes/origin/".Length);
             }
+            
+            var match = System.Text.RegularExpressions.Regex.Match(output,  @"ref:\s*refs/heads/(\S+)\s+HEAD");
+            
+            return match.Success ? match.Groups[1].Value : null;
         }
         catch (LibGit2SharpException e)
         {
