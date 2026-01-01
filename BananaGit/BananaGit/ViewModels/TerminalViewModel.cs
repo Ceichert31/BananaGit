@@ -12,18 +12,24 @@ namespace BananaGit.ViewModels
 
         private TerminalListener _listener;
 
+        private const string LogLocation = "C:\\BananaGit/Log.txt";
+        
         public TerminalViewModel() 
         {
             Output = new ObservableCollection<string>();
             _listener = new TerminalListener();
             _listener.RecievedMessage += AddNewOutput;
             Trace.Listeners.Add(_listener);
+            
+            //Clear log
+            File.WriteAllText(LogLocation, string.Empty);
         }
 
         private void AddNewOutput(string? output)
         {
             if (output == null) return;
 
+            File.AppendAllText(LogLocation, output + Environment.NewLine);
             Output.Add(output);
         }
 
@@ -32,19 +38,15 @@ namespace BananaGit.ViewModels
     public class TerminalListener : TraceListener
     {
         public event Action<string>? RecievedMessage;
-
-        private const string LogLocation = "C:\\BananaGit/Log.txt";
-
+        
         public override void Write(string? message)
         {
             RecievedMessage?.Invoke(message ?? "");
-            File.AppendAllText(LogLocation, message + Environment.NewLine);
         }
 
         public override void WriteLine(string? message)
         {
             RecievedMessage?.Invoke(message + Environment.NewLine);
-            File.AppendAllText(LogLocation, message + Environment.NewLine);
         }
     }
 }
