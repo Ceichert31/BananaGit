@@ -244,6 +244,7 @@ namespace BananaGit.ViewModels
                 Application.Current.Dispatcher.Invoke((() =>
                 {
                     LocalBranches.Clear();
+                    RemoteBranches.Clear();
                     CurrentBranch = currentBranch;
                     LocalBranches.Add(currentBranch);
                     RepoName = new DirectoryInfo(githubUserInfo.GetPath()).Name ?? "N/A";
@@ -251,16 +252,10 @@ namespace BananaGit.ViewModels
                     //Update branches
                     foreach (var branch in repo.Branches)
                     {
-                        if (branch.FriendlyName == repo.Head.FriendlyName) continue;
-
                         if (branch.IsRemote)
                         {
                             //Filter out all remotes with ref in the name
-                            if (branch.FriendlyName.StartsWith("refs"))
-                                continue;
-
-                            //Check if branch already exists
-                            if (RemoteBranches.Any(x => x.Branch == branch))
+                            if (!branch.CanonicalName.StartsWith("refs/remotes/origin"))
                                 continue;
 
                             RemoteBranches.Add(new GitBranch(branch));
