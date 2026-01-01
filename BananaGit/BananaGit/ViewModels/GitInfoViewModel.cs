@@ -108,7 +108,7 @@ namespace BananaGit.ViewModels
 
                 //Load current repo data if there is an already opened repo
                 LocalRepoFilePath = githubUserInfo?.GetPath() ?? throw  new NullReferenceException("Repo path is null");
-                RepoURL = githubUserInfo?.GetPath() ?? throw new NullReferenceException("Repo URL is null");
+                RepoURL = githubUserInfo?.GetUrl() ?? throw new NullReferenceException("Repo URL is null");
 
                 //Update that we successfully initialized the repository
                 NoRepoCloned = false;
@@ -579,7 +579,7 @@ namespace BananaGit.ViewModels
 
                 //Set active repo as locally opened repo
                 LocalRepoFilePath = filePath;
-                var remote = repo.Network.Remotes.FirstOrDefault();
+                var remote = repo.Network.Remotes["origin"];
                 if (remote != null)
                 {
                     RepoURL = remote.Url;
