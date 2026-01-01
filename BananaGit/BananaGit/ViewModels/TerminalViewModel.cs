@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BananaGit.ViewModels
@@ -32,14 +33,18 @@ namespace BananaGit.ViewModels
     {
         public event Action<string>? RecievedMessage;
 
+        private const string LogLocation = "C:\\BananaGit/Log.txt";
+
         public override void Write(string? message)
         {
             RecievedMessage?.Invoke(message ?? "");
+            File.AppendAllText(LogLocation, message + Environment.NewLine);
         }
 
         public override void WriteLine(string? message)
         {
             RecievedMessage?.Invoke(message + Environment.NewLine);
+            File.AppendAllText(LogLocation, message + Environment.NewLine);
         }
     }
 }
