@@ -263,7 +263,7 @@ namespace BananaGit.ViewModels
                         }
 
                         //Check if local branch already exists
-                        if (LocalBranches.Any(x => x.Branch == branch))
+                        if (LocalBranches.Any(x => x.CanonicalName == branch.CanonicalName))
                             continue;
 
                         LocalBranches.Add(new GitBranch(branch));

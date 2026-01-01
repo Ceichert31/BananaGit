@@ -11,8 +11,8 @@ namespace BananaGit.Models
     public partial class GitBranch : ObservableObject
     {
         public string Name { get; set; }
+        public string CanonicalName { get; set; }
         public bool IsRemote { get; set; }
-        public Branch Branch { get; set; }
 
         /// <summary>
         /// Default constructor creates branch from HEAD
@@ -69,16 +69,12 @@ namespace BananaGit.Models
             }
             
             //Update branch info
-            using (var repo = new Repository(gitInfo.SavedRepository?.FilePath))
-            {
-                //Fetch and pull remote
-                //Commands.Fetch(repo, "origin", ["+refs/heads/*:refs/remotes/origin/*"], options, null);
-                
-                //If branch is a remote we need to make it a local branch here
-                Branch = repo.Branches[branchName];
-                Name = Branch.FriendlyName;
-                IsRemote = Branch.IsRemote;
-            }
+            using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
+            
+            var branch = repo.Branches[branchName];
+            Name = branch.FriendlyName;
+            IsRemote = branch.IsRemote;
+            CanonicalName = branch.CanonicalName;
         }
 
         /// <summary>
@@ -89,7 +85,7 @@ namespace BananaGit.Models
         {
             Name = branch.FriendlyName;
             IsRemote = branch.IsRemote;
-            Branch = branch;
+            CanonicalName = branch.CanonicalName;
         }
 
         [RelayCommand]
@@ -117,22 +113,18 @@ namespace BananaGit.Models
                     //Fetch latest
                     Commands.Fetch(repo, "origin", Array.Empty<string>(), options, "");
                     
+                    var remoteBranch = repo.Branches[CanonicalName] ?? throw new NullReferenceException("No remote branch accessed from saved branch data");
+
+                    string localName = Name.Replace("origin/", "");
+                    
                     //Create a local tracking branch
-                    Branch localTrackingBranch = repo.Branches.Add(Branch.FriendlyName, Branch.Tip);
+                    Branch localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
                     
                     //Update local branch
-                    repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = Branch.CanonicalName);
+                    repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = CanonicalName);
                     
                     //Checkout branch
                     Commands.Checkout(repo, localTrackingBranch);
-
-                    /*//Fetch remotes
-                    Commands.Fetch(repo, Branch.RemoteName, new string[0], options, null);
-
-                    string localBranchName = Branch.FriendlyName.Remove(0, 7);
-                    Branch localBranch = repo.CreateBranch(localBranchName, Branch.Tip);
-                    repo.Branches.Update(localBranch, b => b.TrackedBranch = Branch.CanonicalName);
-                    Commands.Checkout(repo, localBranch);*/
                 }
             }
             catch (Exception ex)
