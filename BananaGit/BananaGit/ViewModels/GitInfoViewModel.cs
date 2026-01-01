@@ -71,6 +71,8 @@ namespace BananaGit.ViewModels
         private TerminalViewModel _terminalViewModel = new();
         #endregion
 
+        private int _maxCommitHistoryLength = 30;
+
         private readonly DispatcherTimer _updateGitInfoTimer = new();
 
         private GitInfoModel? githubUserInfo;
@@ -160,6 +162,7 @@ namespace BananaGit.ViewModels
             {
                 VerifyPath(LocalRepoFilePath);
 
+                //Refactor commit history to not update constantly
                 CurrentChanges.Clear();
                 StagedChanges.Clear();
 
@@ -174,8 +177,14 @@ namespace BananaGit.ViewModels
 
                 var commits = currentBranch.Commits.ToList();
 
+                int commitCount = 0;
                 foreach (var commit in commits)
                 {
+                    //Break out if commit history is too long
+                    if (commitCount > _maxCommitHistoryLength)
+                        break;
+                    commitCount++;
+                    
                     GitCommitInfo commitInfo = new()
                     {
                         Author = commit.Author.ToString(),
