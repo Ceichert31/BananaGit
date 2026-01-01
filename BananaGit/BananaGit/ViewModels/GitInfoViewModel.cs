@@ -11,7 +11,6 @@ using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
 using Microsoft.Win32;
 
 namespace BananaGit.ViewModels

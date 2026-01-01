@@ -1,7 +1,6 @@
 ﻿using BananaGit.Models;
 using BananaGit.Services;
 using BananaGit.Utilities;
-using BananaGit.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BananaGit.ViewModels
