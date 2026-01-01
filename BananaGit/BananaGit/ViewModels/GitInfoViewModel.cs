@@ -75,8 +75,6 @@ namespace BananaGit.ViewModels
 
         private GitInfoModel? githubUserInfo;
 
-        private int _commitHistoryLength = 30;
-
         private readonly DialogService _dialogService;
         private readonly GitService _gitService;
 
@@ -176,19 +174,17 @@ namespace BananaGit.ViewModels
 
                 var commits = currentBranch.Commits.ToList();
 
-                //Limits commit history to a certain length
-                for (int i = 0; i < _commitHistoryLength; ++i)
+                foreach (var commit in commits)
                 {
-                    var item = commits[i];
                     GitCommitInfo commitInfo = new()
                     {
-                        Author = item.Author.ToString(),
+                        Author = commit.Author.ToString(),
                         Date =
-                       $"{item.Author.When.DateTime.ToShortTimeString()} {item.Author.When.DateTime.ToShortDateString()}",
-                        Message = item.Message,
-                        Commit = item.Id.ToString(),
+                            $"{commit.Author.When.DateTime.ToShortTimeString()} {commit.Author.When.DateTime.ToShortDateString()}",
+                        Message = commit.Message,
+                        Commit = commit.Id.ToString(),
                         //Check if more than one parent, then it is a merge commit
-                        IsMergeCommit = item.Parents.Count() > 1
+                        IsMergeCommit = commit.Parents.Count() > 1
                     };
                     CommitHistory.Add(commitInfo);
                 }
@@ -231,31 +227,16 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                LocalBranches.Add(currentBranch);
-                
-                //Set fetch options to prune any old remote branches
-                var fetchOptions = new FetchOptions { Prune = true };
-
                 VerifyPath(LocalRepoFilePath);
 
                 using var repo = new Repository(LocalRepoFilePath);
 
-                //Cache first remote
-                var remote = repo.Network.Remotes.FirstOrDefault();
-
-                //Prune remote branches
-                if (remote != null)
-                {
-                    Commands.Fetch(repo, remote.Name, Array.Empty<string>(), fetchOptions, "");
-                }
-                else
-                {
-                    throw new NullReferenceException("Couldn't prune remote branches!");
-                }
-
                 //Update UI properties on the UI thread
                 Application.Current.Dispatcher.Invoke((() =>
                 {
+                    LocalBranches.Clear();
+                    CurrentBranch = currentBranch;
+                    LocalBranches.Add(currentBranch);
                     RepoName = new DirectoryInfo(githubUserInfo.GetPath()).Name ?? "N/A";
                     
                     //Update branches
@@ -284,8 +265,6 @@ namespace BananaGit.ViewModels
                         LocalBranches.Add(new GitBranch(branch));
                     }
                 }));
-                //Update current branch
-                CurrentBranch = currentBranch;
             }
             catch (Exception ex)
             {
@@ -606,8 +585,8 @@ namespace BananaGit.ViewModels
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             
                 //Set flags
-                CanClone = true;
-                DirectoryHasFiles = false;
+                /*CanClone = false;
+                DirectoryHasFiles = true;*/
                 NoRepoCloned = false;
                         
                 ResetBranches();

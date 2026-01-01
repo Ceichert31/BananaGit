@@ -52,7 +52,7 @@ namespace BananaGit.Models
                 throw new InvalidRepoException("Saved file path is an invalid repo");
             }
 
-            //Setup credentials for accesing remote branch info
+            //Setup credentials for accessing remote branch info
             var options = new FetchOptions();
             options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
             {
@@ -61,7 +61,7 @@ namespace BananaGit.Models
             };
 
             //Get the name of the HEAD branch
-            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.Url, options);
+            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.GetUrl(), options);
 
             if (branchName == null)
             {
@@ -72,7 +72,7 @@ namespace BananaGit.Models
             using (var repo = new Repository(gitInfo.SavedRepository?.FilePath))
             {
                 //Fetch and pull remote
-                Commands.Fetch(repo, "origin", ["+refs/heads/*:refs/remotes/origin/*"], options, null);
+                //Commands.Fetch(repo, "origin", ["+refs/heads/*:refs/remotes/origin/*"], options, null);
                 
                 //If branch is a remote we need to make it a local branch here
                 Branch = repo.Branches[branchName];
