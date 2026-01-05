@@ -598,6 +598,27 @@ namespace BananaGit.ViewModels
         }
         #endregion
 
+        /// <summary>
+        /// Resets the local repository to the remote
+        /// </summary>
+        [RelayCommand]
+        private void DiscardLocalChanges()
+        {
+            try
+            {
+                _ = _gitService.ResetLocalCommitsAsync();
+            }   
+            catch (LibGit2SharpException ex)
+            {
+                OutputError(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
+            
+        }
+
         #region Dialog Commands
         [RelayCommand]
         private void OpenCloneWindow()

@@ -24,7 +24,18 @@
             VerticalScrollBarVisibility="Auto"
             >
             <StackPanel Background="Black">
-                <Label Content="Unstaged Changes" FontWeight="DemiBold" Foreground="White" />
+                <DockPanel>
+                    <Label Content="Unstaged Changes" FontWeight="DemiBold" Foreground="White" />
+                    <Button HorizontalAlignment="Right" 
+                            VerticalAlignment="Center" 
+                            Content="Discard Changes" 
+                            Style="{StaticResource GenericButton}" 
+                            Height="20"
+                            FontSize="10" 
+                            Width="85"
+                            Margin="0,0,5,0"
+                            Command="{Binding DiscardLocalChangesCommand}"/>
+                </DockPanel>
                 <Separator Height="1" Background="White"/>
                 <ItemsControl
                     ItemsSource="{Binding CurrentChanges}"
