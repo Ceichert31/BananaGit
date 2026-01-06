@@ -604,7 +604,7 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         private void DiscardLocalChanges()
         {
-            try
+            /*try
             {
                 _ = _gitService.ResetLocalCommitsAsync();
             }   
@@ -615,7 +615,7 @@ namespace BananaGit.ViewModels
             catch (Exception ex)
             {
                 OutputError(ex.Message);
-            }
+            }*/
             
         }
 
