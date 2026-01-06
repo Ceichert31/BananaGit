@@ -10,7 +10,7 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private ObservableCollection<string> _output;
 
-        private TerminalListener _listener;
+        private readonly TerminalListener _listener;
 
         private const string LogLocation = "C:\\BananaGit/Log.txt";
         

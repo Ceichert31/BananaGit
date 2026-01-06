@@ -85,9 +85,13 @@ namespace BananaGit.Services
             });
         }
 
-        /*
+        /// <summary>
+        /// Reset only local uncommited files
+        /// </summary>
         public async Task ResetLocalUncommittedFilesAsync()
         {
+            //May have to make custom command
+            
             await Task.Run(() =>
             {
                 var options = new CheckoutOptions
@@ -98,7 +102,6 @@ namespace BananaGit.Services
                 repo.CheckoutPaths(repo.Head.FriendlyName, new[] {_gitInfo?.GetPath()}, options);
             });
         }
-        */
 
         /// <summary>
         /// Checks current repositories file location before using it

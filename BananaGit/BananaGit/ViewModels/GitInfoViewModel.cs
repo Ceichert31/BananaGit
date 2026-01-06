@@ -604,9 +604,9 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         private void DiscardLocalChanges()
         {
-            /*try
+            try
             {
-                _ = _gitService.ResetLocalCommitsAsync();
+                _ = _gitService.ResetLocalUncommittedFilesAsync();
             }   
             catch (LibGit2SharpException ex)
             {
@@ -615,7 +615,7 @@ namespace BananaGit.ViewModels
             catch (Exception ex)
             {
                 OutputError(ex.Message);
-            }*/
+            }
             
         }
 
