@@ -94,12 +94,10 @@ namespace BananaGit.Services
             
             await Task.Run(() =>
             {
-                var options = new CheckoutOptions
-                {
-                    CheckoutModifiers = CheckoutModifiers.Force
-                };
                 using var repo = new Repository(_gitInfo?.GetPath());
-                repo.CheckoutPaths(repo.Head.FriendlyName, new[] {_gitInfo?.GetPath()}, options);
+
+                //Move HEAD to remotes last commit
+                repo.Reset(ResetMode.Hard);
             });
         }
 
