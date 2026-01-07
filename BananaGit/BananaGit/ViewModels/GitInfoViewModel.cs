@@ -487,12 +487,12 @@ namespace BananaGit.ViewModels
         /// <exception cref="LoadDataException"></exception>
         /// <exception cref="NullReferenceException"></exception>
         [RelayCommand]
-        private void CloneRepo()
+        private async void CloneRepo()
         {
             try
             {
                 //Clone repo using git service
-                _gitService.CloneRepositoryAsync(RepoURL,
+                await _gitService.CloneRepositoryAsync(RepoURL,
                     LocalRepoFilePath);
 
                 //Open after cloning
