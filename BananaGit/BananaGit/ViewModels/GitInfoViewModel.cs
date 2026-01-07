@@ -207,13 +207,13 @@ namespace BananaGit.ViewModels
                         file.State == FileStatus.RenamedInWorkdir || file.State == FileStatus.DeletedFromWorkdir ||
                         file.State == (FileStatus.NewInIndex | FileStatus.ModifiedInWorkdir))
                     {
-                        CurrentChanges.Add(new(file, file.FilePath));
+                        CurrentChanges.Add(new(_gitService, file, file.FilePath));
                     }
                     //Staging logic
                     else if (file.State == FileStatus.ModifiedInIndex || file.State == FileStatus.NewInIndex
                         || file.State == FileStatus.RenamedInIndex || file.State == FileStatus.DeletedFromIndex)
                     {
-                        StagedChanges.Add(new(file, file.FilePath));
+                        StagedChanges.Add(new(_gitService, file, file.FilePath));
                     }
                 }
             }
@@ -602,16 +602,12 @@ namespace BananaGit.ViewModels
         /// Resets the local repository to the remote
         /// </summary>
         [RelayCommand]
-        private void DiscardLocalChanges()
+        private async Task DiscardLocalChanges()
         {
             try
             {
-                _ = _gitService.ResetLocalUncommittedFilesAsync();
+                await _gitService.ResetLocalUncommittedFilesAsync();
             }   
-            catch (LibGit2SharpException ex)
-            {
-                OutputError(ex.Message);
-            }
             catch (Exception ex)
             {
                 OutputError(ex.Message);

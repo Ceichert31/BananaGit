@@ -25,25 +25,38 @@
             >
             <StackPanel Background="Black">
                 <DockPanel>
-                    <Label Content="Unstaged Changes" FontWeight="DemiBold" Foreground="White" />
-                    <Button HorizontalAlignment="Right" 
-                            VerticalAlignment="Center" 
-                            Content="Discard Changes" 
-                            Style="{StaticResource GenericButton}" 
-                            Height="20"
-                            FontSize="10" 
-                            Width="85"
-                            Margin="0,0,5,0"
-                            Command="{Binding DiscardLocalChangesCommand}"/>
+                    <Label
+                        Content="Unstaged Changes"
+                        FontWeight="DemiBold"
+                        Foreground="White"
+                        />
+                    <Button
+                        Width="85"
+                        Height="20"
+                        Margin="0,0,5,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Command="{Binding DiscardLocalChangesCommand}"
+                        Content="Discard Changes"
+                        FontSize="10"
+                        Style="{StaticResource GenericButton}"
+                        />
                 </DockPanel>
-                <Separator Height="1" Background="White"/>
-                <ItemsControl
-                    ItemsSource="{Binding CurrentChanges}"
-                >
+                <Separator Height="1" Background="White" />
+                <ItemsControl ItemsSource="{Binding CurrentChanges}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
                                 <StackPanel Background="{StaticResource BananaGradient}" Orientation="Horizontal">
+                                    <StackPanel.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem
+                                                Command="{Binding DataContext.ResetLocalFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding FilePath}"
+                                                Header="Reset to HEAD"
+                                                />
+                                        </ContextMenu>
+                                    </StackPanel.ContextMenu>
                                     <Button
                                         Width="20"
                                         HorizontalAlignment="Left"
@@ -52,7 +65,7 @@
                                         CommandParameter="{Binding}"
                                         Content="+"
                                         Foreground="White"
-                                    />
+                                        />
                                     <Label Content="{Binding Name}" Foreground="Black" />
                                 </StackPanel>
                             </Border>
@@ -81,7 +94,7 @@
             Content="Stage All"
             Style="{StaticResource GenericButton}"
             />
-        
+
         <ScrollViewer
             Grid.Row="1"
             HorizontalAlignment="Stretch"
@@ -89,11 +102,13 @@
             VerticalScrollBarVisibility="Auto"
             >
             <StackPanel Background="Black">
-                <Label Content="Staged Changes" FontWeight="DemiBold" Foreground="White" />
-                <Separator Height="1" Background="White"/>
-                <ItemsControl
-                    ItemsSource="{Binding StagedChanges}"
-                >
+                <Label
+                    Content="Staged Changes"
+                    FontWeight="DemiBold"
+                    Foreground="White"
+                    />
+                <Separator Height="1" Background="White" />
+                <ItemsControl ItemsSource="{Binding StagedChanges}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
@@ -106,7 +121,7 @@
                                         CommandParameter="{Binding}"
                                         Content="-"
                                         Foreground="White"
-                                    />
+                                        />
                                     <Label Content="{Binding Name}" Foreground="Black" />
                                 </StackPanel>
                             </Border>
@@ -115,7 +130,7 @@
                 </ItemsControl>
             </StackPanel>
         </ScrollViewer>
-        
+
         <Button
             Grid.Row="1"
             Margin="0,0,5,5"
@@ -125,6 +140,6 @@
             Command="{Binding UnstageFilesCommand}"
             Content="Unstage All"
             Style="{StaticResource GenericButton}"
-        />
+            />
     </Grid>
 </UserControl>

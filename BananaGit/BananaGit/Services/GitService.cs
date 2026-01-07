@@ -102,6 +102,23 @@ namespace BananaGit.Services
         }
 
         /// <summary>
+        /// Resets a specific file to the remote version
+        /// </summary>
+        /// <param name="filePath">The path to the file to reset</param>
+        public async Task ResetLocalFileAsync(string filePath)
+        {
+            await Task.Run(() =>
+            {
+                using var repo = new Repository(_gitInfo?.GetPath());
+                
+                repo.CheckoutPaths("HEAD", new[] {filePath}, new CheckoutOptions
+                {
+                    CheckoutModifiers = CheckoutModifiers.Force
+                });
+            });
+        }
+
+        /// <summary>
         /// Checks current repositories file location before using it
         /// </summary>
         /// <param name="path"></param>
