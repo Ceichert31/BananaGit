@@ -47,24 +47,20 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
-                                <StackPanel Background="{StaticResource BananaGradient}" Orientation="Horizontal">
+                                <StackPanel Style="{StaticResource GitChangesStackPanel}">
                                     <StackPanel.ContextMenu>
                                         <ContextMenu>
                                             <MenuItem
                                                 Command="{Binding DataContext.ResetLocalFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 CommandParameter="{Binding FilePath}"
-                                                Header="Reset to HEAD"
+                                                Header="Revert Changes"
                                                 />
                                         </ContextMenu>
                                     </StackPanel.ContextMenu>
                                     <Button
-                                        Width="20"
-                                        HorizontalAlignment="Left"
-                                        Background="{StaticResource BananaDark}"
-                                        Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                        CommandParameter="{Binding}"
+                                        Command="{Binding StageFileCommand}"
                                         Content="+"
-                                        Foreground="White"
+                                        Style="{StaticResource GitChangesButton}"
                                         />
                                     <Label Content="{Binding Name}" Foreground="Black" />
                                 </StackPanel>
@@ -112,15 +108,20 @@
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
-                                <StackPanel Background="{StaticResource BananaGradient}" Orientation="Horizontal">
+                                <StackPanel Style="{StaticResource GitChangesStackPanel}">
+                                    <StackPanel.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem
+                                                Command="{Binding DataContext.ResetLocalFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding FilePath}"
+                                                Header="Revert Changes"
+                                                />
+                                        </ContextMenu>
+                                    </StackPanel.ContextMenu>
                                     <Button
-                                        Width="20"
-                                        HorizontalAlignment="Left"
-                                        Background="{StaticResource BananaDark}"
-                                        Command="{Binding DataContext.UnstageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                        CommandParameter="{Binding}"
+                                        Command="{Binding UnstageFileCommand}"
                                         Content="-"
-                                        Foreground="White"
+                                        Style="{StaticResource GitChangesButton}"
                                         />
                                     <Label Content="{Binding Name}" Foreground="Black" />
                                 </StackPanel>

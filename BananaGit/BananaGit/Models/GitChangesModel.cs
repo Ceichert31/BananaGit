@@ -45,5 +45,47 @@ namespace BananaGit.Models
                 Trace.WriteLine(ex.Message);
             }
         }
+        
+        /// <summary>
+        /// Calls GitService to stage a specific file, handles any errors
+        /// </summary>
+        /// <param name="file">The file to stage</param>
+        [RelayCommand]
+        private async Task StageFile(ChangedFile file)
+        {
+            try
+            {
+                await _gitService.StageFileAsync(file);
+            }
+            catch (LibGit2SharpException ex)
+            {
+                Trace.WriteLine($"Failed to stage {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
+        }
+        
+        /// <summary>
+        /// Calls GitService to unstage a specific file, handles any errors
+        /// </summary>
+        /// <param name="file">The file to unstage</param>
+        [RelayCommand]
+        private async Task UnstageFile(ChangedFile file)
+        {
+            try
+            {
+                await _gitService.UnstageFileAsync(file);
+            }
+            catch (LibGit2SharpException ex)
+            {
+                Trace.WriteLine($"Failed to unstage {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
+        }
     }
 }
