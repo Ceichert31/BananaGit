@@ -81,7 +81,7 @@ namespace BananaGit.ViewModels
 
         public GitInfoViewModel(GitService gitService)
         {
-            _dialogService = new DialogService(this,gitService);
+            _dialogService = new DialogService(this);
             _gitService = gitService;
             
             _updateGitInfoTimer.Tick += UpdateRepoStatus;
@@ -230,7 +230,7 @@ namespace BananaGit.ViewModels
         /// <summary>
         /// Checks if any new branches were added and adds them to list
         /// </summary>
-        /// <param name="repo"></param>
+        /// <param name="currentBranch">The currently selected git branch</param>
         private void UpdateBranches(GitBranch currentBranch)
         {
             try
@@ -246,7 +246,11 @@ namespace BananaGit.ViewModels
                     RemoteBranches.Clear();
                     CurrentBranch = currentBranch;
                     LocalBranches.Add(currentBranch);
-                    RepoName = new DirectoryInfo(githubUserInfo.GetPath()).Name ?? "N/A";
+
+                    if (githubUserInfo?.GetPath() == null)
+                        throw new NullReferenceException("Couldn't access repository path!");
+                    
+                    RepoName = new DirectoryInfo(githubUserInfo?.GetPath()).Name ?? "N/A";
                     
                     //Update branches
                     foreach (var branch in repo.Branches)
@@ -282,7 +286,7 @@ namespace BananaGit.ViewModels
         /// Calls GitService to commit staged files and handles any errors
         /// </summary>
         [RelayCommand]
-        private void CommitStagedFiles()
+        private async Task CommitStagedFiles()
         {
             try
             {
@@ -294,8 +298,7 @@ namespace BananaGit.ViewModels
                 
                 if (!staged.Any() && !added.Any() && !removed.Any()) return;
                 
-                //Discard return value
-                _ = _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader} {CommitMessage}");
+                await _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader} {CommitMessage}");
                 
                 SelectedCommitHeader = string.Empty;
                 //Clear commit message
@@ -361,73 +364,69 @@ namespace BananaGit.ViewModels
         /// Calls GitService to push commited files onto selected branch, handles errors
         /// </summary>
         [RelayCommand]
-        private void PushFiles()
+        private async Task PushFiles()
         {
-            Task.Run(() =>
+            try
             {
-                try
-                {
-                    if (CurrentBranch == null) 
-                        throw new NullReferenceException("No Branch selected! Branch is null!");
+                if (CurrentBranch == null) 
+                    throw new NullReferenceException("No Branch selected! Branch is null!");
                     
-                    _gitService.PushFilesAsync(CurrentBranch);
-                    HasCommitedFiles = false;
-                }
-                catch (LibGit2SharpException ex)
-                {
-                    OutputError($"Failed to Push {ex.Message}");
-                }
-                catch (Exception ex)
-                {
-                    OutputError(ex.Message);
-                }
-            });
+                await _gitService.PushFilesAsync(CurrentBranch);
+                    
+                HasCommitedFiles = false;
+            }
+            catch (LibGit2SharpException ex)
+            {
+                OutputError($"Failed to Push {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
         }
 
         /// <summary>
         /// Pulls changes from the repo and merges them into the local repository
         /// </summary>
         [RelayCommand]
-        private async void PullChanges()
+        private async Task PullChanges()
         {
-            Task.Run(() => {
-                try
-                {
-                    if (CurrentBranch == null)
-                        throw new NullReferenceException("No Branch selected! Branch is null!");
+            try
+            {
+                if (CurrentBranch == null)
+                    throw new NullReferenceException("No Branch selected! Branch is null!");
                     
-                    MergeStatus status = _gitService.PullFilesAsync(CurrentBranch).Result;
+                var status = await _gitService.PullFilesAsync(CurrentBranch);
                    
-                    //Updates the branch list
-                    UpdateBranches(CurrentBranch);
+                //Updates the branch list
+                UpdateBranches(CurrentBranch);
 
-                    switch (status)
-                    {
-                        //Check for merge conflicts
-                        case MergeStatus.Conflicts:
-                            //Display in front end eventually
-                            OutputError("Conflict detected");
-                            return;
-                        case MergeStatus.UpToDate:
-                            //Display in front end eventually
-                            OutputError("Up to date");
-                            return;
-                        case MergeStatus.FastForward:
-                            OutputError("Fast Forward");
-                            break;
-                        case MergeStatus.NonFastForward:
-                            OutputError("Non-Fast Forward");
-                            break;
-                        default:
-                            OutputError("Pulled Successfully");
-                            break;
-                    }
-                }
-                catch (Exception ex)
+                switch (status)
                 {
-                    OutputError(ex.Message);
+                    //Check for merge conflicts
+                    case MergeStatus.Conflicts:
+                        //Display in front end eventually
+                        OutputError("Conflict detected");
+                        return;
+                    case MergeStatus.UpToDate:
+                        //Display in front end eventually
+                        OutputError("Up to date");
+                        return;
+                    case MergeStatus.FastForward:
+                        OutputError("Fast Forward");
+                        break;
+                    case MergeStatus.NonFastForward:
+                        OutputError("Non-Fast Forward");
+                        break;
+                    default:
+                        OutputError("Pulled Successfully");
+                        break;
                 }
-            });
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
         }
         #endregion
 
@@ -439,7 +438,7 @@ namespace BananaGit.ViewModels
         /// <exception cref="LoadDataException"></exception>
         /// <exception cref="NullReferenceException"></exception>
         [RelayCommand]
-        private async void CloneRepo()
+        private async Task CloneRepo()
         {
             try
             {

@@ -17,13 +17,30 @@
             PersonalToken = gitInfo.PersonalToken;
             SavedRepository = gitInfo.SavedRepository;
         }
-        public string? GetPath()
+        public string GetPath()
         {
-            return SavedRepository?.FilePath;
+            return SavedRepository?.FilePath ?? throw new NullReferenceException("Couldn't access repository path!");
         }
-        public string? GetUrl()
+
+        /// <summary>
+        /// Tries to get the repository path
+        /// </summary>
+        /// <param name="output">The output for the path</param>
+        /// <returns>Whether the path is valid or not</returns>
+        public bool TryGetPath(out string output)
         {
-            return SavedRepository?.Url;
+            if (SavedRepository?.FilePath != null)
+            {
+                output = SavedRepository?.FilePath ?? string.Empty;
+                return true;
+            }
+
+            output = string.Empty;
+            return false;
+        }
+        public string GetUrl()
+        {
+            return SavedRepository?.Url ?? throw new NullReferenceException("Couldn't access repository url!");
         }
         public void SetPath(string path) => SavedRepository.FilePath = path;
         public void SetUrl(string url) => SavedRepository.Url = url;
