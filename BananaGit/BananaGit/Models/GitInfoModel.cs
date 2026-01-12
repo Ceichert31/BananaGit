@@ -42,8 +42,24 @@
         {
             return SavedRepository?.Url ?? throw new NullReferenceException("Couldn't access repository url!");
         }
-        public void SetPath(string path) => SavedRepository.FilePath = path;
-        public void SetUrl(string url) => SavedRepository.Url = url;
+
+        public void SetPath(string path)
+        {
+            if (SavedRepository == null)
+            {
+                throw new NullReferenceException("Couldn't access repository!");
+            }
+            SavedRepository.FilePath = path;
+        }
+
+        public void SetUrl(string url)
+        {
+            if (SavedRepository == null)
+            {
+                throw new NullReferenceException("Couldn't access repository!");
+            }
+            SavedRepository.Url = url;
+        }
 
         /// <summary>
         /// Verifies the saved repo is not null

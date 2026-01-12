@@ -236,21 +236,22 @@ namespace BananaGit.ViewModels
             try
             {
                 VerifyPath(LocalRepoFilePath);
-
-                using var repo = new Repository(LocalRepoFilePath);
-
+                
                 //Update UI properties on the UI thread
                 Application.Current.Dispatcher.Invoke((() =>
                 {
+                    using var repo = new Repository(LocalRepoFilePath);
+                    
                     LocalBranches.Clear();
                     RemoteBranches.Clear();
                     CurrentBranch = currentBranch;
                     LocalBranches.Add(currentBranch);
-
-                    if (githubUserInfo?.GetPath() == null)
-                        throw new NullReferenceException("Couldn't access repository path!");
                     
-                    RepoName = new DirectoryInfo(githubUserInfo?.GetPath()).Name ?? "N/A";
+                    if (githubUserInfo?.TryGetPath(out var path) == null)
+                    {
+                        throw new NullReferenceException("Couldn't access repository path!");
+                    }
+                    RepoName = new DirectoryInfo(path).Name;
                     
                     //Update branches
                     foreach (var branch in repo.Branches)
@@ -449,7 +450,7 @@ namespace BananaGit.ViewModels
                 //Open after cloning
                 OpenLocalRepository(LocalRepoFilePath);
             }
-            catch (LibGit2SharpException ex)
+            catch (LibGit2SharpException)
             {
                 OutputError($"Failed to clone repo {githubUserInfo?.SavedRepository?.Url}");
             }
@@ -535,7 +536,8 @@ namespace BananaGit.ViewModels
                 }
 
                 //Save to user info
-                githubUserInfo.SavedRepository = new SavableRepository(LocalRepoFilePath, RepoURL);
+                githubUserInfo?.SetPath(LocalRepoFilePath);
+                githubUserInfo?.SetUrl(RepoURL);
                 JsonDataManager.SaveUserInfo(githubUserInfo);
             
                 //Set flags

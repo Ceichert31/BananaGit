@@ -11,6 +11,7 @@
 	<StartupObject>BananaGit.App</StartupObject>
 	<ApplicationIcon>Assets/Banana.ico</ApplicationIcon>
 	  <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
