@@ -46,7 +46,13 @@
                     </InlineUIContainer>
                 </TextBlock>
             </TabItem>
-            <TabItem Header="Commiting" Style="{StaticResource TabStyle}" />
+            <TabItem Header="Commiting" Style="{StaticResource TabStyle}">
+                <TextBlock TextWrapping="WrapWithOverflow">
+                    Once your changes are staged, they are then ready to be commited.
+                    Commiting files
+                </TextBlock>
+
+            </TabItem>
             <TabItem Header="The Workflow" Style="{StaticResource TabStyle}" />
             <TabItem Header="Branches" Style="{StaticResource TabStyle}" />
             <TabItem Header="Merge Conflicts" Style="{StaticResource TabStyle}" />
