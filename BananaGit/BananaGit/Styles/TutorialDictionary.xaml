@@ -2,6 +2,10 @@
 
 
     <Style x:Key="TabStyle" TargetType="TabItem">
-        <Setter Property="Background" Value="{StaticResource FlowerPurple}" />
+        <Setter Property="Background" Value="{StaticResource BananaAccent}" />
+    </Style>
+
+    <Style x:Key="TextBlockStyle" TargetType="TextBlock">
+        <Setter Property="TextWrapping" Value="WrapWithOverflow" />
     </Style>
 </ResourceDictionary>

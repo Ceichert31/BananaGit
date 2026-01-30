@@ -1,4 +1,4 @@
-<UserControl
+﻿<UserControl
     x:Class="BananaGit.Views.TutorialView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -7,12 +7,13 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     d:DesignHeight="450"
     d:DesignWidth="400"
-    Background="{StaticResource BananaYellow}"
+    Background="{StaticResource BananaPrimary}"
     mc:Ignorable="d"
     >
     <Grid>
         <TabControl
-            Background="{StaticResource BananaYellow}"
+            HorizontalAlignment="Stretch"
+            Background="{StaticResource BananaLight}"
             BorderBrush="Black"
             BorderThickness="3"
             TabStripPlacement="Left"
@@ -34,12 +35,12 @@
                 </TextBlock>
             </TabItem>
             <TabItem Header="Staging" Style="{StaticResource TabStyle}">
-                <TextBlock TextWrapping="WrapWithOverflow">
+                <TextBlock Style="{StaticResource TextBlockStyle}">
                     If you hit the plus next to the modified file,
                     or if you hit the stage all button, this will prepare the
                     modified files to be commited.<LineBreak /><LineBreak />
-                    This will allow you to send your updated files to the repo,
-                    so others can recieve your changes.<LineBreak />
+                    This will allow you to send your updated files to the remote repository,
+                    so others can receive your changes.<LineBreak />
                     <LineBreak />
                     Example of staged file:<InlineUIContainer>
                         <Image Source="pack://application:,,,/Assets/ExampleStagedFileImage.png" />
@@ -47,28 +48,35 @@
                 </TextBlock>
             </TabItem>
             <TabItem Header="Pulling" Style="{StaticResource TabStyle}">
-                <TextBlock TextWrapping="WrapWithOverflow">
-                    If you want to receive changed files from others, 
-                    make sure to pull the changes by pressing the pull button in the toolbar <LineBreak/><LineBreak/>
-                    Remember to pull frequently, as pulling often will reduce the chance of file conflicts. 
-                    If you have a file conflict, reference the merge conflicts section. 
-                    <LineBreak/><LineBreak/>
+                <TextBlock Style="{StaticResource TextBlockStyle}">
+                    If you want to receive changed files from others,
+                    make sure to pull the changes by pressing the pull button in the toolbar<LineBreak /><LineBreak />
+                    Remember to pull frequently, as pulling often will reduce the chance of file conflicts.
+                    If you have a file conflict, reference the merge conflicts section.<LineBreak /><LineBreak />
                     Pull Button:<InlineUIContainer>
                         <Image Source="pack://application:,,,/Assets/PullExample.png" />
                     </InlineUIContainer>
                 </TextBlock>
             </TabItem>
-            <TabItem Header="Commiting" Style="{StaticResource TabStyle}" >
-                <TextBlock TextWrapping="WrapWithOverflow">
+            <TabItem Header="Commiting" Style="{StaticResource TabStyle}">
+                <TextBlock Style="{StaticResource TextBlockStyle}">
                     Commiting and pushing files is one of the most important
-                    parts of version control. 
+                    parts of version control.
                     When you commit your changes, you are
                     updating your changes to your local repository on your computer.
-                    Then in order to upload those changed files, you push those commited changes.
-                    
-                    <LineBreak/><LineBreak/>
-                    INSERT EXAMPLE IMAGE HERE
-                </TextBlock>
+                    Then in order to upload those changed files, you push those commited changes.<LineBreak /><LineBreak />
+                    Practice committing your test file by writing a commit message, and pressing commit.<LineBreak /><LineBreak />
+                    INSERT EXAMPLE IMAGE HERE</TextBlock>
+            </TabItem>
+            <TabItem Header="Pushing" Style="{StaticResource TabStyle}">
+                <TextBlock Style="{StaticResource TextBlockStyle}">
+                    Commiting and pushing files is one of the most important
+                    parts of version control.
+                    When you commit your changes, you are
+                    updating your changes to your local repository on your computer.
+                    Then in order to upload those changed files, you push those commited changes.<LineBreak /><LineBreak />
+                    Practice committing your test file by writing a commit message, and pressing commit.<LineBreak /><LineBreak />
+                    INSERT EXAMPLE IMAGE HERE</TextBlock>
             </TabItem>
             <TabItem Header="The Workflow" Style="{StaticResource TabStyle}" />
             <TabItem Header="Branches" Style="{StaticResource TabStyle}" />
