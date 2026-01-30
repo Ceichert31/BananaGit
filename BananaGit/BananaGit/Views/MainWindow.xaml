@@ -23,13 +23,13 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
             <RowDefinition Height="*" />
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="*" />
             <RowDefinition Height="1.2*" />
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="Auto"/>
+            <ColumnDefinition Width="Auto" />
             <ColumnDefinition Width="1.5*" />
         </Grid.ColumnDefinitions>
 
@@ -38,7 +38,7 @@
             Grid.Row="0"
             Grid.ColumnSpan="4"
             Margin="0,-1,0,0"
-            DataContext="{Binding GitInfoViewModel}"
+            DataContext="{Binding TutorialViewModel}"
             />
 
         <!--  Git Changes  -->

@@ -62,12 +62,6 @@ namespace BananaGit.ViewModels
 
         [ObservableProperty]
         private bool _hasCommitedFiles;
-
-        [ObservableProperty]
-        private bool _isTutorialOpen;
-        
-        [ObservableProperty]
-        private TerminalViewModel _terminalViewModel = new();
         #endregion
 
         private int _maxCommitHistoryLength = 30;
@@ -567,37 +561,6 @@ namespace BananaGit.ViewModels
             }
             
         }
-
-        #region Dialog Commands
-        [RelayCommand]
-        private void OpenCloneWindow()
-        {
-            _dialogService.ShowCloneRepoDialog();
-        }
-        [RelayCommand]
-        private void OpenRemoteWindow()
-        {
-            _dialogService.ShowRemoteBranchesDialog();
-        }
-
-        [RelayCommand]
-        private void OpenTutorialPage()
-        {
-            IsTutorialOpen = !IsTutorialOpen;
-        }
-
-        [RelayCommand]
-        private void OpenSettingsWindow()
-        {
-            _dialogService.ShowSettingsDialog();
-        }
-
-        [RelayCommand]
-        private void OpenConsoleWindow()
-        {
-            _dialogService.ShowConsoleDialog(TerminalViewModel);
-        }
-        #endregion
 
         #region Helper Methods
         /// <summary>

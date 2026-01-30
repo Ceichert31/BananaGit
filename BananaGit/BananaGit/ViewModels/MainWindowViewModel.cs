@@ -9,6 +9,9 @@ namespace BananaGit.ViewModels
     {
         [ObservableProperty]
         private GitInfoViewModel? _gitInfoViewModel;
+        
+        [ObservableProperty]
+        private TutorialViewModel? _tutorialViewModel;
 
         //Refactor for user controls!
         //Create an observable property for each view model here
@@ -31,6 +34,8 @@ namespace BananaGit.ViewModels
             
             //Passed into DialogService for dialog creation
             DialogService dialogService = new DialogService(_gitInfoViewModel);
+            
+            _tutorialViewModel = new TutorialViewModel(dialogService, gitService);
 
             //If no user info is loaded, display login dialog
             if (_userInfo == null)

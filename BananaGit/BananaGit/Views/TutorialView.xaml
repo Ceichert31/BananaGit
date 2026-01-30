@@ -32,6 +32,17 @@
                     Example of modified file:<InlineUIContainer>
                         <Image Source="pack://application:,,,/Assets/ExampleGitChangeImage.png" />
                     </InlineUIContainer>
+                    <LineBreak />
+                    <LineBreak />
+                    If you want a hands on tutorial for commiting files, click this button to try it yourself:<LineBreak />
+                    <InlineUIContainer>
+                        <Button
+                            Width="75"
+                            Height="25"
+                            Content="Tutorial"
+                            Style="{StaticResource GenericButton}"
+                            />
+                    </InlineUIContainer>
                 </TextBlock>
             </TabItem>
             <TabItem Header="Staging" Style="{StaticResource TabStyle}">

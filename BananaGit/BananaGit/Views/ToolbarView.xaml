@@ -6,7 +6,7 @@
     xmlns:local="clr-namespace:BananaGit.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
-    d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
+    d:DataContext="{d:DesignInstance Type=viewmodels:TutorialViewModel}"
     d:DesignHeight="30"
     d:DesignWidth="800"
     mc:Ignorable="d"
@@ -26,7 +26,7 @@
                 Foreground="Black"
                 />
             <Button
-                Command="{Binding OpenTutorialPageCommand}"
+                Command="{Binding OpenTutorialCommand}"
                 Content="Tutorials"
                 Foreground="Black"
                 />
