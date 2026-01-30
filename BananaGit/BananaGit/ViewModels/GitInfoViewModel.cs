@@ -39,12 +39,6 @@ namespace BananaGit.ViewModels
         private ObservableCollection<ChangedFile> _stagedChanges = [];
 
         [ObservableProperty]
-        private ObservableCollection<GitBranch> _localBranches = [];
-
-        [ObservableProperty]
-        private ObservableCollection<GitBranch> _remoteBranches = [];
-
-        [ObservableProperty]
         private GitBranch? _currentBranch;
 
         [ObservableProperty]
@@ -105,7 +99,7 @@ namespace BananaGit.ViewModels
                 //Update that we successfully initialized the repository
                 NoRepoCloned = false;
 
-                UpdateBranches(CurrentBranch);
+                //UpdateBranches(CurrentBranch);
             }
             catch (GitException ex)
             {
@@ -152,7 +146,7 @@ namespace BananaGit.ViewModels
             if (NoRepoCloned) return;
             try
             {
-                VerifyPath(LocalRepoFilePath);
+                //VerifyPath(LocalRepoFilePath);
 
                 //Refactor commit history to not update constantly
                 CurrentChanges.Clear();
@@ -220,59 +214,7 @@ namespace BananaGit.ViewModels
             }
         }
 
-        /// <summary>
-        /// Checks if any new branches were added and adds them to list
-        /// </summary>
-        /// <param name="currentBranch">The currently selected git branch</param>
-        private void UpdateBranches(GitBranch currentBranch)
-        {
-            try
-            {
-                VerifyPath(LocalRepoFilePath);
-                
-                //Update UI properties on the UI thread
-                Application.Current.Dispatcher.Invoke((() =>
-                {
-                    using var repo = new Repository(LocalRepoFilePath);
-                    
-                    LocalBranches.Clear();
-                    RemoteBranches.Clear();
-                    CurrentBranch = currentBranch;
-                    LocalBranches.Add(currentBranch);
-                    
-                    if (githubUserInfo?.TryGetPath(out var path) == null)
-                    {
-                        throw new NullReferenceException("Couldn't access repository path!");
-                    }
-                    RepoName = new DirectoryInfo(path).Name;
-                    
-                    //Update branches
-                    foreach (var branch in repo.Branches)
-                    {
-                        if (branch.IsRemote)
-                        {
-                            //Filter out all remotes with ref in the name
-                            if (!branch.CanonicalName.StartsWith("refs/remotes/origin"))
-                                continue;
-
-                            RemoteBranches.Add(new GitBranch(branch));
-                            continue;
-                        }
-
-                        //Check if local branch already exists
-                        if (LocalBranches.Any(x => x.CanonicalName == branch.CanonicalName))
-                            continue;
-
-                        LocalBranches.Add(new GitBranch(branch));
-                    }
-                }));
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
-        }
-
+      
         #endregion
 
         #region Stage/Commit
@@ -362,12 +304,7 @@ namespace BananaGit.ViewModels
         {
             try
             {
-                if (CurrentBranch == null) 
-                    throw new NullReferenceException("No Branch selected! Branch is null!");
-                    
-                await _gitService.PushFilesAsync(CurrentBranch);
-                    
-                //HasCommitedFiles = false;
+                await _gitService.PushFiles();
             }
             catch (LibGit2SharpException ex)
             {
@@ -377,170 +314,6 @@ namespace BananaGit.ViewModels
             {
                 OutputError(ex.Message);
             }
-        }
-
-        /// <summary>
-        /// Pulls changes from the repo and merges them into the local repository
-        /// </summary>
-        [RelayCommand]
-        private async Task PullChanges()
-        {
-            try
-            {
-                if (CurrentBranch == null)
-                    throw new NullReferenceException("No Branch selected! Branch is null!");
-                    
-                var status = await _gitService.PullFilesAsync(CurrentBranch);
-                   
-                //Updates the branch list
-                UpdateBranches(CurrentBranch);
-
-                switch (status)
-                {
-                    //Check for merge conflicts
-                    case MergeStatus.Conflicts:
-                        //Display in front end eventually
-                        OutputError("Conflict detected");
-                        return;
-                    case MergeStatus.UpToDate:
-                        //Display in front end eventually
-                        OutputError("Up to date");
-                        return;
-                    case MergeStatus.FastForward:
-                        OutputError("Fast Forward");
-                        break;
-                    case MergeStatus.NonFastForward:
-                        OutputError("Non-Fast Forward");
-                        break;
-                    default:
-                        OutputError("Pulled Successfully");
-                        break;
-                }
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
-        }
-        #endregion
-
-        #region Clone 
-
-        /// <summary>
-        /// Calls GitService to clone repo, handles any errors
-        /// </summary>
-        /// <exception cref="LoadDataException"></exception>
-        /// <exception cref="NullReferenceException"></exception>
-        [RelayCommand]
-        private async Task CloneRepo()
-        {
-            try
-            {
-                //Clone repo using git service
-                await _gitService.CloneRepositoryAsync(RepoURL,
-                    LocalRepoFilePath);
-
-                //Open after cloning
-                OpenLocalRepository(LocalRepoFilePath);
-            }
-            catch (LibGit2SharpException)
-            {
-                OutputError($"Failed to clone repo {githubUserInfo?.SavedRepository?.Url}");
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
-        }
-
-        /// <summary>
-        /// Opens a windows prompt to select the desired file directory
-        /// </summary>
-        [RelayCommand]
-        private void ChooseCloneDirectory()
-        {
-            try
-            {
-                if (githubUserInfo == null)
-                {
-                    throw new LoadDataException("No Loaded data!");
-                }
-
-                //Open file select dialogue
-                OpenFolderDialog dialog = new OpenFolderDialog
-                {
-                    Multiselect = false,
-                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
-                };
-
-                if (dialog.ShowDialog() == true)
-                {
-                    string selectedFilePath = dialog.FolderName;
-
-                    //Check if directory is empty and mark as cloneable
-                    if (!Directory.EnumerateFiles(selectedFilePath).Any())
-                    {
-                        CanClone = true;
-                        LocalRepoFilePath = selectedFilePath;
-                        DirectoryHasFiles = false;
-                    }
-                    //Otherwise open if a repository already exists there
-                    else
-                    {
-                        OpenLocalRepository(selectedFilePath);
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                CanClone = false;
-                NoRepoCloned = true;
-                DirectoryHasFiles = true;
-                Trace.WriteLine(ex.Message);
-            }
-        }
-        
-        /// <summary>
-        /// Opens a saved local repository
-        /// </summary>
-        /// <param name="filePath">The file path to the local repository</param>
-        /// <exception cref="NullReferenceException"></exception>
-        private void OpenLocalRepository(string filePath)
-        {
-            RepoName = new DirectoryInfo(filePath).Name ?? "N/A";
-            Task.Run(() =>
-            {
-                //Check if file location is local repo
-                if (!Repository.IsValid(filePath)) 
-                    throw new RepositoryNotFoundException($"Repository not found at {filePath}!");
-            
-                var repo = new Repository(filePath);
-
-                //Set active repo as locally opened repo
-                LocalRepoFilePath = filePath;
-                var remote = repo.Network.Remotes["origin"];
-                if (remote != null)
-                {
-                    RepoURL = remote.Url;
-                }
-                else
-                {
-                    throw new NullReferenceException("Couldn't find any remotes!");
-                }
-
-                //Save to user info
-                githubUserInfo?.SetPath(LocalRepoFilePath);
-                githubUserInfo?.SetUrl(RepoURL);
-                JsonDataManager.SaveUserInfo(githubUserInfo);
-            
-                //Set flags
-                /*CanClone = false;
-                DirectoryHasFiles = true;*/
-                NoRepoCloned = false;
-                        
-                ResetBranches();
-                UpdateBranches(new GitBranch(githubUserInfo));
-            });
         }
         #endregion
 
@@ -562,36 +335,7 @@ namespace BananaGit.ViewModels
         }
 
         #region Helper Methods
-        /// <summary>
-        /// Checks current repositories file location before using it
-        /// </summary>
-        /// <param name="path"></param>
-        /// <exception cref="RepoLocationException"></exception>
-        private void VerifyPath(string path)
-        {
-            try
-            {
-                if (LocalRepoFilePath == null || LocalRepoFilePath == "")
-                {
-                    throw new RepoLocationException("Local repository file path is empty!");
-                }
-
-                if (!Directory.Exists(LocalRepoFilePath))
-                {
-                    throw new RepoLocationException("Local repository file path is missing!");
-                }
-            }
-            catch (GitException ex)
-            {
-                NoRepoCloned = true;
-                OutputError(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
-
-        }
+       
         /// <summary>
         /// Throws errors on the main thread
         /// </summary>
@@ -601,6 +345,7 @@ namespace BananaGit.ViewModels
             Application.Current.Dispatcher.Invoke(() => { Trace.WriteLine(message); });
         }
 
+        /*
         /// <summary>
         /// Resets collection of local branches and re-initializes the lists
         /// </summary>
@@ -611,7 +356,7 @@ namespace BananaGit.ViewModels
                 LocalBranches.Clear();
                 RemoteBranches.Clear();
             });
-        }
+        }*/
         #endregion
     }
 }

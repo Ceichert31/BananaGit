@@ -1,4 +1,6 @@
-﻿using BananaGit.Services;
+﻿using System.Collections.ObjectModel;
+using BananaGit.Models;
+using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -14,6 +16,12 @@ partial class ToolbarViewModel : ObservableObject
     
     [ObservableProperty]
     private bool _hasCommitedFiles;
+    
+    [ObservableProperty]
+    private ObservableCollection<GitBranch> _localBranches = [];
+
+    [ObservableProperty]
+    private ObservableCollection<GitBranch> _remoteBranches = [];
     
     private readonly DialogService? _dialogService;
     private readonly GitService? _gitService;
@@ -56,6 +64,7 @@ partial class ToolbarViewModel : ObservableObject
     {
         if (_gitService == null) return;
         await _gitService.PushFiles();
+        HasCommitedFiles = false;
     }
 
     [RelayCommand]
@@ -64,4 +73,129 @@ partial class ToolbarViewModel : ObservableObject
         if (_gitService == null) return;
         await _gitService.PullChanges();
     }
+    
+     
+     
+      
+        /*
+        /// <summary>
+        /// Opens a windows prompt to select the desired file directory
+        /// </summary>
+        [RelayCommand]
+        private void ChooseCloneDirectory()
+        {
+            try
+            {
+                if (githubUserInfo == null)
+                {
+                    throw new LoadDataException("No Loaded data!");
+                }
+
+                //Open file select dialogue
+                OpenFolderDialog dialog = new OpenFolderDialog
+                {
+                    Multiselect = false,
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles)
+                };
+
+                if (dialog.ShowDialog() == true)
+                {
+                    string selectedFilePath = dialog.FolderName;
+
+                    //Check if directory is empty and mark as cloneable
+                    if (!Directory.EnumerateFiles(selectedFilePath).Any())
+                    {
+                        CanClone = true;
+                        LocalRepoFilePath = selectedFilePath;
+                        DirectoryHasFiles = false;
+                    }
+                    //Otherwise open if a repository already exists there
+                    else
+                    {
+                        OpenLocalRepository(selectedFilePath);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                CanClone = false;
+                NoRepoCloned = true;
+                DirectoryHasFiles = true;
+                Trace.WriteLine(ex.Message);
+            }
+        }
+        */
+      
+        /*
+        /// <summary>
+        /// Opens a saved local repository
+        /// </summary>
+        /// <param name="filePath">The file path to the local repository</param>
+        /// <exception cref="NullReferenceException"></exception>
+        private void OpenLocalRepository(string filePath)
+        {
+            RepoName = new DirectoryInfo(filePath).Name ?? "N/A";
+            Task.Run(() =>
+            {
+                //Check if file location is local repo
+                if (!Repository.IsValid(filePath)) 
+                    throw new RepositoryNotFoundException($"Repository not found at {filePath}!");
+            
+                var repo = new Repository(filePath);
+
+                //Set active repo as locally opened repo
+                LocalRepoFilePath = filePath;
+                var remote = repo.Network.Remotes["origin"];
+                if (remote != null)
+                {
+                    RepoURL = remote.Url;
+                }
+                else
+                {
+                    throw new NullReferenceException("Couldn't find any remotes!");
+                }
+
+                //Save to user info
+                githubUserInfo?.SetPath(LocalRepoFilePath);
+                githubUserInfo?.SetUrl(RepoURL);
+                JsonDataManager.SaveUserInfo(githubUserInfo);
+            
+                //Set flags
+                /*CanClone = false;
+                DirectoryHasFiles = true;#1#
+                NoRepoCloned = false;
+                        
+                ResetBranches();
+                UpdateBranches(new GitBranch(githubUserInfo));
+            });
+        }
+        */
+        
+        /*/// <summary>
+        /// Calls GitService to clone repo, handles any errors
+        /// </summary>
+        /// <exception cref="LoadDataException"></exception>
+        /// <exception cref="NullReferenceException"></exception>
+        [RelayCommand]
+        private async Task CloneRepo()
+        {
+            try
+            {
+                //Clone repo using git service
+                await _gitService?.CloneRepositoryAsync(RepoURL,
+                    LocalRepoFilePath);
+
+                //Open after cloning
+                OpenLocalRepository(LocalRepoFilePath);
+            }
+            catch (LibGit2SharpException)
+            {
+                OutputError($"Failed to clone repo {githubUserInfo?.SavedRepository?.Url}");
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
+        }*/
+
 }

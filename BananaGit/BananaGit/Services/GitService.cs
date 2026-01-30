@@ -436,32 +436,30 @@ namespace BananaGit.Services
                 Repository.Clone(url, cloneLocation, options);
             });
         }
-        #endregion 
-        
+        #endregion
+
+        #region Method Wrappers
         /// <summary>
         /// Calls GitService to push commited files onto selected branch, handles errors
         /// </summary>
-       public async Task PushFiles()
-       {
-           try
-           {
-               if (_gitInfo?.CurrentBranch == null)
-                   throw new NullReferenceException("No Branch selected! Branch is null!");
+        public async Task PushFiles()
+        {
+            try
+            {
+                if (_gitInfo?.CurrentBranch == null)
+                    throw new NullReferenceException("No Branch selected! Branch is null!");
 
-               await PushFilesAsync(_gitInfo.CurrentBranch);
-
-               //HasCommitedFiles = false;
-           }
-           catch (LibGit2SharpException ex)
-           {
-               Trace.WriteLine($"Failed to Push {ex.Message}");
-           }
-           catch (Exception ex)
-           {
-               Trace.WriteLine(ex.Message);
-           }
-       }
-        
+                await PushFilesAsync(_gitInfo.CurrentBranch);
+            }
+            catch (LibGit2SharpException ex)
+            {
+                Trace.WriteLine($"Failed to Push {ex.Message}");
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
+        }
         /// <summary>
         /// Pulls changes from the repo and merges them into the local repository
         /// </summary>
@@ -514,5 +512,55 @@ namespace BananaGit.Services
                 Trace.WriteLine(ex.Message);
             }
         }
+        
+         /*/// <summary>
+        /// Checks if any new branches were added and adds them to list
+        /// </summary>
+        private void UpdateBranches()
+        {
+            try
+            {
+                VerifyPath(_gitInfo?.GetPath());
+                
+                using var repo = new Repository(_gitInfo?.GetPath());
+                    
+                LocalBranches.Clear();
+                RemoteBranches.Clear();
+                CurrentBranch = currentBranch;
+                LocalBranches.Add(currentBranch);
+                    
+                if (githubUserInfo?.TryGetPath(out var path) == null)
+                {
+                    throw new NullReferenceException("Couldn't access repository path!");
+                }
+                RepoName = new DirectoryInfo(path).Name;
+                    
+                //Update branches
+                foreach (var branch in repo.Branches)
+                {
+                    if (branch.IsRemote)
+                    {
+                        //Filter out all remotes with ref in the name
+                        if (!branch.CanonicalName.StartsWith("refs/remotes/origin"))
+                            continue;
+
+                        RemoteBranches.Add(new GitBranch(branch));
+                        continue;
+                    }
+
+                    //Check if local branch already exists
+                    if (LocalBranches.Any(x => x.CanonicalName == branch.CanonicalName))
+                        continue;
+
+                    LocalBranches.Add(new GitBranch(branch));
+                }
+            }
+            catch (Exception ex)
+            {
+                OutputError(ex.Message);
+            }
+        }*/
+      
+        #endregion
    }
 }
