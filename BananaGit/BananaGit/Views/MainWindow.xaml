@@ -68,7 +68,7 @@
                 <Style TargetType="ContentControl">
                     <Setter Property="ContentTemplate" Value="{StaticResource CommitHistoryTemplate}" />
                     <Style.Triggers>
-                        <DataTrigger Binding="{Binding TutorialViewModel.IsTutorialOpen}" Value="True">
+                        <DataTrigger Binding="{Binding ToolbarViewModel.IsTutorialOpen}" Value="True">
                             <Setter Property="ContentTemplate" Value="{StaticResource TutorialTemplate}" />
                         </DataTrigger>
                     </Style.Triggers>
