@@ -38,7 +38,7 @@
             Grid.Row="0"
             Grid.ColumnSpan="4"
             Margin="0,-1,0,0"
-            DataContext="{Binding TutorialViewModel}"
+            DataContext="{Binding ToolbarViewModel}"
             />
 
         <!--  Git Changes  -->

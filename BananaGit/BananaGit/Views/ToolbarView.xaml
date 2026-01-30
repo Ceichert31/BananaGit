@@ -6,7 +6,7 @@
     xmlns:local="clr-namespace:BananaGit.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
-    d:DataContext="{d:DesignInstance Type=viewmodels:TutorialViewModel}"
+    d:DataContext="{d:DesignInstance Type=viewmodels:ToolbarViewModel}"
     d:DesignHeight="30"
     d:DesignWidth="800"
     mc:Ignorable="d"
@@ -41,13 +41,13 @@
                 Foreground="Black"
                 />
             <Button
-                Command="{Binding PushFilesCommand}"
+                Command="{Binding CallPushFilesCommand}"
                 Content="Push"
                 Foreground="Black"
                 IsEnabled="{Binding HasCommitedFiles}"
                 />
             <Button
-                Command="{Binding PullChangesCommand}"
+                Command="{Binding CallPullFilesCommand}"
                 Content="Pull"
                 Foreground="Black"
                 />

@@ -9,6 +9,7 @@
         public string? Email { get; set; }
         public string? PersonalToken { get; set; } 
         public SavableRepository? SavedRepository { get; set; }
+        public GitBranch? CurrentBranch { get; set; }
 
         public void CopyContents(GitInfoModel gitInfo)
         {

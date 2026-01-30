@@ -436,6 +436,73 @@ namespace BananaGit.Services
                 Repository.Clone(url, cloneLocation, options);
             });
         }
-        #endregion
-    }
+        #endregion 
+        
+        /// <summary>
+        /// Calls GitService to push commited files onto selected branch, handles errors
+        /// </summary>
+       public async Task PushFiles()
+       {
+           try
+           {
+               if (_gitInfo?.CurrentBranch == null)
+                   throw new NullReferenceException("No Branch selected! Branch is null!");
+
+               await PushFilesAsync(_gitInfo.CurrentBranch);
+
+               //HasCommitedFiles = false;
+           }
+           catch (LibGit2SharpException ex)
+           {
+               Trace.WriteLine($"Failed to Push {ex.Message}");
+           }
+           catch (Exception ex)
+           {
+               Trace.WriteLine(ex.Message);
+           }
+       }
+        
+        /// <summary>
+        /// Pulls changes from the repo and merges them into the local repository
+        /// </summary>
+        public async Task PullChanges()
+        {
+            try
+            {
+                if (_gitInfo?.CurrentBranch == null)
+                    throw new NullReferenceException("No Branch selected! Branch is null!");
+                    
+                var status = await PullFilesAsync(_gitInfo.CurrentBranch);
+                   
+                //Updates the branch list
+                //UpdateBranches(CurrentBranch);
+
+                switch (status)
+                {
+                    //Check for merge conflicts
+                    case MergeStatus.Conflicts:
+                        //Display in front end eventually
+                        Trace.WriteLine("Conflict detected");
+                        return;
+                    case MergeStatus.UpToDate:
+                        //Display in front end eventually
+                        Trace.WriteLine("Up to date");
+                        return;
+                    case MergeStatus.FastForward:
+                        Trace.WriteLine("Fast Forward");
+                        break;
+                    case MergeStatus.NonFastForward:
+                        Trace.WriteLine("Non-Fast Forward");
+                        break;
+                    default:
+                        Trace.WriteLine("Pulled Successfully");
+                        break;
+                }
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
+        }
+   }
 }

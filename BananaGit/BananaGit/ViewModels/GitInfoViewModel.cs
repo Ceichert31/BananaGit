@@ -60,8 +60,7 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private bool _noRepoCloned;
 
-        [ObservableProperty]
-        private bool _hasCommitedFiles;
+     
         #endregion
 
         private int _maxCommitHistoryLength = 30;
@@ -298,7 +297,7 @@ namespace BananaGit.ViewModels
                 SelectedCommitHeader = string.Empty;
                 //Clear commit message
                 CommitMessage = string.Empty;
-                HasCommitedFiles = true;
+                //HasCommitedFiles = true;
             }
             catch (LibGit2SharpException ex)
             {
@@ -368,7 +367,7 @@ namespace BananaGit.ViewModels
                     
                 await _gitService.PushFilesAsync(CurrentBranch);
                     
-                HasCommitedFiles = false;
+                //HasCommitedFiles = false;
             }
             catch (LibGit2SharpException ex)
             {
