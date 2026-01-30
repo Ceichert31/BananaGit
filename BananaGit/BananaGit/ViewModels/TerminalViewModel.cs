@@ -12,7 +12,7 @@ namespace BananaGit.ViewModels
 
         private readonly TerminalListener _listener;
 
-        private const string LogLocation = "C:\\BananaGit/Log.txt";
+        private const string LogLocation = "C:\\ProgramData/BananaGit/Log.txt";
         
         public TerminalViewModel() 
         {
