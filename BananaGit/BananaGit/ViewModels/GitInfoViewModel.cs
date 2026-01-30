@@ -72,7 +72,7 @@ namespace BananaGit.ViewModels
         private readonly DialogService _dialogService;
         private readonly GitService _gitService;
 
-        public GitInfoViewModel(GitService gitService)
+        public GitInfoViewModel(GitService gitService, GitInfoModel userInfo)
         {
             _dialogService = new DialogService(this);
             _gitService = gitService;
@@ -81,7 +81,7 @@ namespace BananaGit.ViewModels
             _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(1000);
             _updateGitInfoTimer.Start();
 
-            JsonDataManager.LoadUserInfo(ref githubUserInfo);
+            githubUserInfo = userInfo;
 
             PropertyChanged += UpdateCurrentRepository;
 
@@ -96,7 +96,7 @@ namespace BananaGit.ViewModels
             try
             {
                 //Create new git branch
-                CurrentBranch = new GitBranch();
+                CurrentBranch = new GitBranch(githubUserInfo);
 
                 //Load current repo data if there is an already opened repo
                 LocalRepoFilePath = githubUserInfo?.GetPath() ?? throw  new NullReferenceException("Repo path is null");
@@ -539,7 +539,7 @@ namespace BananaGit.ViewModels
                 NoRepoCloned = false;
                         
                 ResetBranches();
-                UpdateBranches(new GitBranch());
+                UpdateBranches(new GitBranch(githubUserInfo));
             });
         }
         #endregion

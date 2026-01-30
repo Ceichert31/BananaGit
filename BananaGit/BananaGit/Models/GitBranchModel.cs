@@ -14,6 +14,12 @@ namespace BananaGit.Models
         public string CanonicalName { get; set; }
         public bool IsRemote { get; set; }
 
+        public GitBranch()
+        {
+            Name = "";
+            CanonicalName = "";
+        }
+        
         /// <summary>
         /// Default constructor creates branch from HEAD
         /// </summary>
@@ -23,11 +29,8 @@ namespace BananaGit.Models
         /// An overarching git exception, if thrown something 
         /// relating to git operations or repositories has gone wrong 
         /// </exception>
-        public GitBranch()
+        public GitBranch(GitInfoModel? gitInfo)
         {
-            GitInfoModel? gitInfo = new();
-            JsonDataManager.LoadUserInfo(ref gitInfo);
-            
             //Check user info has loaded
             if (gitInfo == null)
             {

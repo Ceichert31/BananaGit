@@ -471,9 +471,9 @@ namespace BananaGit.Services
             {
                 if (_gitInfo?.CurrentBranch == null)
                     throw new NullReferenceException("No Branch selected! Branch is null!");
-                    
+
                 var status = await PullFilesAsync(_gitInfo.CurrentBranch);
-                   
+
                 //Updates the branch list
                 //UpdateBranches(CurrentBranch);
 
@@ -497,6 +497,16 @@ namespace BananaGit.Services
                     default:
                         Trace.WriteLine("Pulled Successfully");
                         break;
+                }
+            }
+            catch (NullReferenceException ex)
+            {
+                Trace.WriteLine(ex.Message);
+
+                if (_gitInfo != null)
+                {
+                    _gitInfo.CurrentBranch = new(_gitInfo);   
+                    JsonDataManager.SaveUserInfo(_gitInfo);
                 }
             }
             catch (Exception ex)

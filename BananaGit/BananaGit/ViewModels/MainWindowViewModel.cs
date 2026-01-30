@@ -30,8 +30,6 @@ namespace BananaGit.ViewModels
             
             GitService gitService = new GitService(_userInfo);
             
-            _gitInfoViewModel = new GitInfoViewModel(gitService);
-            
             //Passed into DialogService for dialog creation
             DialogService dialogService = new DialogService(_gitInfoViewModel);
             
@@ -41,7 +39,10 @@ namespace BananaGit.ViewModels
             if (_userInfo == null)
             {
                 dialogService.ShowCredentialsDialog();
+                return;
             }
+            
+            _gitInfoViewModel = new GitInfoViewModel(gitService, _userInfo);
         }
     }
 }
