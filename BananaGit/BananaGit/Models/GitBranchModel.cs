@@ -11,8 +11,8 @@ namespace BananaGit.Models
     public partial class GitBranch : ObservableObject
     {
         public string Name { get; set; }
+        public string CanonicalName { get; set; }
         public bool IsRemote { get; set; }
-        public Branch Branch { get; set; }
 
         /// <summary>
         /// Default constructor creates branch from HEAD
@@ -52,7 +52,7 @@ namespace BananaGit.Models
                 throw new InvalidRepoException("Saved file path is an invalid repo");
             }
 
-            //Setup credentials for accesing remote branch info
+            //Setup credentials for accessing remote branch info
             var options = new FetchOptions();
             options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
             {
@@ -61,20 +61,20 @@ namespace BananaGit.Models
             };
 
             //Get the name of the HEAD branch
-            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.SavedRepository?.Url, options);
+            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.GetUrl());
 
             if (branchName == null)
             {
                 throw new InvalidRepoException("Couldn't find default branch name");
             }
-
+            
             //Update branch info
-            using (var repo = new Repository(gitInfo.SavedRepository?.FilePath))
-            {
-                Branch = repo.Branches[branchName];
-                Name = Branch.FriendlyName;
-                IsRemote = Branch.IsRemote;
-            }
+            using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
+            
+            var branch = repo.Branches[branchName];
+            Name = branch.FriendlyName;
+            IsRemote = branch.IsRemote;
+            CanonicalName = branch.CanonicalName;
         }
 
         /// <summary>
@@ -85,11 +85,11 @@ namespace BananaGit.Models
         {
             Name = branch.FriendlyName;
             IsRemote = branch.IsRemote;
-            Branch = branch;
+            CanonicalName = branch.CanonicalName;
         }
 
         [RelayCommand]
-        public void RemoveRemoteBranch()
+        private void CheckoutBranch()
         {
             if (!IsRemote) return;
 
@@ -100,53 +100,7 @@ namespace BananaGit.Models
 
                 if (gitInfo != null)
                 {
-                    using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-
-                    repo.Network.Remotes.Remove(Branch.RemoteName);
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message);
-            }
-        }
-
-        [RelayCommand]
-        public void RemoveLocalBranch()
-        {
-            if (IsRemote) return;
-
-            try
-            {
-                GitInfoModel? gitInfo = new();
-                JsonDataManager.LoadUserInfo(ref gitInfo);
-
-                if (gitInfo != null)
-                {
-                    using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-
-                    repo.Branches.Remove(Branch.CanonicalName);
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message);
-            }
-        }
-
-        [RelayCommand]
-        public void CheckoutBranch()
-        {
-            if (!IsRemote) return;
-
-            try
-            {
-                GitInfoModel? gitInfo = new();
-                JsonDataManager.LoadUserInfo(ref gitInfo);
-
-                if (gitInfo != null)
-                {
-                    using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
+                    using var repo = new Repository(gitInfo.GetPath());
 
                     var options = new FetchOptions();
 
@@ -155,14 +109,22 @@ namespace BananaGit.Models
                         Username = gitInfo.Username,
                         Password = gitInfo.PersonalToken
                     };
+                    
+                    //Fetch latest
+                    Commands.Fetch(repo, "origin", Array.Empty<string>(), options, "");
+                    
+                    var remoteBranch = repo.Branches[CanonicalName] ?? throw new NullReferenceException("No remote branch accessed from saved branch data");
 
-                    //Fetch remotes
-                    Commands.Fetch(repo, Branch.RemoteName, new string[0], options, null);
-
-                    string localBranchName = Branch.FriendlyName.Remove(0, 7);
-                    Branch localBranch = repo.CreateBranch(localBranchName, Branch.Tip);
-                    repo.Branches.Update(localBranch, b => b.TrackedBranch = Branch.CanonicalName);
-                    Commands.Checkout(repo, localBranch);
+                    string localName = Name.Replace("origin/", "");
+                    
+                    //Create a local tracking branch
+                    Branch localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
+                    
+                    //Update local branch
+                    repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = CanonicalName);
+                    
+                    //Checkout branch
+                    Commands.Checkout(repo, localTrackingBranch);
                 }
             }
             catch (Exception ex)

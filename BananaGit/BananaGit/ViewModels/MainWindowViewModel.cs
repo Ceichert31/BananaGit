@@ -1,7 +1,6 @@
 ﻿using BananaGit.Models;
 using BananaGit.Services;
 using BananaGit.Utilities;
-using BananaGit.Views;
 using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BananaGit.ViewModels
@@ -31,7 +30,7 @@ namespace BananaGit.ViewModels
             _gitInfoViewModel = new GitInfoViewModel(gitService);
             
             //Passed into DialogService for dialog creation
-            DialogService dialogService = new DialogService(_gitInfoViewModel, gitService);
+            DialogService dialogService = new DialogService(_gitInfoViewModel);
 
             //If no user info is loaded, display login dialog
             if (_userInfo == null)

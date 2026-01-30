@@ -3,7 +3,6 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:BananaGit.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
     d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
@@ -24,46 +23,66 @@
             VerticalAlignment="Stretch"
             VerticalScrollBarVisibility="Auto"
             >
-            <ItemsControl
-                Background="Black"
-                Foreground="White"
-                ItemsSource="{Binding CurrentChanges}"
-                >
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderBrush="{StaticResource FlowerPurple}" BorderThickness="2">
-                            <StackPanel Background="{StaticResource BananaYellow}" Orientation="Horizontal">
-                                <Button
-                                    Width="20"
-                                    HorizontalAlignment="Left"
-                                    Background="{StaticResource FlowerPurple}"
-                                    Command="{Binding DataContext.StageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}"
-                                    Content="+"
-                                    Foreground="White"
-                                    />
-                                <Label Content="{Binding Name}" Foreground="Black" />
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <StackPanel Background="Black">
+                <DockPanel>
+                    <Label
+                        Content="Unstaged Changes"
+                        FontWeight="DemiBold"
+                        Foreground="White"
+                        />
+                    <Button
+                        Width="85"
+                        Height="20"
+                        Margin="0,0,5,0"
+                        HorizontalAlignment="Right"
+                        VerticalAlignment="Center"
+                        Command="{Binding DiscardLocalChangesCommand}"
+                        Content="Discard Changes"
+                        FontSize="10"
+                        Style="{StaticResource GenericButton}"
+                        />
+                </DockPanel>
+                <Separator Height="1" Background="White" />
+                <ItemsControl ItemsSource="{Binding CurrentChanges}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
+                                <StackPanel Style="{StaticResource GitChangesStackPanel}">
+                                    <StackPanel.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem
+                                                Command="{Binding DataContext.ResetLocalFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding FilePath}"
+                                                Header="Revert Changes"
+                                                />
+                                        </ContextMenu>
+                                    </StackPanel.ContextMenu>
+                                    <Button
+                                        Command="{Binding StageFileCommand}"
+                                        Content="+"
+                                        Style="{StaticResource GitChangesButton}"
+                                        />
+                                    <Label Content="{Binding Name}" Foreground="Black" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
 
         <GridSplitter
             Grid.Row="0"
-            Grid.Column="3"
-            Height="2"
+            Height="0"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Bottom"
-            Background="{StaticResource BananaYellow}"
+            Background="Black"
             IsEnabled="False"
             />
 
         <Button
             Grid.Row="0"
-            Grid.Column="2"
-            Margin="0,0,0,5"
+            Margin="0,0,5,5"
             Padding="3"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
@@ -73,36 +92,55 @@
             />
 
         <ScrollViewer
-            Grid.Row="2"
-            Grid.Column="3"
+            Grid.Row="1"
             HorizontalAlignment="Stretch"
             VerticalAlignment="Stretch"
             VerticalScrollBarVisibility="Auto"
             >
-            <ItemsControl
-                Background="Black"
-                Foreground="White"
-                ItemsSource="{Binding StagedChanges}"
-                >
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate>
-                        <Border BorderBrush="{StaticResource FlowerPurple}" BorderThickness="2">
-                            <StackPanel Background="{StaticResource BananaYellow}" Orientation="Horizontal">
-                                <Button
-                                    Width="20"
-                                    HorizontalAlignment="Left"
-                                    Background="{StaticResource FlowerPurple}"
-                                    Command="{Binding DataContext.UnstageFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
-                                    CommandParameter="{Binding}"
-                                    Content="-"
-                                    Foreground="White"
-                                    />
-                                <Label Content="{Binding Name}" Foreground="Black" />
-                            </StackPanel>
-                        </Border>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <StackPanel Background="Black">
+                <Label
+                    Content="Staged Changes"
+                    FontWeight="DemiBold"
+                    Foreground="White"
+                    />
+                <Separator Height="1" Background="White" />
+                <ItemsControl ItemsSource="{Binding StagedChanges}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
+                                <StackPanel Style="{StaticResource GitChangesStackPanel}">
+                                    <StackPanel.ContextMenu>
+                                        <ContextMenu>
+                                            <MenuItem
+                                                Command="{Binding DataContext.ResetLocalFileCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
+                                                CommandParameter="{Binding FilePath}"
+                                                Header="Revert Changes"
+                                                />
+                                        </ContextMenu>
+                                    </StackPanel.ContextMenu>
+                                    <Button
+                                        Command="{Binding UnstageFileCommand}"
+                                        Content="-"
+                                        Style="{StaticResource GitChangesButton}"
+                                        />
+                                    <Label Content="{Binding Name}" Foreground="Black" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
+
+        <Button
+            Grid.Row="1"
+            Margin="0,0,5,5"
+            Padding="3"
+            HorizontalAlignment="Right"
+            VerticalAlignment="Bottom"
+            Command="{Binding UnstageFilesCommand}"
+            Content="Unstage All"
+            Style="{StaticResource GenericButton}"
+            />
     </Grid>
 </UserControl>

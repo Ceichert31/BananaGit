@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
@@ -11,6 +11,7 @@
 	<StartupObject>BananaGit.App</StartupObject>
 	<ApplicationIcon>Assets/Banana.ico</ApplicationIcon>
 	  <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +28,14 @@
 		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 	  </Content>
       <InternalsVisibleTo Include="BananaGit.Test" />
+      <None Remove="Assets\BananaMerge.png" />
+      <Content Include="Assets\BananaMerge.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
+      <None Remove="Assets\BananaCurrent.png" />
+      <Content Include="Assets\BananaCurrent.png">
+        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      </Content>
       <None Remove="Assets\PullExample.png" />
       <Content Include="Assets\PullExample.png">
         <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>

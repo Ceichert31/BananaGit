@@ -9,7 +9,7 @@ namespace BananaGit.Services
     /// </summary>
     /// <param name="vm">The <see cref="GitInfoViewModel"/>
     /// that is currently being used by the main window </param>
-    class DialogService(GitInfoViewModel? vm, GitService gitService)
+    class DialogService(GitInfoViewModel? vm)
     {
         /// <summary>
         /// Opens a dialog for cloning a new repository 
@@ -48,9 +48,9 @@ namespace BananaGit.Services
         /// <summary>
         /// Opens a dialog with a debug console
         /// </summary>
-        public void ShowConsoleDialog()
+        public void ShowConsoleDialog(TerminalViewModel terminalViewModel)
         {
-            TerminalView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
+            TerminalView view = new() { DataContext = terminalViewModel, Owner = System.Windows.Application.Current.MainWindow };
             view.Show();
         }
     }

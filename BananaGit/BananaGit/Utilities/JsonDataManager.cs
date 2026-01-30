@@ -8,7 +8,7 @@ namespace BananaGit.Utilities
     {
         public static bool HasPersonalToken = false;
 
-        private const string USER_DATA_LOCATION = "C:\\BananaGit/";
+        private const string USER_DATA_LOCATION = "C:\\ProgramData/BananaGit/";
         private const string USER_DATA_NAME = "UserInfo.json";
 
         public static EventHandler? UserInfoChanged;

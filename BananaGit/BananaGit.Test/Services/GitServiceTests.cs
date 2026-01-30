@@ -86,7 +86,12 @@ public class GitServiceTests
         string testPath = Path.Combine(TEST_PATH_BASE, "TestCommitFiles");
         _userInfo?.SetPath(testPath);
         GitService gitService = new GitService(_userInfo);
-        
+
+        ChangedFile file = new ChangedFile(gitService)
+        {
+            Name = "test.txt",
+            FilePath = Path.Combine(testPath, "test.txt")
+        };
         try
         {
             //Arrange
@@ -94,11 +99,6 @@ public class GitServiceTests
             await gitService.CloneRepositoryAsync(TEST_REPO, testPath);
             
             //Create and add file to stage
-            ChangedFile file = new ChangedFile
-            {
-                Name = "test.txt",
-                FilePath = Path.Combine(testPath, "test.txt")
-            };
             await File.Create(file.FilePath).DisposeAsync();
             using Repository repo = new Repository(testPath);
             

@@ -3,32 +3,52 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:BananaGit.Views.DialogueViews"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
     Title="RemoteBranchView"
-    Width="400"
-    Height="300"
+    Width="500"
+    Height="400"
     d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
     Background="{StaticResource BananaYellow}"
     WindowStartupLocation="CenterOwner"
     mc:Ignorable="d"
     >
     <Grid>
-        <ItemsControl
-            HorizontalAlignment="Stretch"
-            VerticalAlignment="Stretch"
-            ItemsSource="{Binding RemoteBranches}"
+        
+        <Grid.RowDefinitions>
+            <RowDefinition Height="25"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+        
+        <Label Foreground="Black" 
+               FontWeight="Bold" 
+               Background="{StaticResource BananaAccent}"
+               Content="Checkout Remote Branches"/>
+        
+        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
+            <ItemsControl
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                ItemsSource="{Binding RemoteBranches}"
             >
-            <ItemsControl.ItemTemplate>
-                <DataTemplate>
-                    <StackPanel Orientation="Horizontal">
-                        <Button Command="{Binding CheckoutBranchCommand}" Content="+" />
-                        <Button Command="{Binding RemoveRemoteBranchCommand}" Content="-" />
-                        <Label Content="{Binding Name}" />
-                    </StackPanel>
-                </DataTemplate>
-            </ItemsControl.ItemTemplate>
-        </ItemsControl>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
+                            <DockPanel Background="{StaticResource BananaGradient}">
+                                <Button
+                                    Width="20"
+                                    HorizontalAlignment="Left"
+                                    Background="{StaticResource BananaDark}"
+                                    Command="{Binding CheckoutBranchCommand}"
+                                    Content="+"
+                                    Foreground="White"
+                                />
+                                <Label Content="{Binding Name}" Foreground="Black" />
+                            </DockPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
     </Grid>
 </Window>
