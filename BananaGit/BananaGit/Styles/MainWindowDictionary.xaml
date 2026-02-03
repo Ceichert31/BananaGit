@@ -3,22 +3,22 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:views="clr-namespace:BananaGit.Views"
     >
-    
+
     <SolidColorBrush x:Key="BananaYellow" Color="#FFEA78" />
     <SolidColorBrush x:Key="FlowerPurple" Color="#788DFF" />
     <SolidColorBrush x:Key="DarkGold" Color="#debc00" />
-    
-    <SolidColorBrush x:Key="BananaPrimary" Color="#FFD93D"/>
-    <SolidColorBrush x:Key="BananaSecondary" Color="#FFC93D"/>
-    <SolidColorBrush x:Key="BananaAccent" Color="#FFB520"/>
-    <SolidColorBrush x:Key="BananaDark" Color="#CC8800"/>
-    <SolidColorBrush x:Key="BananaBold" Color="#8B5E00"/>
-    <SolidColorBrush x:Key="BananaLight" Color="#FFF6D4"/>
+
+    <SolidColorBrush x:Key="BananaPrimary" Color="#FFD93D" />
+    <SolidColorBrush x:Key="BananaSecondary" Color="#FFC93D" />
+    <SolidColorBrush x:Key="BananaAccent" Color="#FFB520" />
+    <SolidColorBrush x:Key="BananaDark" Color="#CC8800" />
+    <SolidColorBrush x:Key="BananaBold" Color="#8B5E00" />
+    <SolidColorBrush x:Key="BananaLight" Color="#FFF6D4" />
     <LinearGradientBrush x:Key="BananaGradient">
-        <GradientStop Color="#FFB520" Offset="0"/>
-        <GradientStop Color="#FFD93D" Offset="1"/>
+        <GradientStop Offset="0" Color="#FFB520" />
+        <GradientStop Offset="1" Color="#FFD93D" />
     </LinearGradientBrush>
-    
+
     <Style x:Key="GenericButton" TargetType="{x:Type Button}">
         <Setter Property="Background" Value="{StaticResource BananaGradient}" />
         <Setter Property="Foreground" Value="Black" />
@@ -72,11 +72,11 @@
     </DataTemplate>
 
     <DataTemplate x:Key="CommitHistoryTemplate">
-        <views:CommitHistoryView x:Name="CommitHistory" DataContext="{Binding GitInfoViewModel}" />
+        <views:CommitHistoryView x:Name="CommitHistory" DataContext="{Binding CommitHistoryViewModel}" />
     </DataTemplate>
 
     <DataTemplate x:Key="TutorialTemplate">
-        <views:TutorialView x:Name="Tutorial" DataContext="{Binding GitInfoViewModel}" />
+        <views:TutorialView x:Name="Tutorial" DataContext="{Binding TutorialViewModel}" />
     </DataTemplate>
 
 </ResourceDictionary>
