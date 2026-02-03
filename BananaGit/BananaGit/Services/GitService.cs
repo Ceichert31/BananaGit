@@ -264,7 +264,7 @@ namespace BananaGit.Services
             {
                 VerifyPath();
 
-                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+                using var repo = new Repository(_gitInfo?.GetPath());
 
                 //Set author for commiting
                 Signature author = new(_gitInfo?.Username, _gitInfo?.Email, DateTime.Now);
@@ -281,7 +281,7 @@ namespace BananaGit.Services
             {
                 VerifyPath();
 
-                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+                using var repo = new Repository(_gitInfo?.GetPath());
                 //Get status and return if no changes have been made
                 var status = repo.RetrieveStatus();
                 if (!status.IsDirty)
@@ -306,7 +306,7 @@ namespace BananaGit.Services
             {
                 VerifyPath();
 
-                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+                using var repo = new Repository(_gitInfo?.GetPath());
                 //Get status and return if no changes have been made
                 var status = repo.RetrieveStatus();
                 if (!status.IsDirty)
@@ -515,10 +515,19 @@ namespace BananaGit.Services
         /// </summary>
         /// <param name="url">The URL for the repository</param>
         /// <param name="cloneLocation">The location to clone to</param>
-        public async Task CloneRepositoryAsync(string url, string cloneLocation)
+        public async Task CloneRepositoryAsync(string? url, string? cloneLocation)
         {
             await Task.Run(() =>
             {
+                if (cloneLocation == null )
+                {
+                    throw new NullReferenceException("No path found!");
+                }
+                if (url == null)
+                {
+                    throw new NullReferenceException("No URL found!");
+                }
+                
                 var options = new CloneOptions
                 {
                     FetchOptions =
@@ -644,6 +653,7 @@ namespace BananaGit.Services
                     LocalRepoFilePath = selectedFilePath;
                     DirectoryHasFiles = false;*/
                     _gitInfo?.SetPath(selectedFilePath);
+                    JsonDataManager.SaveUserInfo(_gitInfo);
                     return true;
                 }
                 //Otherwise open if a repository already exists there
@@ -695,6 +705,29 @@ namespace BananaGit.Services
                     //Notify view models that the repository data has changed
                     OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
                 });
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
+        }
+        /// <summary>
+        /// Clones a local repository from a selected URL
+        /// </summary>
+        /// <exception cref="NullReferenceException"></exception>
+        public async Task CloneRepository()
+        {
+            try
+            { 
+                VerifyPath();
+
+                string path = _gitInfo?.GetPath() ?? throw new NullReferenceException("No path found!");
+                
+                //Clone repo using git service
+                await CloneRepositoryAsync(_gitInfo?.GetUrl(),
+                    path);
+                
+                OpenLocalRepository(path);
             }
             catch (Exception ex)
             {

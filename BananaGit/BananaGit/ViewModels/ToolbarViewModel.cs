@@ -94,32 +94,4 @@ partial class ToolbarViewModel : ObservableObject
             LocalBranches = new(_gitService.GetLocalBranches());
         });
     }
-        
-        /*/// <summary>
-        /// Calls GitService to clone repo, handles any errors
-        /// </summary>
-        /// <exception cref="LoadDataException"></exception>
-        /// <exception cref="NullReferenceException"></exception>
-        [RelayCommand]
-        private async Task CloneRepo()
-        {
-            try
-            {
-                //Clone repo using git service
-                await _gitService?.CloneRepositoryAsync(RepoURL,
-                    LocalRepoFilePath);
-
-                //Open after cloning
-                OpenLocalRepository(LocalRepoFilePath);
-            }
-            catch (LibGit2SharpException)
-            {
-                OutputError($"Failed to clone repo {githubUserInfo?.SavedRepository?.Url}");
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
-        }*/
-
 }

@@ -9,7 +9,7 @@
     Title="CloneRepoView"
     Width="300"
     Height="300"
-    d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
+    d:DataContext="{d:DesignInstance Type=viewmodels:CloneRepoViewModel}"
     Background="#FFEA78"
     WindowStartupLocation="CenterOwner"
     mc:Ignorable="d"
@@ -34,7 +34,7 @@
                 HorizontalAlignment="Center"
                 VerticalAlignment="Center"
                 Click="CloseWindow_Click"
-                Command="{Binding CloneRepoCommand}"
+                Command="{Binding CloneRepositoryCommand}"
                 Content="Clone"
                 IsEnabled="{Binding CanClone}"
                 />

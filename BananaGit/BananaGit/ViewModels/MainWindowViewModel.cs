@@ -33,15 +33,16 @@ namespace BananaGit.ViewModels
             
             GitService gitService = new GitService(_userInfo);
             
-            //Passed into DialogService for dialog creation
-            DialogService dialogService = new DialogService(_gitInfoViewModel, gitService);
-
             //If no user info is loaded, display login dialog
             if (_userInfo == null)
             {
-                dialogService.ShowCredentialsDialog();
+                DialogService tempDialogService = new DialogService(_gitInfoViewModel, gitService, new());
+                tempDialogService.ShowCredentialsDialog();
                 return;
             }
+            
+            //Passed into DialogService for dialog creation
+            DialogService dialogService = new DialogService(_gitInfoViewModel, gitService, _userInfo);
             
             ToolbarViewModel = new ToolbarViewModel(dialogService, gitService, _userInfo);
 

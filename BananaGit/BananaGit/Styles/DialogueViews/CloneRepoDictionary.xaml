@@ -9,7 +9,7 @@
                 <TextBox
                     Width="150"
                     Foreground="Black"
-                    Text="{Binding RepoURL}"
+                    Text="{Binding RepositoryUrl}"
                     />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
@@ -17,12 +17,12 @@
                 <TextBox
                     Width="100"
                     Foreground="Black"
-                    Text="{Binding LocalRepoFilePath}"
+                    Text="{Binding RepositoryPath}"
                     />
                 <Button
                     Padding="3"
                     HorizontalAlignment="Center"
-                    Command="{Binding ChooseCloneDirectoryCommand}"
+                    Command="{Binding DataContext.CallRepositoryDialogCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                     Content="Directory"
                     />
             </StackPanel>
@@ -37,7 +37,7 @@
                 <TextBox
                     Width="150"
                     Foreground="Black"
-                    Text="{Binding RepoURL}"
+                    Text="{Binding RepositoryUrl}"
                     />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
@@ -45,12 +45,12 @@
                 <TextBox
                     Width="100"
                     Foreground="Black"
-                    Text="{Binding LocalRepoFilePath}"
+                    Text="{Binding RepositoryPath}"
                     />
                 <Button
                     Padding="3"
                     HorizontalAlignment="Center"
-                    Command="{Binding ChooseCloneDirectoryCommand}"
+                    Command="{Binding DataContext.CallRepositoryDialogCommand, RelativeSource={RelativeSource AncestorType=Window}}"
                     Content="Directory"
                     />
             </StackPanel>
