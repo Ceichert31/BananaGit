@@ -41,8 +41,7 @@ namespace BananaGit.ViewModels
         [ObservableProperty]
         private GitBranch? _currentBranch;
 
-        [ObservableProperty]
-        private ObservableCollection<GitCommitInfo> _commitHistory = [];
+
 
         //Flags
         [ObservableProperty]
@@ -56,8 +55,6 @@ namespace BananaGit.ViewModels
 
      
         #endregion
-
-        private int _maxCommitHistoryLength = 30;
 
         private readonly DispatcherTimer _updateGitInfoTimer = new();
 
@@ -155,34 +152,10 @@ namespace BananaGit.ViewModels
                 using var repo = new Repository(LocalRepoFilePath);
                 var stats = repo.RetrieveStatus(new StatusOptions());
 
-                CommitHistory.Clear();
                 //Update list of all commits
                 if (CurrentBranch == null || CurrentBranch.Name == "") throw new NullReferenceException("Current branch isn't set");
 
                 var currentBranch = repo.Branches[CurrentBranch.Name] ?? throw new NullReferenceException("Current branch isn't set");
-
-                var commits = currentBranch.Commits.ToList();
-
-                int commitCount = 0;
-                foreach (var commit in commits)
-                {
-                    //Break out if commit history is too long
-                    if (commitCount > _maxCommitHistoryLength)
-                        break;
-                    commitCount++;
-                    
-                    GitCommitInfo commitInfo = new()
-                    {
-                        Author = commit.Author.ToString(),
-                        Date =
-                            $"{commit.Author.When.DateTime.ToShortTimeString()} {commit.Author.When.DateTime.ToShortDateString()}",
-                        Message = commit.Message,
-                        Commit = commit.Id.ToString(),
-                        //Check if more than one parent, then it is a merge commit
-                        IsMergeCommit = commit.Parents.Count() > 1
-                    };
-                    CommitHistory.Add(commitInfo);
-                }
 
                 //If no changes have been made, don't do anything
                 if (!stats.IsDirty) return;

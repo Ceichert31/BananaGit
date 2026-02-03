@@ -6,10 +6,10 @@
     xmlns:local="clr-namespace:BananaGit.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
-    d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
-    Background="{StaticResource BananaLight}"
+    d:DataContext="{d:DesignInstance Type=viewmodels:CommitHistoryViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="400"
+    Background="{StaticResource BananaLight}"
     mc:Ignorable="d"
     >
     <Grid>
@@ -23,8 +23,12 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <Label Content="{Binding RepoName}" VerticalAlignment="Stretch" Background="{StaticResource BananaAccent}"/>
-        
+        <Label
+            VerticalAlignment="Stretch"
+            Background="{StaticResource BananaAccent}"
+            Content="{Binding RepositoryName}"
+            />
+
         <ScrollViewer
             Grid.Row="1"
             HorizontalAlignment="Stretch"
@@ -36,19 +40,24 @@
             <ItemsControl ItemsSource="{Binding CommitHistory}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border x:Name="GitHistoryItemBorder" BorderBrush="{StaticResource BananaGradient}" BorderThickness="0,3,0,0">
+                        <Border
+                            x:Name="GitHistoryItemBorder"
+                            BorderBrush="{StaticResource BananaGradient}"
+                            BorderThickness="0,3,0,0"
+                            >
                             <StackPanel Orientation="Vertical">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image 
-                                        VerticalAlignment="Center"
+                                    <Image
                                         HorizontalAlignment="Center"
-                                        Style="{StaticResource GitBananaIconStyle}"/>
+                                        VerticalAlignment="Center"
+                                        Style="{StaticResource GitBananaIconStyle}"
+                                        />
                                     <Label
                                         Content="{Binding Message}"
                                         FontSize="12"
                                         FontWeight="Bold"
                                         Foreground="Black"
-                                    />
+                                        />
                                 </StackPanel>
                                 <StackPanel VerticalAlignment="Bottom" Orientation="Horizontal">
                                     <Label
@@ -66,7 +75,7 @@
                         </Border>
                         <DataTemplate.Triggers>
                             <DataTrigger Binding="{Binding RelativeSource={RelativeSource PreviousData}}" Value="{x:Null}">
-                                <Setter TargetName="GitHistoryItemBorder" Property="BorderThickness" Value="0,0,0,0"/>
+                                <Setter TargetName="GitHistoryItemBorder" Property="BorderThickness" Value="0,0,0,0" />
                             </DataTrigger>
                         </DataTemplate.Triggers>
                     </DataTemplate>

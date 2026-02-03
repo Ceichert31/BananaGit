@@ -20,8 +20,7 @@ partial class ToolbarViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<GitBranch> _localBranches = [];
 
-    [ObservableProperty]
-    private ObservableCollection<GitBranch> _remoteBranches = [];
+
     
     public GitBranch? CurrentBranch => _gitInfo.CurrentBranch;
     
@@ -83,12 +82,8 @@ partial class ToolbarViewModel : ObservableObject
     private void UpdateBranches()
     { 
         LocalBranches.Clear(); 
-        RemoteBranches.Clear();
         LocalBranches = new(_gitService.GetLocalBranches());
-        RemoteBranches = new(_gitService.GetRemoteBranches());
     }
-
-    
      
       
         /*

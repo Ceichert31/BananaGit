@@ -15,6 +15,9 @@ namespace BananaGit.Services
     {
         private GitInfoModel? _gitInfo;
 
+        public EventHandler<EventArgs>? OnRepositoryChanged;
+        public EventHandler<EventArgs>? OnChangesPulled;
+
         public GitService(GitInfoModel? gitInfo)
         {
             _gitInfo = gitInfo;
@@ -60,8 +63,6 @@ namespace BananaGit.Services
                     ExcludeReachableFrom = repo.Head.TrackedBranch.Tip.Id,
                 }
             );
-
-            bool i = localCommits.Any();
 
             return localCommits.Any();
         }
@@ -121,9 +122,8 @@ namespace BananaGit.Services
         /// <summary>
         /// Checks current repositories file location before using it
         /// </summary>
-        /// <param name="path"></param>
         /// <exception cref="RepoLocationException"></exception>
-        private void VerifyPath(string? path)
+        private void VerifyPath()
         {
             if (
                 _gitInfo?.SavedRepository?.FilePath == null
@@ -164,7 +164,7 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+                VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
 
@@ -181,7 +181,7 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+                VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
                 //Get status and return if no changes have been made
@@ -206,7 +206,7 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+                VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
                 //Get status and return if no changes have been made
@@ -232,7 +232,7 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+                VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
                 var status = repo.RetrieveStatus();
@@ -252,7 +252,7 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+                VerifyPath();
 
                 var status = repo.RetrieveStatus();
                 if (!status.IsDirty)
@@ -270,7 +270,7 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+                VerifyPath();
 
                 using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
                 {
@@ -293,7 +293,7 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+                VerifyPath();
 
                 using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
                 {
@@ -360,11 +360,11 @@ namespace BananaGit.Services
         /// </summary>
         /// <param name="branch">The branch changes will be pulled from</param>
         /// <returns></returns>
-        public async Task<MergeStatus> PullFilesAsync(GitBranch branch)
+        private async Task<MergeStatus> PullFilesAsync(GitBranch branch)
         {
             await Task.Run(() =>
             {
-                VerifyPath(_gitInfo?.SavedRepository?.FilePath);
+                VerifyPath();
 
                 var options = new PullOptions
                 {
@@ -500,13 +500,18 @@ namespace BananaGit.Services
 
                 if (_gitInfo != null)
                 {
-                    _gitInfo.CurrentBranch = new(_gitInfo);   
+                    _gitInfo.CurrentBranch = new(_gitInfo);
                     JsonDataManager.SaveUserInfo(_gitInfo);
                 }
             }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex.Message);
+            }
+            finally
+            {
+                //Notify view models that changes have been pulled
+                OnChangesPulled?.Invoke(this, EventArgs.Empty);
             }
         }
         
@@ -516,7 +521,7 @@ namespace BananaGit.Services
         /// <returns>A list of local branches</returns>
         public List<GitBranch> GetLocalBranches()
         {
-            VerifyPath(_gitInfo?.GetPath());
+            VerifyPath();
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
@@ -540,7 +545,7 @@ namespace BananaGit.Services
         /// <returns>A list of remote branches</returns>
         public List<GitBranch> GetRemoteBranches()
         {
-            VerifyPath(_gitInfo?.GetPath());
+            VerifyPath();
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
@@ -569,11 +574,42 @@ namespace BananaGit.Services
                 throw new NullReferenceException("Couldn't access repository path!");
             }
             
-            VerifyPath(_gitInfo?.GetPath());
+            VerifyPath();
             
             return new DirectoryInfo(path).Name;
         }
-      
+
+        /// <summary>
+        /// Returns the commit history for the current branch
+        /// </summary>
+        /// <returns></returns>
+        public List<GitCommitInfo> GetCommitHistory(int historyLength)
+        {
+            VerifyPath();
+
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            var commits = repo.Branches[_gitInfo?.CurrentBranch?.CanonicalName].Commits.ToList();
+
+            List<GitCommitInfo> commitList = new();
+            
+            //Iterate through and convert commit info into GitCommitInfo model
+            for (int i = 0; i < historyLength; i++)
+            {
+                GitCommitInfo commitInfo = new()
+                {
+                    Author = commits[i].Author.ToString(),
+                    Date =
+                        $"{commits[i].Author.When.DateTime.ToShortTimeString()} {commits[i].Author.When.DateTime.ToShortDateString()}",
+                    Message = commits[i].Message,
+                    Commit = commits[i].Id.ToString(),
+                    //Check if more than one parent, then it is a merge commit
+                    IsMergeCommit = commits[i].Parents.Count() > 1
+                };
+                commitList.Add(commitInfo);
+            }
+            return commitList;
+        }
         #endregion
    }
 }
