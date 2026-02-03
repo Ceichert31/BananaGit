@@ -50,7 +50,7 @@ namespace BananaGit.Services
         public void ShowSettingsDialog()
         {
             SettingsView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
-            view.Show();
+            view.ShowDialog();
         }
         /// <summary>
         /// Opens a dialog with a debug console

@@ -22,11 +22,6 @@ namespace BananaGit.Services
         {
             _gitInfo = gitInfo;
             JsonDataManager.UserInfoChanged += OnUserDataChange;
-
-            if (_gitInfo == null)
-            {
-                //throw new LoadDataException("ERROR: Couldn't load user info!");
-            }
         }
 
         /// <summary>
@@ -40,11 +35,10 @@ namespace BananaGit.Services
         }
 
         #region Getters
-
         /// <summary>
         /// Checks if the current repo has files commited but not pushed
         /// </summary>
-        /// <returns>Whether localally commited files have been pushed</returns>
+        /// <returns>Whether locally commited files have been pushed</returns>
         public bool HasLocalCommitedFiles()
         {
             using var repo = new Repository(_gitInfo?.GetPath());
@@ -66,10 +60,108 @@ namespace BananaGit.Services
 
             return localCommits.Any();
         }
+
+        #region Branch Getters
+        /// <summary>
+        /// Verifies repository path and returns a list of local branches
+        /// </summary>
+        /// <returns>A list of local branches</returns>
+        public List<GitBranch> GetLocalBranches()
+        {
+            VerifyPath();
+
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            List<GitBranch> localBranches = new();
+            
+            foreach (var branch in repo.Branches)
+            {
+                if (branch.IsRemote)
+                {
+                    continue;
+                }
+                localBranches.Add(new GitBranch(branch));
+            }
+
+            return localBranches;
+        }
+
+        /// <summary>
+        /// Verifies repository path and returns a list of remote branches
+        /// </summary>
+        /// <returns>A list of remote branches</returns>
+        public List<GitBranch> GetRemoteBranches()
+        {
+            VerifyPath();
+
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            List<GitBranch> remoteBranches = new();
+            
+            foreach (var branch in repo.Branches)
+            {
+                if (!branch.IsRemote)
+                {
+                    continue;
+                }
+                remoteBranches.Add(new GitBranch(branch));
+            }
+            return remoteBranches;
+        }
+
+        #endregion
+
+        /// <summary>
+        /// Checks if the repository is accessible, and gets the repository name
+        /// </summary>
+        /// <returns>The name of the current repository name</returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public string GetRepositoryName()
+        {
+            if (_gitInfo?.TryGetPath(out var path) == null)
+            {
+                throw new NullReferenceException("Couldn't access repository path!");
+            }
+            
+            VerifyPath();
+            
+            return new DirectoryInfo(path).Name;
+        }
+
+        /// <summary>
+        /// Returns the commit history for the current branch
+        /// </summary>
+        /// <returns>A list of past commits</returns>
+        public List<GitCommitInfo> GetCommitHistory(int historyLength)
+        {
+            VerifyPath();
+
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            var commits = repo.Branches[_gitInfo?.CurrentBranch?.CanonicalName].Commits.ToList();
+
+            List<GitCommitInfo> commitList = new();
+            
+            //Iterate through and convert commit info into GitCommitInfo model
+            for (int i = 0; i < historyLength; i++)
+            {
+                GitCommitInfo commitInfo = new()
+                {
+                    Author = commits[i].Author.ToString(),
+                    Date =
+                        $"{commits[i].Author.When.DateTime.ToShortTimeString()} {commits[i].Author.When.DateTime.ToShortDateString()}",
+                    Message = commits[i].Message,
+                    Commit = commits[i].Id.ToString(),
+                    //Check if more than one parent, then it is a merge commit
+                    IsMergeCommit = commits[i].Parents.Count() > 1
+                };
+                commitList.Add(commitInfo);
+            }
+            return commitList;
+        }
         #endregion
 
         #region Helper Methods
-
         /// <summary>
         /// Removes all local commits and reverts to the remotes last commit
         /// (Aka deletes all unpushed commits)
@@ -289,7 +381,7 @@ namespace BananaGit.Services
         /// Pushes files that are commited to the repository on the specified branch
         /// </summary>
         /// <param name="branch">The branch that files will be pushed to</param>
-        public async Task PushFilesAsync(GitBranch branch)
+        private async Task PushFilesAsync(GitBranch branch)
         {
             await Task.Run(() =>
             {
@@ -438,7 +530,7 @@ namespace BananaGit.Services
         }
         #endregion
 
-        #region Method Wrappers
+        #region Public Method Wrappers
         /// <summary>
         /// Calls GitService to push commited files onto selected branch, handles errors
         /// </summary>
@@ -513,102 +605,6 @@ namespace BananaGit.Services
                 //Notify view models that changes have been pulled
                 OnChangesPulled?.Invoke(this, EventArgs.Empty);
             }
-        }
-        
-        /// <summary>
-        /// Verifies repository path and returns a list of local branches
-        /// </summary>
-        /// <returns>A list of local branches</returns>
-        public List<GitBranch> GetLocalBranches()
-        {
-            VerifyPath();
-
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            List<GitBranch> localBranches = new();
-            
-            foreach (var branch in repo.Branches)
-            {
-                if (branch.IsRemote)
-                {
-                    continue;
-                }
-                localBranches.Add(new GitBranch(branch));
-            }
-
-            return localBranches;
-        }
-
-        /// <summary>
-        /// Verifies repository path and returns a list of remote branches
-        /// </summary>
-        /// <returns>A list of remote branches</returns>
-        public List<GitBranch> GetRemoteBranches()
-        {
-            VerifyPath();
-
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            List<GitBranch> remoteBranches = new();
-            
-            foreach (var branch in repo.Branches)
-            {
-                if (!branch.IsRemote)
-                {
-                    continue;
-                }
-                remoteBranches.Add(new GitBranch(branch));
-            }
-            return remoteBranches;
-        }
-
-        /// <summary>
-        /// Checks if the repository is accessible, and gets the repository name
-        /// </summary>
-        /// <returns>The name of the current repository name</returns>
-        /// <exception cref="NullReferenceException"></exception>
-        public string GetRepositoryName()
-        {
-            if (_gitInfo?.TryGetPath(out var path) == null)
-            {
-                throw new NullReferenceException("Couldn't access repository path!");
-            }
-            
-            VerifyPath();
-            
-            return new DirectoryInfo(path).Name;
-        }
-
-        /// <summary>
-        /// Returns the commit history for the current branch
-        /// </summary>
-        /// <returns></returns>
-        public List<GitCommitInfo> GetCommitHistory(int historyLength)
-        {
-            VerifyPath();
-
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            var commits = repo.Branches[_gitInfo?.CurrentBranch?.CanonicalName].Commits.ToList();
-
-            List<GitCommitInfo> commitList = new();
-            
-            //Iterate through and convert commit info into GitCommitInfo model
-            for (int i = 0; i < historyLength; i++)
-            {
-                GitCommitInfo commitInfo = new()
-                {
-                    Author = commits[i].Author.ToString(),
-                    Date =
-                        $"{commits[i].Author.When.DateTime.ToShortTimeString()} {commits[i].Author.When.DateTime.ToShortDateString()}",
-                    Message = commits[i].Message,
-                    Commit = commits[i].Id.ToString(),
-                    //Check if more than one parent, then it is a merge commit
-                    IsMergeCommit = commits[i].Parents.Count() > 1
-                };
-                commitList.Add(commitInfo);
-            }
-            return commitList;
         }
         #endregion
    }
