@@ -61,7 +61,7 @@
                 Foreground="Black"
                 IsSynchronizedWithCurrentItem="True"
                 ItemsSource="{Binding LocalBranches}"
-                SelectedItem="{Binding CurrentBranch}"
+                SelectedItem="{Binding CurrentBranch, Mode=OneWay}"
                 >
                 <ComboBox.ItemTemplate>
                     <DataTemplate>

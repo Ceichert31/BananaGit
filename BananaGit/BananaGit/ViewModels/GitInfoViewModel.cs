@@ -300,20 +300,9 @@ namespace BananaGit.ViewModels
         /// Calls GitService to push commited files onto selected branch, handles errors
         /// </summary>
         [RelayCommand]
-        private async Task PushFiles()
-        {
-            try
-            {
-                await _gitService.PushFiles();
-            }
-            catch (LibGit2SharpException ex)
-            {
-                OutputError($"Failed to Push {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
+        private async Task CallPushFiles()
+        { 
+            await _gitService.PushFiles();
         }
         #endregion
 

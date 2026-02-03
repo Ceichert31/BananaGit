@@ -23,13 +23,17 @@ partial class ToolbarViewModel : ObservableObject
     [ObservableProperty]
     private ObservableCollection<GitBranch> _remoteBranches = [];
     
-    private readonly DialogService? _dialogService;
-    private readonly GitService? _gitService;
+    public GitBranch? CurrentBranch => _gitInfo.CurrentBranch;
+    
+    private readonly DialogService _dialogService;
+    private readonly GitService _gitService;
+    private readonly GitInfoModel _gitInfo;
 
-    public ToolbarViewModel(DialogService dialogService, GitService gitService)
+    public ToolbarViewModel(DialogService dialogService, GitService gitService, GitInfoModel gitInfo)
     {
         _dialogService = dialogService;
         _gitService = gitService;
+        _gitInfo = gitInfo;
     }
     
     [RelayCommand]
@@ -40,29 +44,28 @@ partial class ToolbarViewModel : ObservableObject
     [RelayCommand]
     private void OpenCloneWindow()
     {
-        _dialogService?.ShowCloneRepoDialog();
+        _dialogService.ShowCloneRepoDialog();
     }
     [RelayCommand]
     private void OpenRemoteWindow()
     {
-        _dialogService?.ShowRemoteBranchesDialog();
+        _dialogService.ShowRemoteBranchesDialog();
     }
     [RelayCommand]
     private void OpenSettingsWindow()
     {
-        _dialogService?.ShowSettingsDialog();
+        _dialogService.ShowSettingsDialog();
     }
 
     [RelayCommand]
     private void OpenConsoleWindow()
     {
-        _dialogService?.ShowConsoleDialog(TerminalViewModel);
+        _dialogService.ShowConsoleDialog(TerminalViewModel);
     }
 
     [RelayCommand]
     private async Task CallPushFiles()
     {
-        if (_gitService == null) return;
         await _gitService.PushFiles();
         HasCommitedFiles = false;
     }
@@ -70,11 +73,22 @@ partial class ToolbarViewModel : ObservableObject
     [RelayCommand]
     private async Task CallPullFiles()
     {
-        if (_gitService == null) return;
         await _gitService.PullChanges();
+        UpdateBranches();
     }
     
-     
+    /// <summary>
+    /// Checks if any new branches were added and adds them to list
+    /// </summary>
+    private void UpdateBranches()
+    { 
+        LocalBranches.Clear(); 
+        RemoteBranches.Clear();
+        LocalBranches = new(_gitService.GetLocalBranches());
+        RemoteBranches = new(_gitService.GetRemoteBranches());
+    }
+
+    
      
       
         /*

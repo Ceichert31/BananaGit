@@ -472,9 +472,6 @@ namespace BananaGit.Services
 
                 var status = await PullFilesAsync(_gitInfo.CurrentBranch);
 
-                //Updates the branch list
-                //UpdateBranches(CurrentBranch);
-
                 switch (status)
                 {
                     //Check for merge conflicts
@@ -513,53 +510,69 @@ namespace BananaGit.Services
             }
         }
         
-         /*/// <summary>
-        /// Checks if any new branches were added and adds them to list
+        /// <summary>
+        /// Verifies repository path and returns a list of local branches
         /// </summary>
-        private void UpdateBranches()
+        /// <returns>A list of local branches</returns>
+        public List<GitBranch> GetLocalBranches()
         {
-            try
+            VerifyPath(_gitInfo?.GetPath());
+
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            List<GitBranch> localBranches = new();
+            
+            foreach (var branch in repo.Branches)
             {
-                VerifyPath(_gitInfo?.GetPath());
-                
-                using var repo = new Repository(_gitInfo?.GetPath());
-                    
-                LocalBranches.Clear();
-                RemoteBranches.Clear();
-                CurrentBranch = currentBranch;
-                LocalBranches.Add(currentBranch);
-                    
-                if (githubUserInfo?.TryGetPath(out var path) == null)
+                if (branch.IsRemote)
                 {
-                    throw new NullReferenceException("Couldn't access repository path!");
+                    continue;
                 }
-                RepoName = new DirectoryInfo(path).Name;
-                    
-                //Update branches
-                foreach (var branch in repo.Branches)
-                {
-                    if (branch.IsRemote)
-                    {
-                        //Filter out all remotes with ref in the name
-                        if (!branch.CanonicalName.StartsWith("refs/remotes/origin"))
-                            continue;
-
-                        RemoteBranches.Add(new GitBranch(branch));
-                        continue;
-                    }
-
-                    //Check if local branch already exists
-                    if (LocalBranches.Any(x => x.CanonicalName == branch.CanonicalName))
-                        continue;
-
-                    LocalBranches.Add(new GitBranch(branch));
-                }
+                localBranches.Add(new GitBranch(branch));
             }
-            catch (Exception ex)
+
+            return localBranches;
+        }
+
+        /// <summary>
+        /// Verifies repository path and returns a list of remote branches
+        /// </summary>
+        /// <returns>A list of remote branches</returns>
+        public List<GitBranch> GetRemoteBranches()
+        {
+            VerifyPath(_gitInfo?.GetPath());
+
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            List<GitBranch> remoteBranches = new();
+            
+            foreach (var branch in repo.Branches)
             {
-                OutputError(ex.Message);
+                if (!branch.IsRemote)
+                {
+                    continue;
+                }
+                remoteBranches.Add(new GitBranch(branch));
             }
-        }*/
+            return remoteBranches;
+        }
+
+        /// <summary>
+        /// Checks if the repository is accessible, and gets the repository name
+        /// </summary>
+        /// <returns>The name of the current repository name</returns>
+        /// <exception cref="NullReferenceException"></exception>
+        public string GetRepositoryName()
+        {
+            if (_gitInfo?.TryGetPath(out var path) == null)
+            {
+                throw new NullReferenceException("Couldn't access repository path!");
+            }
+            
+            VerifyPath(_gitInfo?.GetPath());
+            
+            return new DirectoryInfo(path).Name;
+        }
       
         #endregion
    }
