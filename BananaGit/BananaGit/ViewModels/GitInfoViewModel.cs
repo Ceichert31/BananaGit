@@ -97,6 +97,7 @@ namespace BananaGit.ViewModels
                 NoRepoCloned = false;
 
                 //UpdateBranches(CurrentBranch);
+                _gitService.OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
             }
             catch (GitException ex)
             {

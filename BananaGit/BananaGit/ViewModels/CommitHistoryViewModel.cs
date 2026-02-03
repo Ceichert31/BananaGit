@@ -36,6 +36,7 @@ partial class CommitHistoryViewModel : ObservableObject
     {
         //Display new repo name
         RepositoryName = _gitService.GetRepositoryName();
+        PulledChanges(sender, e);
     }
     
     /// <summary>

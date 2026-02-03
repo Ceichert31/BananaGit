@@ -19,8 +19,6 @@ partial class ToolbarViewModel : ObservableObject
     
     [ObservableProperty]
     private ObservableCollection<GitBranch> _localBranches = [];
-
-
     
     public GitBranch? CurrentBranch => _gitInfo.CurrentBranch;
     
@@ -33,6 +31,9 @@ partial class ToolbarViewModel : ObservableObject
         _dialogService = dialogService;
         _gitService = gitService;
         _gitInfo = gitInfo;
+        
+        _gitService.OnRepositoryChanged += UpdateBranches;
+        _gitService.OnChangesPulled += UpdateBranches;
     }
     
     [RelayCommand]
@@ -73,13 +74,12 @@ partial class ToolbarViewModel : ObservableObject
     private async Task CallPullFiles()
     {
         await _gitService.PullChanges();
-        UpdateBranches();
     }
     
     /// <summary>
     /// Checks if any new branches were added and adds them to list
     /// </summary>
-    private void UpdateBranches()
+    private void UpdateBranches(object? sender, EventArgs e)
     { 
         LocalBranches.Clear(); 
         LocalBranches = new(_gitService.GetLocalBranches());
