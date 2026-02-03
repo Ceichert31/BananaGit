@@ -5,6 +5,7 @@ using BananaGit.Models;
 using BananaGit.Utilities;
 using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
+using Microsoft.Win32;
 
 namespace BananaGit.Services
 {
@@ -607,5 +608,93 @@ namespace BananaGit.Services
             }
         }
         #endregion
+
+        /// <summary>
+        /// Opens a dialog to prompt the user to select an already
+        /// existing repository to open, or a directory to clone to
+        /// </summary>
+        /// <returns>True if the file location is empty, otherwise false</returns>
+        public bool ChooseRepositoryDialog()
+        {
+            //Open dialog, choose path, check path validity, if path is valid save to user info, if not give message
+            try
+            {
+                //Open file select dialogue
+                OpenFolderDialog dialog = new OpenFolderDialog
+                {
+                    Multiselect = false,
+                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+                };
+
+                //If dialog closes, check result
+                if (dialog.ShowDialog() != true) return false;
+                
+                string selectedFilePath = dialog.FolderName;
+
+                //Check if directory is empty and mark as cloneable
+                if (!Directory.EnumerateFiles(selectedFilePath).Any())
+                {
+                    //Directory is empty, can clone
+                    /*CanClone = true;
+                    LocalRepoFilePath = selectedFilePath;
+                    DirectoryHasFiles = false;*/
+                    _gitInfo?.SetPath(selectedFilePath);
+                    return true;
+                }
+                //Otherwise open if a repository already exists there
+                OpenLocalRepository(selectedFilePath);
+            }
+            catch (Exception ex)
+            {
+                /*CanClone = false;
+                NoRepoCloned = true;
+                DirectoryHasFiles = true;*/
+                Trace.WriteLine(ex.Message);
+            }
+            return true;
+        }
+        
+        /// <summary>
+        /// Verifies that a repository exists at the file location and opens it
+        /// </summary>
+        /// <param name="filePath">Filepath to a local git repository</param>
+        /// <exception cref="RepositoryNotFoundException"></exception>
+        /// <exception cref="NullReferenceException"></exception>
+        private void OpenLocalRepository(string filePath)
+        {
+            try
+            {
+                Task.Run(() =>
+                {
+                    //Check if file location is local repo
+                    if (!Repository.IsValid(filePath)) 
+                        throw new RepositoryNotFoundException($"Repository not found at {filePath}!");
+            
+                    var repo = new Repository(filePath);
+
+                    //Set active repo as locally opened repo
+                    var remote = repo.Network.Remotes["origin"];
+                    if (remote != null)
+                    {
+                        _gitInfo?.SetUrl(remote.Url);
+                    }
+                    else
+                    {
+                        throw new NullReferenceException("Couldn't find any remotes!");
+                    }
+
+                    //Save to user info
+                    _gitInfo?.SetPath(filePath);
+                    JsonDataManager.SaveUserInfo(_gitInfo);
+                    
+                    //Notify view models that the repository data has changed
+                    OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
+                });
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
+        }
    }
 }

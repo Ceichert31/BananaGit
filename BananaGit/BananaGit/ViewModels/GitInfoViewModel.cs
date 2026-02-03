@@ -307,19 +307,6 @@ namespace BananaGit.ViewModels
         {
             Application.Current.Dispatcher.Invoke(() => { Trace.WriteLine(message); });
         }
-
-        /*
-        /// <summary>
-        /// Resets collection of local branches and re-initializes the lists
-        /// </summary>
-        private void ResetBranches()
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {      
-                LocalBranches.Clear();
-                RemoteBranches.Clear();
-            });
-        }*/
         #endregion
     }
 }
