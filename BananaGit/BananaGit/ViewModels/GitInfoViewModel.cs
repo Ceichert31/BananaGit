@@ -65,7 +65,7 @@ namespace BananaGit.ViewModels
 
         public GitInfoViewModel(GitService gitService, GitInfoModel userInfo)
         {
-            _dialogService = new DialogService(this);
+            _dialogService = new DialogService(this, gitService);
             _gitService = gitService;
             
             _updateGitInfoTimer.Tick += UpdateRepoStatus;

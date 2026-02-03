@@ -8,29 +8,31 @@
     Title="RemoteBranchView"
     Width="500"
     Height="400"
-    d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
+    d:DataContext="{d:DesignInstance Type=viewmodels:RemoteBranchViewModel}"
     Background="{StaticResource BananaYellow}"
     WindowStartupLocation="CenterOwner"
     mc:Ignorable="d"
     >
     <Grid>
-        
+
         <Grid.RowDefinitions>
-            <RowDefinition Height="25"/>
-            <RowDefinition Height="*"/>
+            <RowDefinition Height="25" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
-        
-        <Label Foreground="Black" 
-               FontWeight="Bold" 
-               Background="{StaticResource BananaAccent}"
-               Content="Checkout Remote Branches"/>
-        
-        <ScrollViewer VerticalScrollBarVisibility="Auto" Grid.Row="1">
+
+        <Label
+            Background="{StaticResource BananaAccent}"
+            Content="Checkout Remote Branches"
+            FontWeight="Bold"
+            Foreground="Black"
+            />
+
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
             <ItemsControl
                 HorizontalAlignment="Stretch"
                 VerticalAlignment="Stretch"
                 ItemsSource="{Binding RemoteBranches}"
-            >
+                >
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
@@ -42,7 +44,7 @@
                                     Command="{Binding CheckoutBranchCommand}"
                                     Content="+"
                                     Foreground="White"
-                                />
+                                    />
                                 <Label Content="{Binding Name}" Foreground="Black" />
                             </DockPanel>
                         </Border>
