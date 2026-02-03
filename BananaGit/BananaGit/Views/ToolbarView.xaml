@@ -31,7 +31,7 @@
                 Foreground="Black"
                 />
             <Button
-                Command="{Binding ChooseCloneDirectoryCommand}"
+                Command="{Binding CallRepositoryDialogCommand}"
                 Content="Open"
                 Foreground="Black"
                 />

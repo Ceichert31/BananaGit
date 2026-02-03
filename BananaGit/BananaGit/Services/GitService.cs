@@ -142,6 +142,11 @@ namespace BananaGit.Services
             var commits = repo.Branches[_gitInfo?.CurrentBranch?.CanonicalName].Commits.ToList();
 
             List<GitCommitInfo> commitList = new();
+
+            if (historyLength > commits.Count)
+            {
+                historyLength = commits.Count;
+            }
             
             //Iterate through and convert commit info into GitCommitInfo model
             for (int i = 0; i < historyLength; i++)

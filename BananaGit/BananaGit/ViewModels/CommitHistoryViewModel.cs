@@ -48,6 +48,4 @@ partial class CommitHistoryViewModel : ObservableObject
     {
         CommitHistory = new(_gitService.GetCommitHistory(_maxCommitHistoryLength));
     }
-    
-    
 }
