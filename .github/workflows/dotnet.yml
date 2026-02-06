@@ -23,14 +23,27 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+        
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_PATH }}
+      
     - name: Build
       run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore 
+      
     - name: Test
       run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
       env: 
         GIT_TEST_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
         GIT_TEST_USERNAME: ${{ secrets.GIT_TEST_USERNAME }}
         GIT_TEST_EMAIL: ${{ secrets.GIT_TEST_EMAIL }}
-        
+
+    - name: Publish application
+      run: dotnet publish -c Release -o ${{ env.DEPLOY_PATH }} --no-build
+      env:
+        DEPLOY_PATH: builds/BananaGit/
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: BananaGit 
+        path: builds/BananaGit/
