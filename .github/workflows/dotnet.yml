@@ -39,7 +39,7 @@ jobs:
         GIT_TEST_EMAIL: ${{ secrets.GIT_TEST_EMAIL }}
 
     - name: Publish application
-      run: dotnet publish ${{ env.SOLUTION_PATH }} -c Release -o ${{ env.DEPLOY_PATH }} --no-build
+      run: dotnet publish BananaGit/BananaGit/BananaGit.csproj -c Release -o builds/BananaGit/
       env:
         DEPLOY_PATH: builds/BananaGit/
 
