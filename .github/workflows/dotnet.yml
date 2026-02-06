@@ -48,3 +48,4 @@ jobs:
       with:
         name: BananaGit 
         path: builds/BananaGit/
+        retention-days: 7
