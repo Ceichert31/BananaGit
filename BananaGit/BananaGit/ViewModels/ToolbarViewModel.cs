@@ -16,9 +16,6 @@ partial class ToolbarViewModel : ObservableObject
     private TerminalViewModel _terminalViewModel = new();
     
     [ObservableProperty]
-    private bool _hasCommitedFiles;
-    
-    [ObservableProperty]
     private ObservableCollection<GitBranch> _localBranches = [];
     
     public GitBranch? CurrentBranch => _gitInfo.CurrentBranch;
@@ -68,7 +65,6 @@ partial class ToolbarViewModel : ObservableObject
     private async Task CallPushFiles()
     {
         await _gitService.PushFiles();
-        HasCommitedFiles = false;
     }
 
     [RelayCommand]

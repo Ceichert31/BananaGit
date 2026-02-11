@@ -53,7 +53,7 @@
         <local:CommitView
             Grid.Row="3"
             Grid.Column="3"
-            DataContext="{Binding GitInfoViewModel}"
+            DataContext="{Binding CommitViewModel}"
             />
 
         <!--  Commit History & Tutorial  -->

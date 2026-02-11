@@ -181,7 +181,7 @@ namespace BananaGit.Services
             var removed = repo.RetrieveStatus().Removed;
 
             //Check if any changes exist 
-            return staged.Any() && added.Any() && removed.Any();
+            return staged.Any() || added.Any() || removed.Any();
         }
         #endregion
 

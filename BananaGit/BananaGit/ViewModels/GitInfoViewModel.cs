@@ -193,40 +193,6 @@ namespace BananaGit.ViewModels
 
         #region Stage/Commit
         /// <summary>
-        /// Calls GitService to commit staged files and handles any errors
-        /// </summary>
-        [RelayCommand]
-        private async Task CommitStagedFiles()
-        {
-            try
-            {
-                using var repo = new Repository(githubUserInfo?.GetPath());
-
-                var staged = repo.RetrieveStatus().Staged;
-                var added = repo.RetrieveStatus().Added;
-                var removed = repo.RetrieveStatus().Removed;
-                
-                if (!staged.Any() && !added.Any() && !removed.Any()) return;
-                
-                await _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader} {CommitMessage}");
-                
-                SelectedCommitHeader = string.Empty;
-                //Clear commit message
-                CommitMessage = string.Empty;
-                //HasCommitedFiles = true;
-            }
-            catch (LibGit2SharpException ex)
-            {
-                OutputError($"Failed to commit {LocalRepoFilePath}");
-                OutputError(ex.Message);
-            }
-            catch (Exception ex)
-            {
-                OutputError(ex.Message);
-            }
-        }
-
-        /// <summary>
         /// Calls GitService to stage all changed files, handles any errors
         /// </summary>
         [RelayCommand]

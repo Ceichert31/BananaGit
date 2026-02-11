@@ -15,6 +15,9 @@ partial class CommitViewModel : ObservableObject
     [ObservableProperty]
     private string _commitMessage = string.Empty;
     
+    [ObservableProperty]
+    private string _selectedCommitHeader = string.Empty;
+    
     private readonly GitService _gitService;
     
     public CommitViewModel(GitService gitService)
@@ -29,6 +32,8 @@ partial class CommitViewModel : ObservableObject
     private async Task PushFiles()
     {
         await _gitService.PushFiles();
+        
+        HasCommitedFiles = false;
     }
 
     /// <summary>
@@ -39,6 +44,12 @@ partial class CommitViewModel : ObservableObject
     {
         if (!_gitService.HasLocalChanges()) return;
         
-        await _gitService.CommitStagedFilesAsync(CommitMessage);
+        await _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader}: {CommitMessage}");
+        
+        HasCommitedFiles = true;
+        
+        //Clear commit message
+        CommitMessage = string.Empty;
+        SelectedCommitHeader = string.Empty;
     }
 }

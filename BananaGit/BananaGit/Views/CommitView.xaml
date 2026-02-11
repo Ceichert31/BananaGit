@@ -43,12 +43,12 @@
                 Text="{Binding SelectedCommitHeader, Mode=TwoWay}"
                 >
                 <ComboBoxItem Content="" IsSelected="true" />
-                <ComboBoxItem Content="feat:" />
-                <ComboBoxItem Content="fix:" />
-                <ComboBoxItem Content="refactor:" />
-                <ComboBoxItem Content="chore:" />
-                <ComboBoxItem Content="doc:" />
-                <ComboBoxItem Content="ci/cd:" />
+                <ComboBoxItem Content="feat" />
+                <ComboBoxItem Content="fix" />
+                <ComboBoxItem Content="refactor" />
+                <ComboBoxItem Content="chore" />
+                <ComboBoxItem Content="doc" />
+                <ComboBoxItem Content="ci/cd" />
             </ComboBox>
 
             <StackPanel

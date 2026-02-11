@@ -44,7 +44,6 @@
                 Command="{Binding CallPushFilesCommand}"
                 Content="Push"
                 Foreground="Black"
-                IsEnabled="{Binding HasCommitedFiles}"
                 />
             <Button
                 Command="{Binding CallPullFilesCommand}"
