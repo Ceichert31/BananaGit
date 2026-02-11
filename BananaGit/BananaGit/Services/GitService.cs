@@ -680,7 +680,7 @@ namespace BananaGit.Services
 
                 if (_gitInfo != null)
                 {
-                    _gitInfo.CurrentBranch = new(_gitInfo);
+                    _gitInfo.CurrentBranch = new GitBranch(_gitInfo);
                     JsonDataManager.SaveUserInfo(_gitInfo);
                 }
             }

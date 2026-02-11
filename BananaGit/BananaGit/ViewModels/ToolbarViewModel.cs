@@ -7,6 +7,9 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace BananaGit.ViewModels;
 
+/// <summary>
+/// View model for Toolbar view
+/// </summary>
 partial class ToolbarViewModel : ObservableObject
 {
     [ObservableProperty]
@@ -17,8 +20,12 @@ partial class ToolbarViewModel : ObservableObject
     
     [ObservableProperty]
     private ObservableCollection<GitBranch> _localBranches = [];
-    
-    public GitBranch? CurrentBranch => _gitInfo.CurrentBranch;
+
+    public GitBranch? CurrentBranch
+    {
+        get => _gitInfo.CurrentBranch;
+        set => _gitInfo.CurrentBranch = value;
+    }
     
     private readonly DialogService _dialogService;
     private readonly GitService _gitService;
@@ -86,8 +93,31 @@ partial class ToolbarViewModel : ObservableObject
     {
         Application.Current.Dispatcher.Invoke(() =>
         {
-            LocalBranches.Clear(); 
-            LocalBranches = new(_gitService.GetLocalBranches());
+            //Cache current branch name
+            string? currentBranchName = CurrentBranch?.Name;
+            
+            LocalBranches.Clear();
+            
+            var branches = _gitService.GetLocalBranches();
+
+            //Re-add all branches
+            foreach (var branch in branches)
+            {
+                LocalBranches.Add(branch);
+            }
+
+            //Find the current branch and cache it
+            if (!string.IsNullOrEmpty(currentBranchName))
+            {
+                CurrentBranch = LocalBranches.FirstOrDefault(n => n.Name == currentBranchName);
+            }
+
+            //If current branch couldn't be found, set current branch to first branch
+            if (CurrentBranch == null && LocalBranches.Any())
+            {
+                CurrentBranch = LocalBranches.First();
+            }
+            OnPropertyChanged(nameof(CurrentBranch));
         });
     }
 }
