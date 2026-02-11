@@ -15,31 +15,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="Assets\Banana.png">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-    <Content Include="Assets\Banana.ico">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </Content>
-	  <Content Include="Assets\ExampleGitChangeImage.png">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
-	  <Content Include="Assets\ExampleStagedFileImage.png">
-		  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-	  </Content>
+    <Resource Include="Assets\**\*.png" />
+    <Resource Include="Assets\**\*.ico" />
       <InternalsVisibleTo Include="BananaGit.Test" />
-      <None Remove="Assets\BananaMerge.png" />
-      <Content Include="Assets\BananaMerge.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="Assets\BananaCurrent.png" />
-      <Content Include="Assets\BananaCurrent.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
-      <None Remove="Assets\PullExample.png" />
-      <Content Include="Assets\PullExample.png">
-        <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      </Content>
   </ItemGroup>
 
   <ItemGroup>
