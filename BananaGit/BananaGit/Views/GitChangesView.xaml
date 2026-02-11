@@ -5,7 +5,7 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
-    d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
+    d:DataContext="{d:DesignInstance Type=viewmodels:GitChangesViewModel}"
     d:DesignHeight="450"
     d:DesignWidth="400"
     mc:Ignorable="d"
@@ -86,7 +86,7 @@
             Padding="3"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
-            Command="{Binding StageFilesCommand}"
+            Command="{Binding StageLocalChangesCommand}"
             Content="Stage All"
             Style="{StaticResource GenericButton}"
             />
@@ -138,7 +138,7 @@
             Padding="3"
             HorizontalAlignment="Right"
             VerticalAlignment="Bottom"
-            Command="{Binding UnstageFilesCommand}"
+            Command="{Binding UnstageLocalChangesCommand}"
             Content="Unstage All"
             Style="{StaticResource GenericButton}"
             />

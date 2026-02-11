@@ -183,6 +183,61 @@ namespace BananaGit.Services
             //Check if any changes exist 
             return staged.Any() || added.Any() || removed.Any();
         }
+
+        /// <summary>
+        /// Returns a list of all unstaged local changes
+        /// </summary>
+        /// <returns>A list of all unstaged local changes</returns>
+        public List<ChangedFile> GetUnstagedChanges()
+        {   
+            VerifyPath();
+            using var repo = new Repository(_gitInfo?.GetPath());
+            
+            var stats = repo.RetrieveStatus(new StatusOptions());
+
+            List<ChangedFile> changedFiles = new();
+
+            //Find all unstaged changed files and add them to list
+            foreach (var file in stats)
+            {
+                if (file.State is FileStatus.ModifiedInWorkdir or FileStatus.NewInWorkdir ||
+                    file.State == FileStatus.RenamedInWorkdir || 
+                    file.State == FileStatus.DeletedFromWorkdir ||
+                    file.State == (FileStatus.NewInIndex | FileStatus.ModifiedInWorkdir))
+                {
+                    changedFiles.Add(new ChangedFile(this, file, file.FilePath));
+                }
+            }
+            return changedFiles;
+        }
+
+        /// <summary>
+        /// Returns a list of all staged local changes
+        /// </summary>
+        /// <returns>A list of all staged local changes</returns>
+        public List<ChangedFile> GetStagedChanges()
+        {
+            VerifyPath();
+            using var repo = new Repository(_gitInfo?.GetPath());
+            
+            var stats = repo.RetrieveStatus(new StatusOptions());
+
+            List<ChangedFile> changedFiles = new();
+
+            //Find all unstaged changed files and add them to list
+            foreach (var file in stats)
+            {
+                if (file.State == FileStatus.ModifiedInIndex || 
+                    file.State == FileStatus.NewInIndex || 
+                    file.State == FileStatus.RenamedInIndex || 
+                    file.State == FileStatus.DeletedFromIndex)
+                {
+                    changedFiles.Add(new ChangedFile(this, file, file.FilePath));
+                }
+            }
+            return changedFiles;
+        }
+        
         #endregion
 
         #region Helper Methods

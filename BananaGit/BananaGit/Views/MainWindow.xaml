@@ -46,7 +46,7 @@
             Grid.Row="1"
             Grid.RowSpan="2"
             Grid.Column="3"
-            DataContext="{Binding GitInfoViewModel}"
+            DataContext="{Binding GitChangesViewModel}"
             />
 
         <!--  Git Commit  -->

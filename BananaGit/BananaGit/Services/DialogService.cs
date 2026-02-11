@@ -10,11 +10,10 @@ namespace BananaGit.Services
     /// </summary>
     /// <param name="vm">The <see cref="GitInfoViewModel"/>
     /// that is currently being used by the main window </param>
-    class DialogService(GitInfoViewModel? vm, GitService gitService, GitInfoModel gitInfo)
+    class DialogService(GitService gitService, GitInfoModel gitInfo)
     {
-  
-        private RemoteBranchViewModel _remoteBranchViewModel = new RemoteBranchViewModel(gitService);
-        private CloneRepoViewModel _cloneRepoViewModel = new CloneRepoViewModel(gitService, gitInfo);
+        private readonly RemoteBranchViewModel _remoteBranchViewModel = new RemoteBranchViewModel(gitService);
+        private readonly CloneRepoViewModel _cloneRepoViewModel = new CloneRepoViewModel(gitService, gitInfo);
         
         /// <summary>
         /// Opens a dialog for cloning a new repository 
@@ -50,7 +49,7 @@ namespace BananaGit.Services
         /// </summary>
         public void ShowSettingsDialog()
         {
-            SettingsView view = new() { DataContext = vm, Owner = System.Windows.Application.Current.MainWindow };
+            SettingsView view = new() { DataContext = new SettingsViewModel(), Owner = System.Windows.Application.Current.MainWindow };
             view.ShowDialog();
         }
         /// <summary>

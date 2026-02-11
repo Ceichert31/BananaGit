@@ -1,4 +1,5 @@
-﻿using BananaGit.Models;
+﻿using System.Diagnostics;
+using BananaGit.Models;
 using BananaGit.Services;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -8,9 +9,6 @@ namespace BananaGit.ViewModels
     partial class MainWindowViewModel : ObservableObject
     {
         [ObservableProperty]
-        private GitInfoViewModel? _gitInfoViewModel;
-        
-        [ObservableProperty]
         private ToolbarViewModel? _toolbarViewModel;
         
         [ObservableProperty]
@@ -18,6 +16,9 @@ namespace BananaGit.ViewModels
         
         [ObservableProperty]
         private CommitViewModel? _commitViewModel;
+        
+        [ObservableProperty]
+        private GitChangesViewModel? _gitChangesViewModel;
 
         //Refactor for user controls!
         //Create an observable property for each view model here
@@ -39,13 +40,13 @@ namespace BananaGit.ViewModels
             //If no user info is loaded, display login dialog
             if (_userInfo == null)
             {
-                DialogService tempDialogService = new DialogService(_gitInfoViewModel, gitService, new());
+                DialogService tempDialogService = new DialogService(gitService, new GitInfoModel());
                 tempDialogService.ShowCredentialsDialog();
                 return;
             }
             
             //Passed into DialogService for dialog creation
-            DialogService dialogService = new DialogService(_gitInfoViewModel, gitService, _userInfo);
+            DialogService dialogService = new DialogService(gitService, _userInfo);
             
             ToolbarViewModel = new ToolbarViewModel(dialogService, gitService, _userInfo);
 
@@ -53,7 +54,22 @@ namespace BananaGit.ViewModels
 
             CommitViewModel = new CommitViewModel(gitService);
             
-            GitInfoViewModel = new GitInfoViewModel(gitService, _userInfo);
+            GitChangesViewModel = new GitChangesViewModel(gitService);
+            
+            Initialize(gitService);
+        }
+        
+        private void Initialize(GitService gitService)
+        {
+            try
+            {
+                //UpdateBranches(CurrentBranch);
+                gitService.OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
+            }
+            catch (Exception ex)
+            {
+                Trace.WriteLine(ex.Message);
+            }
         }
     }
 }
