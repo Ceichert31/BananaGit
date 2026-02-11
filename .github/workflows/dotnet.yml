@@ -16,6 +16,7 @@ jobs:
 
     env:
       SOLUTION_PATH: BananaGit/BananaGit.sln
+      DEPLOY_PATH: builds/BananaGit/
 
     steps:
     - uses: actions/checkout@v4
@@ -23,14 +24,28 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+        
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_PATH }}
+      
     - name: Build
       run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore 
+      
     - name: Test
       run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
       env: 
         GIT_TEST_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
         GIT_TEST_USERNAME: ${{ secrets.GIT_TEST_USERNAME }}
         GIT_TEST_EMAIL: ${{ secrets.GIT_TEST_EMAIL }}
-        
+
+    - name: Publish application
+      run: dotnet publish BananaGit/BananaGit/BananaGit.csproj -c Release -o builds/BananaGit/
+      env:
+        DEPLOY_PATH: builds/BananaGit/
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: BananaGit 
+        path: builds/BananaGit/
+        retention-days: 7
