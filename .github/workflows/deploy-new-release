@@ -1,0 +1,52 @@
+# This workflow will build a .NET project
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-net
+
+name: Publish Release
+
+on:
+  workflow_run:
+    workflows: [".NET"]
+    types: [completed]
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: 'Build run ID to deploy (leave empty for latest)'
+        required: false
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    env:
+      SOLUTION_PATH: BananaGit/BananaGit.sln
+      DEPLOY_PATH: builds/BananaGit/
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Setup .NET
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: 8.0.x
+
+    - name: Download build Artifact
+      uses: dawidd6/action-download-artifact@v3
+      with: 
+        workflow: dotnet.yml
+        name: BananaGit
+        path: builds/BananaGit
+        run_id: ${{ github.event.workflow_run.id }}
+        
+    - name: Zip release
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: Compress-Archive -Path ${{ env.DEPLOY_PATH }}* -DestinationPath BananaGit-${{ github.ref_name }}-win-x64.zip
+    
+    - name: Create Release
+      if: startsWith(github.ref, 'refs/tags/v')
+      uses: softprops/action-gh-release@v1
+      with:
+        files: BananaGit-${{ github.ref_name }}-win-x64.zip
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
