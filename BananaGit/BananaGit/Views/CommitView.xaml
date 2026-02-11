@@ -6,10 +6,10 @@
     xmlns:local="clr-namespace:BananaGit.Views"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
-    d:DataContext="{d:DesignInstance Type=viewmodels:GitInfoViewModel}"
-    Background="{StaticResource BananaYellow}"
+    d:DataContext="{d:DesignInstance Type=viewmodels:CommitViewModel}"
     d:DesignHeight="250"
     d:DesignWidth="400"
+    Background="{StaticResource BananaYellow}"
     mc:Ignorable="d"
     >
     <Grid>
@@ -22,20 +22,26 @@
                 Text="Commit Message"
                 TextAlignment="Center"
                 />
-            
+
             <Label Content="Summary" FontSize="15" />
             <TextBox
                 MinHeight="25"
                 Margin="6,0,0,0"
-                Background="{StaticResource BananaLight}"
                 HorizontalAlignment="Stretch"
                 VerticalContentAlignment="Center"
+                Background="{StaticResource BananaLight}"
                 Foreground="Black"
-                Text="{Binding CommitMessage}"/>
-            
-            
+                Text="{Binding CommitMessage}"
+                />
+
+
             <Label Content="Conventional Commit" FontSize="12" />
-            <ComboBox Margin="6,0,0,0" HorizontalAlignment="Left" Width="70" Text="{Binding SelectedCommitHeader, Mode=TwoWay}">
+            <ComboBox
+                Width="70"
+                Margin="6,0,0,0"
+                HorizontalAlignment="Left"
+                Text="{Binding SelectedCommitHeader, Mode=TwoWay}"
+                >
                 <ComboBoxItem Content="" IsSelected="true" />
                 <ComboBoxItem Content="feat:" />
                 <ComboBoxItem Content="fix:" />
@@ -44,7 +50,7 @@
                 <ComboBoxItem Content="doc:" />
                 <ComboBoxItem Content="ci/cd:" />
             </ComboBox>
-          
+
             <StackPanel
                 Margin="0,10,10,0"
                 HorizontalAlignment="Right"

@@ -165,6 +165,24 @@ namespace BananaGit.Services
             }
             return commitList;
         }
+
+        /// <summary>
+        /// Checks if there have been any local changes
+        /// </summary>
+        /// <returns>Returns true if there has been local changes</returns>
+        public bool HasLocalChanges()
+        {
+            VerifyPath();
+
+            using var repo = new Repository(_gitInfo?.GetPath());
+            
+            var staged = repo.RetrieveStatus().Staged;
+            var added = repo.RetrieveStatus().Added;
+            var removed = repo.RetrieveStatus().Removed;
+
+            //Check if any changes exist 
+            return staged.Any() && added.Any() && removed.Any();
+        }
         #endregion
 
         #region Helper Methods
