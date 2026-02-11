@@ -9,7 +9,7 @@
                 <TextBox
                     Width="150"
                     Foreground="Black"
-                    Text="{Binding RepositoryUrl}"
+                    Text="{Binding DataContext.RepositoryUrl, RelativeSource={RelativeSource AncestorType=Window}}"
                     />
             </StackPanel>
             <StackPanel Orientation="Horizontal">
@@ -17,7 +17,7 @@
                 <TextBox
                     Width="100"
                     Foreground="Black"
-                    Text="{Binding RepositoryPath}"
+                    Text="{Binding DataContext.RepositoryPath, RelativeSource={RelativeSource AncestorType=Window}}"
                     />
                 <Button
                     Padding="3"
