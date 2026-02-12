@@ -38,6 +38,8 @@ jobs:
           @semantic-release/git
           @semantic-release/changelog
           @semantic-release/exec
+        repositoryURL: 
+          "https://github.com/Ceichert31/BananaGit"
         
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_PATH }}
