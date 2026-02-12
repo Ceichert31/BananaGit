@@ -25,6 +25,15 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+
+
+    - name: Semantic Release
+      id: semantic
+      uses: cycjimmy/semantic-release-action@v2
+      with:
+        extra_plugins: |
+          @semantic-release/git
+          @semantic-release/changelog
         
     - name: Restore dependencies
       run: dotnet restore ${{ env.SOLUTION_PATH }}
@@ -38,20 +47,7 @@ jobs:
         GIT_TEST_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
         GIT_TEST_USERNAME: ${{ secrets.GIT_TEST_USERNAME }}
         GIT_TEST_EMAIL: ${{ secrets.GIT_TEST_EMAIL }}
-
-    - name: Semantic Release
-      if: github.ref == 'refs/heads/main'
-      id: semantic
-      uses: cycjimmy/semantic-release-action@v4
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      with:
-        semantic_version: 19
-        extra_plugins: |
-          @semantic-release/changelog
-          @semantic-release/git
-        dry_run: false
-
+        
     - name: Publish application
       if: steps.semantic.outputs.new_release_published == 'true'
       run: |
