@@ -38,7 +38,7 @@ jobs:
           @semantic-release/git
           @semantic-release/changelog
           @semantic-release/exec
-        repositoryURL: 
+        repository_url: 
           "https://github.com/Ceichert31/BananaGit"
         
     - name: Restore dependencies
