@@ -1,23 +1,23 @@
 <Project Sdk="Microsoft.NET.Sdk">
-
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
-	  <PublishSingleFile>true</PublishSingleFile>
-	<EnableWindowsTargeting>true</EnableWindowsTargeting>
-	<StartupObject>BananaGit.App</StartupObject>
-	<ApplicationIcon>Assets/Banana.ico</ApplicationIcon>
-	  <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-      <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <PublishSingleFile>true</PublishSingleFile>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <StartupObject>BananaGit.App</StartupObject>
+    <ApplicationIcon>Assets/Banana.ico</ApplicationIcon>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <Version>1.0.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <Resource Include="Assets\**\*.png" />
     <Resource Include="Assets\**\*.ico" />
-      <InternalsVisibleTo Include="BananaGit.Test" />
+    <InternalsVisibleTo Include="BananaGit.Test" />
   </ItemGroup>
 
   <ItemGroup>
