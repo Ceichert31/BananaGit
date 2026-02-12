@@ -1,16 +1,23 @@
-{
-  "branches": ["main"],
-  "plugins": [
-    "@semantic-release/commit-analyzer",
-    "@semantic-release/release-notes-generator",
-    "@semantic-release/changelog",
+module.exports = {
+  branches: ['main'], // or 'master', whatever your default branch is
+  plugins: [
+    '@semantic-release/commit-analyzer',
+    '@semantic-release/release-notes-generator',
+    '@semantic-release/changelog',
     [
-      "@semantic-release/git",
+      '@semantic-release/exec',
       {
-        "assets": ["CHANGELOG.md"],
-        "message": "chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}"
+        prepareCmd: 'echo ${nextRelease.version} > .version',
+        publishCmd: 'echo "Version ${nextRelease.version} released"'
       }
     ],
-    "@semantic-release/github"
+    [
+      '@semantic-release/git',
+      {
+        assets: ['CHANGELOG.md'],
+        message: 'chore(release): ${nextRelease.version} [skip ci]\n\n${nextRelease.notes}'
+      }
+    ],
+    '@semantic-release/github'
   ]
-}
+};
