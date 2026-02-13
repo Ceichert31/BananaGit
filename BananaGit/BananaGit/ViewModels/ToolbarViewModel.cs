@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
+using BananaGit.EventArgExtensions;
 using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -71,13 +72,27 @@ partial class ToolbarViewModel : ObservableObject
     [RelayCommand]
     private async Task CallPushFiles()
     {
-        await _gitService.PushFiles();
+        try
+        {
+            await _gitService.PushFiles();
+        }
+        catch (Exception ex)
+        {
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
     }
 
     [RelayCommand]
     private async Task CallPullFiles()
     {
-        await _gitService.PullChanges();
+        try
+        {
+            await _gitService.PullChanges();
+        }
+        catch (Exception ex)
+        {
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
     }
 
     [RelayCommand]
@@ -85,39 +100,47 @@ partial class ToolbarViewModel : ObservableObject
     {
         _gitService.ChooseRepositoryDialog();
     }
-    
+
     /// <summary>
     /// Checks if any new branches were added and adds them to list
     /// </summary>
     private void UpdateBranches(object? sender, EventArgs e)
     {
-        Application.Current.Dispatcher.Invoke(() =>
+        try
         {
-            //Cache current branch name
-            string? currentBranchName = CurrentBranch?.Name;
-            
-            LocalBranches.Clear();
-            
-            var branches = _gitService.GetLocalBranches();
-
-            //Re-add all branches
-            foreach (var branch in branches)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                LocalBranches.Add(branch);
-            }
+                //Cache current branch name
+                string? currentBranchName = CurrentBranch?.Name;
 
-            //Find the current branch and cache it
-            if (!string.IsNullOrEmpty(currentBranchName))
-            {
-                CurrentBranch = LocalBranches.FirstOrDefault(n => n.Name == currentBranchName);
-            }
+                LocalBranches.Clear();
 
-            //If current branch couldn't be found, set current branch to first branch
-            if (CurrentBranch == null && LocalBranches.Any())
-            {
-                CurrentBranch = LocalBranches.First();
-            }
-            OnPropertyChanged(nameof(CurrentBranch));
-        });
+                var branches = _gitService.GetLocalBranches();
+
+                //Re-add all branches
+                foreach (var branch in branches)
+                {
+                    LocalBranches.Add(branch);
+                }
+
+                //Find the current branch and cache it
+                if (!string.IsNullOrEmpty(currentBranchName))
+                {
+                    CurrentBranch = LocalBranches.FirstOrDefault(n => n.Name == currentBranchName);
+                }
+
+                //If current branch couldn't be found, set current branch to first branch
+                if (CurrentBranch == null && LocalBranches.Any())
+                {
+                    CurrentBranch = LocalBranches.First();
+                }
+
+                OnPropertyChanged(nameof(CurrentBranch));
+            });
+        }
+        catch (Exception ex)
+        {
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
     }
 }
