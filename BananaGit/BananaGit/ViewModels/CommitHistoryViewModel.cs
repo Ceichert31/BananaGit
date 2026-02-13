@@ -1,4 +1,6 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
+using BananaGit.EventArgExtensions;
 using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -34,9 +36,16 @@ partial class CommitHistoryViewModel : ObservableObject
     /// <param name="e"></param>
     private void RepositoryChanged(object? sender, EventArgs e)
     {
-        //Display new repo name
-        RepositoryName = _gitService.GetRepositoryName();
-        PulledChanges(sender, e);
+        try
+        {
+            //Display new repo name
+            RepositoryName = _gitService.GetRepositoryName();
+            PulledChanges(sender, e);
+        }
+        catch (Exception ex)
+        {
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
     }
     
     /// <summary>
@@ -46,6 +55,13 @@ partial class CommitHistoryViewModel : ObservableObject
     /// <param name="e"></param>
     private void PulledChanges(object? sender, EventArgs e)
     {
-        CommitHistory = new(_gitService.GetCommitHistory(_maxCommitHistoryLength));
+        try
+        {
+            CommitHistory = new(_gitService.GetCommitHistory(_maxCommitHistoryLength));
+        }
+        catch (Exception ex)
+        {
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
     }
 }

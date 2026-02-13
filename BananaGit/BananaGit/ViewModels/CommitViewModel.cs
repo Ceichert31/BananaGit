@@ -1,4 +1,6 @@
-﻿using BananaGit.Services;
+﻿using System.Diagnostics;
+using BananaGit.EventArgExtensions;
+using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 
@@ -31,9 +33,16 @@ partial class CommitViewModel : ObservableObject
     [RelayCommand]
     private async Task PushFiles()
     {
-        await _gitService.PushFiles();
-        
-        HasCommitedFiles = false;
+        try
+        {
+            await _gitService.PushFiles();
+
+            HasCommitedFiles = false;
+        }
+        catch (Exception ex)
+        {
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
     }
 
     /// <summary>
@@ -42,14 +51,21 @@ partial class CommitViewModel : ObservableObject
     [RelayCommand]
     private async Task CommitStagedFiles()
     {
-        if (!_gitService.HasLocalChanges()) return;
-        
-        await _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader}: {CommitMessage}");
-        
-        HasCommitedFiles = true;
-        
-        //Clear commit message
-        CommitMessage = string.Empty;
-        SelectedCommitHeader = string.Empty;
+        try
+        {
+            if (!_gitService.HasLocalChanges()) return;
+
+            await _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader}: {CommitMessage}");
+
+            HasCommitedFiles = true;
+
+            //Clear commit message
+            CommitMessage = string.Empty;
+            SelectedCommitHeader = string.Empty;
+        }
+        catch (Exception ex)
+        {
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
     }
 }

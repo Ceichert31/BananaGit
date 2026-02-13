@@ -1,4 +1,6 @@
-﻿using BananaGit.Models;
+﻿using System.Diagnostics;
+using BananaGit.EventArgExtensions;
+using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -36,7 +38,15 @@ partial class CloneRepoViewModel : ObservableObject
     [RelayCommand]
     private async Task CloneRepository()
     {
-        await _gitService.CloneRepository();
-        CanClone = false;
+        try
+        {
+            await _gitService.CloneRepository();
+            CanClone = false;
+        }
+        catch (Exception ex)
+        {
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            CanClone = false;
+        }
     }
 }

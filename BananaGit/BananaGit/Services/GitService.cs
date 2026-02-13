@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using BananaGit.EventArgExtensions;
 using BananaGit.Exceptions;
 using BananaGit.Models;
 using BananaGit.Utilities;
@@ -35,6 +36,18 @@ namespace BananaGit.Services
             JsonDataManager.LoadUserInfo(ref _gitInfo);
         }
 
+        /// <summary>
+        /// Writes to the console
+        /// </summary>
+        /// <param name="sender">The script sending this message</param>
+        /// <param name="e">The message</param>
+        public void OutputToConsole(object? sender, MessageEventArgs e)
+        {
+            if (sender == null) return;
+            
+            Trace.WriteLine($"{sender.GetType().ToString().Split('.').Last()}: {e.Message}");
+        }
+        
         #region Getters
         /// <summary>
         /// Checks if the current repo has files commited but not pushed

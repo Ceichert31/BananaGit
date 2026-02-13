@@ -1,6 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Windows.Threading;
+using BananaGit.EventArgExtensions;
 using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -39,8 +40,15 @@ partial class GitChangesViewModel : ObservableObject
     /// <param name="e">Empty</param>
     private void UpdateLocalRepositoryChanges(object? sender, EventArgs e)
     {
-        CurrentChanges = new ObservableCollection<ChangedFile>(_gitService.GetUnstagedChanges());
-        StagedChanges = new ObservableCollection<ChangedFile>(_gitService.GetStagedChanges());
+        try
+        {
+            CurrentChanges = new ObservableCollection<ChangedFile>(_gitService.GetUnstagedChanges());
+            StagedChanges = new ObservableCollection<ChangedFile>(_gitService.GetStagedChanges());
+        }
+        catch (Exception ex)
+        {
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
     }
 
     /// <summary>
@@ -55,7 +63,7 @@ partial class GitChangesViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Trace.WriteLine(ex.Message);
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 
@@ -71,7 +79,7 @@ partial class GitChangesViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Trace.WriteLine(ex.Message);
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
     
@@ -87,7 +95,7 @@ partial class GitChangesViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            Trace.WriteLine(ex.Message);
+            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 }

@@ -81,17 +81,17 @@
             </TabItem>
             <TabItem Header="Pushing" Style="{StaticResource TabStyle}">
                 <TextBlock Style="{StaticResource TextBlockStyle}">
-                    Commiting and pushing files is one of the most important
-                    parts of version control.
-                    When you commit your changes, you are
-                    updating your changes to your local repository on your computer.
-                    Then in order to upload those changed files, you push those commited changes.<LineBreak /><LineBreak />
-                    Practice committing your test file by writing a commit message, and pressing commit.<LineBreak /><LineBreak />
+                    Pushing your files is the action of uploading changes from your local repository to the
+                    remote repository. Think of it like uploading a document to google drive, up until you push your
+                    changes they are all local to your computer, only after you push do they become accessible to others.<LineBreak /><LineBreak />
+                    When you commit something, the push button should become enabled and allow you to push those changes.
+                    If you ever need to push something, and the push button is disabled, the toolbar has a push button as well that can always be used<LineBreak /><LineBreak />
                     INSERT EXAMPLE IMAGE HERE</TextBlock>
             </TabItem>
-            <TabItem Header="The Workflow" Style="{StaticResource TabStyle}" />
+            <!--
             <TabItem Header="Branches" Style="{StaticResource TabStyle}" />
             <TabItem Header="Merge Conflicts" Style="{StaticResource TabStyle}" />
+            -->
         </TabControl>
 
     </Grid>
