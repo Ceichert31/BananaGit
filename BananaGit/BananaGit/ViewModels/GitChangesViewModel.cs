@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Windows;
 using System.Windows.Threading;
 using BananaGit.EventArgExtensions;
 using BananaGit.Models;
@@ -55,11 +56,13 @@ partial class GitChangesViewModel : ObservableObject
     /// Calls git service to discard all local changes (Not including local commits)
     /// </summary>
     [RelayCommand]
-    private async Task DiscardLocalChanges()
+    private void CallDiscardLocalChanges()
     {
         try
         {
-            await _gitService.ResetLocalUncommittedFilesAsync();
+            //Import dialog service with DI so we can open dialog
+            //Create pop up that shows up to confirm reset
+            //await _gitService.ResetLocalUncommittedFilesAsync();
         }
         catch (Exception ex)
         {
