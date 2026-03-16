@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Windows;
 using System.Windows.Threading;
 using BananaGit.EventArgExtensions;
 using BananaGit.Models;
@@ -20,13 +21,15 @@ partial class GitChangesViewModel : ObservableObject
     private ObservableCollection<ChangedFile> _stagedChanges = [];
 
     private readonly GitService _gitService;
+    private readonly DialogService _dialogService;
     private readonly DispatcherTimer _updateGitInfoTimer = new();
     
     private const float UpdateGitInfoInterval = 1000f;
     
-    public GitChangesViewModel(GitService gitService)
+    public GitChangesViewModel(GitService gitService, DialogService dialogService)
     {
         _gitService = gitService;
+        _dialogService = dialogService;
         
         _updateGitInfoTimer.Tick += UpdateLocalRepositoryChanges;
         _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(UpdateGitInfoInterval);
@@ -55,11 +58,14 @@ partial class GitChangesViewModel : ObservableObject
     /// Calls git service to discard all local changes (Not including local commits)
     /// </summary>
     [RelayCommand]
-    private async Task DiscardLocalChanges()
+    private void CallDiscardLocalChanges()
     {
         try
         {
-            await _gitService.ResetLocalUncommittedFilesAsync();
+            //Import dialog service with DI so we can open dialog
+            //Create pop up that shows up to confirm reset
+            //await _gitService.ResetLocalUncommittedFilesAsync();
+            _dialogService.ShowDiscardChangesDialog();
         }
         catch (Exception ex)
         {

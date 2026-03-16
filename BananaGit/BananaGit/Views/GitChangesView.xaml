@@ -36,7 +36,7 @@
                         Margin="0,0,5,0"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
-                        Command="{Binding DiscardLocalChangesCommand}"
+                        Command="{Binding CallDiscardLocalChangesCommand}"
                         Content="Discard Changes"
                         FontSize="10"
                         Style="{StaticResource GenericButton}"

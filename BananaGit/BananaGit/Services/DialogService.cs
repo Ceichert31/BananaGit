@@ -10,10 +10,18 @@ namespace BananaGit.Services
     /// </summary>
     /// <param name="vm">The <see cref="GitInfoViewModel"/>
     /// that is currently being used by the main window </param>
-    class DialogService(GitService gitService, GitInfoModel gitInfo)
+    class DialogService
     {
-        private readonly RemoteBranchViewModel _remoteBranchViewModel = new RemoteBranchViewModel(gitService);
-        private readonly CloneRepoViewModel _cloneRepoViewModel = new CloneRepoViewModel(gitService, gitInfo);
+        private readonly RemoteBranchViewModel _remoteBranchViewModel;
+        private readonly CloneRepoViewModel _cloneRepoViewModel;
+        private readonly DiscardChangesViewModel _discardChangesViewModel;
+
+        public DialogService(GitService gitService, GitInfoModel gitInfo)
+        { 
+            _remoteBranchViewModel = new RemoteBranchViewModel(gitService);
+            _cloneRepoViewModel = new CloneRepoViewModel(gitService, gitInfo); 
+            _discardChangesViewModel = new DiscardChangesViewModel(gitService, this);   
+        }
         
         /// <summary>
         /// Opens a dialog for cloning a new repository 
@@ -59,6 +67,25 @@ namespace BananaGit.Services
         {
             TerminalView view = new() { DataContext = terminalViewModel, Owner = System.Windows.Application.Current.MainWindow };
             view.Show();
+        }
+
+        private DiscardChangesConfirmationView? discardChangesView; 
+
+        /// <summary>
+        /// Opens a dialog confirming discarding local changes
+        /// </summary>
+        public void ShowDiscardChangesDialog()
+        {
+            discardChangesView = new()
+            {
+                DataContext = _discardChangesViewModel,
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+            discardChangesView.ShowDialog();
+        }
+        public void CloseDiscardChangesDialog()
+        {
+            discardChangesView?.Close();    
         }
     }
 }

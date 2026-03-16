@@ -54,7 +54,7 @@ namespace BananaGit.ViewModels
 
             CommitViewModel = new CommitViewModel(gitService);
             
-            GitChangesViewModel = new GitChangesViewModel(gitService);
+            GitChangesViewModel = new GitChangesViewModel(gitService, dialogService);
             
             Initialize(gitService);
         }
