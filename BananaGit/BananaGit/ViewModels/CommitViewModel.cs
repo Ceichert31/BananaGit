@@ -55,7 +55,7 @@ partial class CommitViewModel : ObservableObject
         {
             if (!_gitService.HasLocalChanges()) return;
 
-            await _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader}: {CommitMessage}");
+            await _gitService.CommitStagedFilesAsync($"{SelectedCommitHeader} {CommitMessage}");
 
             HasCommitedFiles = true;
 

@@ -69,14 +69,23 @@ namespace BananaGit.Services
             view.Show();
         }
 
+        private DiscardChangesConfirmationView? discardChangesView; 
+
+        /// <summary>
+        /// Opens a dialog confirming discarding local changes
+        /// </summary>
         public void ShowDiscardChangesDialog()
         {
-            DiscardChangesConfirmationView view = new()
+            discardChangesView = new()
             {
                 DataContext = _discardChangesViewModel,
                 Owner = System.Windows.Application.Current.MainWindow
             };
-            view.ShowDialog();
+            discardChangesView.ShowDialog();
+        }
+        public void CloseDiscardChangesDialog()
+        {
+            discardChangesView?.Close();    
         }
     }
 }

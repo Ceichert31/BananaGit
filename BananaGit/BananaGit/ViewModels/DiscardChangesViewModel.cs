@@ -1,4 +1,5 @@
-﻿using BananaGit.EventArgExtensions;
+﻿using System.Diagnostics;
+using BananaGit.EventArgExtensions;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -31,12 +32,17 @@ partial class DiscardChangesViewModel : ObservableObject
     {
         try
         {
-            //Create pop up that shows up to confirm reset
+            _dialogService.CloseDiscardChangesDialog();
             await _gitService.ResetLocalUncommittedFilesAsync();
+   
+            Trace.WriteLine("Discarded Local Changes!");
         }
         catch (Exception ex)
         {
             _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
+    
+    [RelayCommand]
+    private void CloseDialog() => _dialogService.CloseDiscardChangesDialog();
 }
