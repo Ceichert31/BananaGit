@@ -30,9 +30,9 @@ partial class CloneRepoViewModel : ObservableObject
     [RelayCommand]
     private void CallRepositoryDialog()
     {
-        CanClone = _gitService.ChooseRepositoryDialog();
-        RepositoryPath = _gitInfo.GetPath();
-        RepositoryUrl = _gitInfo.GetUrl();
+        var result = _gitService.ChooseRepositoryDialog();
+        CanClone = result.Item2;
+        RepositoryPath = result.Item1;
     }
 
     [RelayCommand]
@@ -40,7 +40,7 @@ partial class CloneRepoViewModel : ObservableObject
     {
         try
         {
-            await _gitService.CloneRepository();
+            await _gitService.CloneRepository(RepositoryUrl, RepositoryPath);
             CanClone = false;
         }
         catch (Exception ex)

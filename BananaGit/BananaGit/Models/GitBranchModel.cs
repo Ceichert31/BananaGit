@@ -75,6 +75,9 @@ namespace BananaGit.Models
             using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
             
             var branch = repo.Branches[branchName];
+            
+            Commands.Checkout(repo, branch);
+            
             Name = branch.FriendlyName;
             IsRemote = branch.IsRemote;
             CanonicalName = branch.CanonicalName;

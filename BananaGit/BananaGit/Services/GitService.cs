@@ -714,9 +714,11 @@ namespace BananaGit.Services
         /// existing repository to open, or a directory to clone to
         /// </summary>
         /// <returns>True if the file location is empty, otherwise false</returns>
-        public bool ChooseRepositoryDialog()
+        public Tuple<string,bool> ChooseRepositoryDialog()
         {
             //Open dialog, choose path, check path validity, if path is valid save to user info, if not give message
+
+            string selectedFilePath = "";
             try
             {
                 //Open file select dialogue
@@ -727,9 +729,9 @@ namespace BananaGit.Services
                 };
 
                 //If dialog closes, check result
-                if (dialog.ShowDialog() != true) return false;
+                if (dialog.ShowDialog() != true) return new Tuple<string, bool>("", false);
                 
-                string selectedFilePath = dialog.FolderName;
+                selectedFilePath = dialog.FolderName;
 
                 //Check if directory is empty and mark as cloneable
                 if (!Directory.EnumerateFiles(selectedFilePath).Any())
@@ -738,9 +740,7 @@ namespace BananaGit.Services
                     /*CanClone = true;
                     LocalRepoFilePath = selectedFilePath;
                     DirectoryHasFiles = false;*/
-                    _gitInfo?.SetPath(selectedFilePath);
-                    JsonDataManager.SaveUserInfo(_gitInfo);
-                    return true;
+                    return new Tuple<string, bool>(selectedFilePath, true);
                 }
                 //Otherwise open if a repository already exists there
                 OpenLocalRepository(selectedFilePath);
@@ -752,7 +752,7 @@ namespace BananaGit.Services
                 DirectoryHasFiles = true;*/
                 Trace.WriteLine(ex.Message);
             }
-            return true;
+            return new Tuple<string, bool>(selectedFilePath, true);
         }
         
         /// <summary>
@@ -801,17 +801,18 @@ namespace BananaGit.Services
         /// Clones a local repository from a selected URL
         /// </summary>
         /// <exception cref="NullReferenceException"></exception>
-        public async Task CloneRepository()
+        public async Task CloneRepository(string url, string path)
         {
             try
             { 
                 VerifyPath();
 
-                string path = _gitInfo?.GetPath() ?? throw new NullReferenceException("No path found!");
+                if (url == string.Empty || path == string.Empty)
+                    throw new NullReferenceException("No URL or Path found!");
+                
                 
                 //Clone repo using git service
-                await CloneRepositoryAsync(_gitInfo?.GetUrl(),
-                    path);
+                await CloneRepositoryAsync(url, path);
                 
                 OpenLocalRepository(path);
             }
