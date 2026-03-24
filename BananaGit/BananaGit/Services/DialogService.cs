@@ -16,10 +16,10 @@ namespace BananaGit.Services
         private readonly CloneRepoViewModel _cloneRepoViewModel;
         private readonly DiscardChangesViewModel _discardChangesViewModel;
 
-        public DialogService(GitService gitService, GitInfoModel gitInfo)
+        public DialogService(GitService gitService, ref GitInfoModel gitInfo)
         { 
             _remoteBranchViewModel = new RemoteBranchViewModel(gitService);
-            _cloneRepoViewModel = new CloneRepoViewModel(gitService, gitInfo); 
+            _cloneRepoViewModel = new CloneRepoViewModel(gitService, ref gitInfo); 
             _discardChangesViewModel = new DiscardChangesViewModel(gitService, this);   
         }
         

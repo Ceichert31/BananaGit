@@ -642,6 +642,9 @@ namespace BananaGit.Services
                     },
                 };
                 Repository.Clone(url, cloneLocation, options);
+
+                _gitInfo?.SetUrl(url);
+                _gitInfo?.SetPath(cloneLocation);
             });
         }
 

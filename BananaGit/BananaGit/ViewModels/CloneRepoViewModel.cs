@@ -20,7 +20,7 @@ partial class CloneRepoViewModel : ObservableObject
     private readonly GitService _gitService;
     private readonly GitInfoModel _gitInfo;
     
-    public CloneRepoViewModel(GitService gitService, GitInfoModel gitInfo)
+    public CloneRepoViewModel(GitService gitService, ref GitInfoModel gitInfo)
     {
         _gitService = gitService;
         _gitInfo = gitInfo;
