@@ -8,17 +8,13 @@ namespace BananaGit.ViewModels
 {
     partial class MainWindowViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private ToolbarViewModel? _toolbarViewModel;
-        
-        [ObservableProperty]
-        private CommitHistoryViewModel? _commitHistoryViewModel;
-        
-        [ObservableProperty]
-        private CommitViewModel? _commitViewModel;
-        
-        [ObservableProperty]
-        private GitChangesViewModel? _gitChangesViewModel;
+        [ObservableProperty] private ToolbarViewModel? _toolbarViewModel;
+
+        [ObservableProperty] private CommitHistoryViewModel? _commitHistoryViewModel;
+
+        [ObservableProperty] private CommitViewModel? _commitViewModel;
+
+        [ObservableProperty] private GitChangesViewModel? _gitChangesViewModel;
 
         //Refactor for user controls!
         //Create an observable property for each view model here
@@ -30,13 +26,13 @@ namespace BananaGit.ViewModels
 
         private readonly GitInfoModel? _userInfo;
 
-        public MainWindowViewModel() 
+        public MainWindowViewModel()
         {
             //Load user info
             JsonDataManager.LoadUserInfo(ref _userInfo);
-            
+
             GitService gitService = new GitService(_userInfo);
-            
+
             //If no user info is loaded, display login dialog
             if (_userInfo == null)
             {
@@ -44,21 +40,21 @@ namespace BananaGit.ViewModels
                 tempDialogService.ShowCredentialsDialog();
                 return;
             }
-            
+
             //Passed into DialogService for dialog creation
             DialogService dialogService = new DialogService(gitService, _userInfo);
-            
-            ToolbarViewModel = new ToolbarViewModel(dialogService, gitService, _userInfo);
+
+            ToolbarViewModel = new ToolbarViewModel(dialogService, gitService, ref _userInfo);
 
             CommitHistoryViewModel = new CommitHistoryViewModel(gitService);
 
             CommitViewModel = new CommitViewModel(gitService);
-            
+
             GitChangesViewModel = new GitChangesViewModel(gitService, dialogService);
-            
+
             Initialize(gitService);
         }
-        
+
         private void Initialize(GitService gitService)
         {
             try

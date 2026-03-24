@@ -1,5 +1,6 @@
 ﻿using System.Collections.ObjectModel;
 using System.Windows;
+using System.Windows.Threading;
 using BananaGit.EventArgExtensions;
 using BananaGit.Models;
 using BananaGit.Services;
@@ -13,54 +14,56 @@ namespace BananaGit.ViewModels;
 /// </summary>
 partial class ToolbarViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private bool _isTutorialOpen;
+    [ObservableProperty] private bool _isTutorialOpen;
 
-    [ObservableProperty]
-    private TerminalViewModel _terminalViewModel = new();
-    
-    [ObservableProperty]
-    private ObservableCollection<GitBranch> _localBranches = [];
+    [ObservableProperty] private TerminalViewModel _terminalViewModel = new();
+
+    [ObservableProperty] private ObservableCollection<GitBranch> _localBranches = [];
 
     public GitBranch? CurrentBranch
     {
         get => _gitInfo.CurrentBranch;
-        set
-        {
-            _gitInfo.CurrentBranch = value;
-            _ = _gitService.PullChangesAsync();
-        }
+        set => _gitInfo.CurrentBranch = value;
     }
-    
+
+    //private GitBranch? _currentBranch;
+
     private readonly DialogService _dialogService;
     private readonly GitService _gitService;
     private readonly GitInfoModel _gitInfo;
 
-    public ToolbarViewModel(DialogService dialogService, GitService gitService, GitInfoModel gitInfo)
+    public ToolbarViewModel(DialogService dialogService, GitService gitService, ref GitInfoModel gitInfo)
     {
         _dialogService = dialogService;
         _gitService = gitService;
         _gitInfo = gitInfo;
-        
+
+        //_currentBranch = gitInfo.CurrentBranch;
+
         _gitService.OnRepositoryChanged += UpdateBranches;
         _gitService.OnChangesPulled += UpdateBranches;
     }
-    
+
+    #region Toolbar Commands
+
     [RelayCommand]
     private void OpenTutorial()
     {
         IsTutorialOpen = !IsTutorialOpen;
     }
+
     [RelayCommand]
     private void OpenCloneWindow()
     {
         _dialogService.ShowCloneRepoDialog();
     }
+
     [RelayCommand]
     private void OpenRemoteWindow()
     {
         _dialogService.ShowRemoteBranchesDialog();
     }
+
     [RelayCommand]
     private void OpenSettingsWindow()
     {
@@ -104,6 +107,8 @@ partial class ToolbarViewModel : ObservableObject
     {
         _gitService.ChooseRepositoryDialog();
     }
+
+    #endregion
 
     /// <summary>
     /// Checks if any new branches were added and adds them to list
