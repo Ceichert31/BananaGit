@@ -576,6 +576,7 @@ namespace BananaGit.Services
                 {
                     //Create signature and pull
                     Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
+                    
                     var result = Commands.Pull(repo, signature, options);
 
                     switch (result.Status)
@@ -656,7 +657,7 @@ namespace BananaGit.Services
         /// <summary>
         /// Pulls changes from the repo and merges them into the local repository
         /// </summary>
-        public async Task PullChanges()
+        public async Task PullChangesAsync()
         {
             try
             {

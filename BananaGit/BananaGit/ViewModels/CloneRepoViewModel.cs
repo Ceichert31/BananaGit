@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using BananaGit.EventArgExtensions;
+﻿using BananaGit.EventArgExtensions;
 using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;

@@ -25,7 +25,11 @@ partial class ToolbarViewModel : ObservableObject
     public GitBranch? CurrentBranch
     {
         get => _gitInfo.CurrentBranch;
-        set => _gitInfo.CurrentBranch = value;
+        set
+        {
+            _gitInfo.CurrentBranch = value;
+            _ = _gitService.PullChangesAsync();
+        }
     }
     
     private readonly DialogService _dialogService;
@@ -87,7 +91,7 @@ partial class ToolbarViewModel : ObservableObject
     {
         try
         {
-            await _gitService.PullChanges();
+            await _gitService.PullChangesAsync();
         }
         catch (Exception ex)
         {
