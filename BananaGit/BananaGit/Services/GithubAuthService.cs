@@ -35,14 +35,18 @@ public class GithubAuthService
                 CreateNoWindow = true
             };
 
-            //var tokenResponse = await _githubClient.Oauth.
+            Process.Start(validationProcess);
+
+            //Response from redirect
+            var tokenResponse =
+                await _githubClient.Authorization.CheckApplicationAuthentication(ClientId, codeResponse.DeviceCode);
+
+            return tokenResponse.Token;
         }
         catch (Exception ex)
         {
             Trace.WriteLine($"Failed to Authenticate: {ex.Message}");
             return null;
         }
-
-        return null;
     }
 }
