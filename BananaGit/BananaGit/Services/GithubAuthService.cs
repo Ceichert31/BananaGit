@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics;
-using System;
 using Octokit;
 
 namespace BananaGit.Services;
 
 /// <summary>
-/// Verifies user login
+/// Uses <see href="https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps">GitHub Device Flow</see>
+/// to access user's repositories and credentials
 /// </summary>
 public class GithubAuthService
 {
