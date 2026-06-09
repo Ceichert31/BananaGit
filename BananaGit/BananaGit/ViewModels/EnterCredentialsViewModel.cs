@@ -1,4 +1,7 @@
-﻿using BananaGit.Models;
+﻿using System.Windows.Threading;
+using BananaGit.EventArgExtensions;
+using BananaGit.Models;
+using BananaGit.Services;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -9,23 +12,48 @@ namespace BananaGit.ViewModels
     {
         private readonly EventHandler onEnterCredentials = eventHandler;
 
-        [ObservableProperty]
-        private string _userToken = "";
-        [ObservableProperty]
-        private string _email = "";
-        [ObservableProperty]
-        private string _username = "";
+        [ObservableProperty] private string _userToken = "";
+        [ObservableProperty] private string _email = "";
+        [ObservableProperty] private string _username = "";
 
-        private readonly GitInfoModel githubUserInfo = new();
+        private readonly GitInfoModel _githubUserInfo = new();
+        private readonly GithubAuthService _githubAuthService = new();
 
         [RelayCommand]
-        public void UpdateCredentials()
+        private async Task UpdateCredentials()
         {
-            githubUserInfo.Username = Username;
+            //Run login async command
+
+            //Get access token in return
+
+            //Pass access token to GitInfoModel
+
+            var githubAccessToken = await _githubAuthService.LoginAsync((userCode, url) =>
+            {
+                //Update frontend on completion
+            });
+
+            //Successful login
+            if (!string.IsNullOrEmpty(githubAccessToken))
+            {
+                _githubUserInfo.Username = githubAccessToken;
+                _githubUserInfo.PersonalToken = githubAccessToken;
+                _githubUserInfo.Email = Email;
+                JsonDataManager.SaveUserInfo(_githubUserInfo);
+                onEnterCredentials?.Invoke(this, new CredentialsEventArgs(true));
+            }
+            //Unsuccessful login
+            else
+            {
+                onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+            }
+
+            //Deprecated
+            /*githubUserInfo.Username = Username;
             githubUserInfo.Email = Email;
             githubUserInfo.PersonalToken = UserToken;
             JsonDataManager.SaveUserInfo(githubUserInfo);
-            onEnterCredentials?.Invoke(this, new EventArgs());
+            onEnterCredentials?.Invoke(this, new EventArgs());*/
         }
     }
 }

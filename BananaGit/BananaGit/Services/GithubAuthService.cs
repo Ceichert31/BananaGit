@@ -17,6 +17,14 @@ public class GithubAuthService
         _githubClient = new GitHubClient(new ProductHeaderValue("BananaGit"));
     }
 
+    /// <summary>
+    /// 
+    /// </summary>
+    /// <param name="userCode">The user code returned by GitHub</param>
+    /// <returns>The GitHub access token</returns>
+    /// <remarks>
+    /// The GitHub access token is used by Lib2GitSharp as credentials to modify repositories
+    /// </remarks>
     public async Task<string?> LoginAsync(Action<string, string> userCode)
     {
         try
