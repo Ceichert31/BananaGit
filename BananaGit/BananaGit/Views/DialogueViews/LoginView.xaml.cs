@@ -1,55 +1,56 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using BananaGit.Utilities;
+using BananaGit.EventArgExtensions;
 using BananaGit.ViewModels;
 
-namespace BananaGit.Views
+namespace BananaGit.Views.DialogueViews
 {
     /// <summary>
     /// Interaction logic for EnterCredentialsView.xaml
     /// </summary>
     public partial class LoginView : Window
     {
-        private readonly LoginViewModel _loginVm;
+        private readonly EventHandler<CredentialsEventArgs> _loginAttemptedEvent;
 
-        private readonly EventHandler credentialsEnteredEvent;
-
-        private bool credentialsEntered;
+        private bool _isLoggedIn;
 
         public LoginView()
         {
             InitializeComponent();
 
             //Event to close credential dialogue
-            credentialsEnteredEvent += CloseCredentialDialogue;
+            _loginAttemptedEvent += UpdateLoginDialogue;
 
-            _loginVm = new LoginViewModel(credentialsEnteredEvent);
+            var loginVm = new LoginViewModel(_loginAttemptedEvent);
 
-            DataContext = _loginVm;
+            DataContext = loginVm;
         }
 
-        private void CloseCredentialDialogue(object? sender, EventArgs e)
+        /// <summary>
+        /// Update login status and window status
+        /// </summary>
+        /// <param name="sender"><see cref="LoginViewModel"/></param>
+        /// <param name="e"><see cref="CredentialsEventArgs"/></param>
+        private void UpdateLoginDialogue(object? sender, CredentialsEventArgs e)
         {
-            credentialsEntered = true;
+            _isLoggedIn = e.LoginSuccess;
+
+            if (!_isLoggedIn)
+                return;
+
             Close();
         }
 
-        private void Window_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        /// <summary>
+        /// Logic for handling user initiated window closure. If window is closed and while user isn't logged in, shutdown application. 
+        /// </summary>
+        /// <param name="sender">User</param>
+        /// <param name="e"><see cref="CancelEventArgs"/></param>
+        private void Window_Closing(object sender, CancelEventArgs e)
         {
-            if (credentialsEntered) return;
+            if (_isLoggedIn) return;
 
-            App.Current.Shutdown();
+            Application.Current.Shutdown();
         }
     }
 }
