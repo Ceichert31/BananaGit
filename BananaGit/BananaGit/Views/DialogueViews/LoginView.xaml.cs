@@ -19,24 +19,24 @@ namespace BananaGit.Views
     /// <summary>
     /// Interaction logic for EnterCredentialsView.xaml
     /// </summary>
-    public partial class EnterCredentialsView : Window
+    public partial class LoginView : Window
     {
-        private readonly EnterCredentialsViewModel enterCredentialsVM;
+        private readonly LoginViewModel _loginVm;
 
         private readonly EventHandler credentialsEnteredEvent;
 
         private bool credentialsEntered;
 
-        public EnterCredentialsView()
+        public LoginView()
         {
             InitializeComponent();
 
             //Event to close credential dialogue
             credentialsEnteredEvent += CloseCredentialDialogue;
 
-            enterCredentialsVM = new EnterCredentialsViewModel(credentialsEnteredEvent);
+            _loginVm = new LoginViewModel(credentialsEnteredEvent);
 
-            DataContext = enterCredentialsVM;
+            DataContext = _loginVm;
         }
 
         private void CloseCredentialDialogue(object? sender, EventArgs e)

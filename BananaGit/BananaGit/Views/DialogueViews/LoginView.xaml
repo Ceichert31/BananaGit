@@ -1,5 +1,5 @@
 ﻿<Window
-    x:Class="BananaGit.Views.EnterCredentialsView"
+    x:Class="BananaGit.Views.LoginView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
@@ -9,12 +9,11 @@
     Title="EnterCredentialsView"
     Width="400"
     Height="300"
-    d:DataContext="{d:DesignInstance Type=viewmodels:EnterCredentialsViewModel}"
+    d:DataContext="{d:DesignInstance Type=viewmodels:LoginViewModel}"
     Background="#FFEA78"
     Closing="Window_Closing"
     WindowStartupLocation="CenterScreen"
-    mc:Ignorable="d"
-    >
+    mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="30" />
@@ -25,8 +24,7 @@
         <Label
             HorizontalAlignment="Center"
             Content="Enter Github info"
-            FontWeight="Bold"
-            />
+            FontWeight="Bold" />
 
 
         <StackPanel Grid.Row="1">
@@ -40,8 +38,7 @@
                 VerticalAlignment="Center"
                 Background="Black"
                 Foreground="White"
-                Text="{Binding Username}"
-                />
+                Text="{Binding Username}" />
             <Label HorizontalAlignment="Center" Content="Email" />
             <TextBox
                 Grid.Row="1"
@@ -50,8 +47,7 @@
                 VerticalAlignment="Center"
                 Background="Black"
                 Foreground="White"
-                Text="{Binding Email}"
-                />
+                Text="{Binding Email}" />
             <Label HorizontalAlignment="Center" Content="Personal Token" />
             <TextBox
                 Grid.Row="1"
@@ -60,8 +56,7 @@
                 VerticalAlignment="Center"
                 Background="Black"
                 Foreground="White"
-                Text="{Binding UserToken}"
-                />
+                Text="{Binding UserToken}" />
         </StackPanel>
 
         <Button
@@ -72,7 +67,6 @@
             VerticalAlignment="Center"
             Background="White"
             Command="{Binding UpdateCredentialsCommand}"
-            Content="Confirm"
-            />
+            Content="Confirm" />
     </Grid>
 </Window>

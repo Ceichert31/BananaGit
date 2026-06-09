@@ -17,18 +17,19 @@ namespace BananaGit.Services
         private readonly DiscardChangesViewModel _discardChangesViewModel;
 
         public DialogService(GitService gitService, GitInfoModel gitInfo)
-        { 
+        {
             _remoteBranchViewModel = new RemoteBranchViewModel(gitService);
-            _cloneRepoViewModel = new CloneRepoViewModel(gitService, gitInfo); 
-            _discardChangesViewModel = new DiscardChangesViewModel(gitService, this);   
+            _cloneRepoViewModel = new CloneRepoViewModel(gitService, gitInfo);
+            _discardChangesViewModel = new DiscardChangesViewModel(gitService, this);
         }
-        
+
         /// <summary>
         /// Opens a dialog for cloning a new repository 
         /// </summary>
         public void ShowCloneRepoDialog()
         {
-            CloneRepoView view = new() { DataContext = _cloneRepoViewModel, Owner = System.Windows.Application.Current.MainWindow };
+            CloneRepoView view = new()
+                { DataContext = _cloneRepoViewModel, Owner = System.Windows.Application.Current.MainWindow };
             view.ShowDialog();
         }
 
@@ -37,7 +38,7 @@ namespace BananaGit.Services
         /// </summary>
         public void ShowCredentialsDialog()
         {
-            EnterCredentialsView view = new();
+            LoginView view = new();
             view.ShowDialog();
         }
 
@@ -46,30 +47,35 @@ namespace BananaGit.Services
         /// </summary>
         public void ShowRemoteBranchesDialog()
         {
-            RemoteBranchView view = new() { 
-                DataContext = _remoteBranchViewModel, 
-                Owner = System.Windows.Application.Current.MainWindow 
+            RemoteBranchView view = new()
+            {
+                DataContext = _remoteBranchViewModel,
+                Owner = System.Windows.Application.Current.MainWindow
             };
             view.Show();
         }
+
         /// <summary>
         /// Opens a dialog that shows all the user settings
         /// </summary>
         public void ShowSettingsDialog()
         {
-            SettingsView view = new() { DataContext = new SettingsViewModel(), Owner = System.Windows.Application.Current.MainWindow };
+            SettingsView view = new()
+                { DataContext = new SettingsViewModel(), Owner = System.Windows.Application.Current.MainWindow };
             view.ShowDialog();
         }
+
         /// <summary>
         /// Opens a dialog with a debug console
         /// </summary>
         public void ShowConsoleDialog(TerminalViewModel terminalViewModel)
         {
-            TerminalView view = new() { DataContext = terminalViewModel, Owner = System.Windows.Application.Current.MainWindow };
+            TerminalView view = new()
+                { DataContext = terminalViewModel, Owner = System.Windows.Application.Current.MainWindow };
             view.Show();
         }
 
-        private DiscardChangesConfirmationView? discardChangesView; 
+        private DiscardChangesConfirmationView? discardChangesView;
 
         /// <summary>
         /// Opens a dialog confirming discarding local changes
@@ -83,9 +89,10 @@ namespace BananaGit.Services
             };
             discardChangesView.ShowDialog();
         }
+
         public void CloseDiscardChangesDialog()
         {
-            discardChangesView?.Close();    
+            discardChangesView?.Close();
         }
     }
 }

@@ -8,7 +8,12 @@ using CommunityToolkit.Mvvm.Input;
 
 namespace BananaGit.ViewModels
 {
-    partial class EnterCredentialsViewModel(EventHandler eventHandler) : ObservableObject
+    /// <summary>
+    /// This view model is used to get user credentials and then save them with the <see cref="JsonDataManager"/>
+    /// </summary>
+    /// <param name="eventHandler"></param>
+    /// <br/><br/>
+    partial class LoginViewModel(EventHandler eventHandler) : ObservableObject
     {
         private readonly EventHandler onEnterCredentials = eventHandler;
 
@@ -19,6 +24,10 @@ namespace BananaGit.ViewModels
         private readonly GitInfoModel _githubUserInfo = new();
         private readonly GithubAuthService _githubAuthService = new();
 
+        /// <summary>
+        /// Redirects user to a GitHub Authentication page and
+        /// updates the front-end depending on a successful login or not
+        /// </summary>
         [RelayCommand]
         private async Task UpdateCredentials()
         {
