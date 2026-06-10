@@ -1,16 +1,19 @@
 ﻿using System.Diagnostics;
+using BananaGit.EventArgExtensions;
 using Octokit;
 
 namespace BananaGit.Services;
 
 /// <summary>
-/// Uses <see href="https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps">GitHub Device Flow</see>
+/// Uses <see href="https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/authorizing-oauth-apps#device-flow">GitHub Device Flow</see>
 /// to access user's repositories and credentials
 /// </summary>
 public class GithubAuthService
 {
     private const string ClientId = "Ov23liz6gkcsl8SP4P38";
     private readonly GitHubClient _githubClient;
+
+    public EventHandler<DeviceCodeEventArgs>? OnDeviceCodeAvailable;
 
     public GithubAuthService()
     {
@@ -36,20 +39,22 @@ public class GithubAuthService
 
             var codeResponse = await _githubClient.Oauth.InitiateDeviceFlow(codeRequest);
 
+            //Show user device code
+            //OnDeviceCodeAvailable?.Invoke(this, new DeviceCodeEventArgs(codeResponse.DeviceCode));
+            userCode?.Invoke(codeResponse.UserCode, codeResponse.VerificationUri);
+
             //Create process to open browser for validation
             var validationProcess = new ProcessStartInfo(codeResponse.VerificationUri)
             {
-                UseShellExecute = true,
-                CreateNoWindow = true
+                UseShellExecute = true
             };
 
             Process.Start(validationProcess);
 
             //Response from redirect
-            var tokenResponse =
-                await _githubClient.Authorization.CheckApplicationAuthentication(ClientId, codeResponse.DeviceCode);
+            var accessToken = await _githubClient.Oauth.CreateAccessTokenForDeviceFlow(ClientId, codeResponse);
 
-            return tokenResponse.Token;
+            return accessToken.AccessToken;
         }
         catch (Exception ex)
         {

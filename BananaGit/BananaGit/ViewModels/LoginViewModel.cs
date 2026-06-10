@@ -1,4 +1,5 @@
-﻿using System.Windows.Threading;
+﻿using System.Windows;
+using System.Windows.Threading;
 using BananaGit.EventArgExtensions;
 using BananaGit.Models;
 using BananaGit.Services;
@@ -13,16 +14,21 @@ namespace BananaGit.ViewModels
     /// </summary>
     /// <param name="eventHandler"></param>
     /// <br/><br/>
-    partial class LoginViewModel(EventHandler<CredentialsEventArgs> eventHandler) : ObservableObject
+    partial class LoginViewModel : ObservableObject
     {
-        private readonly EventHandler<CredentialsEventArgs> onEnterCredentials = eventHandler;
-
         [ObservableProperty] private string _userToken = "";
         [ObservableProperty] private string _email = "";
         [ObservableProperty] private string _username = "";
+        [ObservableProperty] private string _displayText = "Hitting Confirm will redirect to browser.";
 
         private readonly GitInfoModel _githubUserInfo = new();
         private readonly GithubAuthService _githubAuthService = new();
+        private readonly EventHandler<CredentialsEventArgs>? _onEnterCredentials;
+
+        public LoginViewModel(EventHandler<CredentialsEventArgs> eventHandler)
+        {
+            _onEnterCredentials = eventHandler;
+        }
 
         /// <summary>
         /// Redirects user to a GitHub Authentication page and
@@ -40,21 +46,29 @@ namespace BananaGit.ViewModels
             var githubAccessToken = await _githubAuthService.LoginAsync((userCode, url) =>
             {
                 //Update frontend on completion
+                Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        DisplayText = $"Please enter the code: {userCode} in your browser window.";
+                    }
+                );
             });
 
             //Successful login
             if (!string.IsNullOrEmpty(githubAccessToken))
             {
+                DisplayText = "Successfully logged in!";
+
                 _githubUserInfo.Username = githubAccessToken;
                 _githubUserInfo.PersonalToken = githubAccessToken;
                 _githubUserInfo.Email = Email;
                 JsonDataManager.SaveUserInfo(_githubUserInfo);
-                onEnterCredentials?.Invoke(this, new CredentialsEventArgs(true));
+                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(true));
             }
             //Unsuccessful login
             else
             {
-                onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                DisplayText = "Login failed or timed out. Please try again.";
+                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
             }
 
             //Deprecated

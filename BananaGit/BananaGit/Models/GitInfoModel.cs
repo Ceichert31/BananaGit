@@ -7,7 +7,7 @@
     {
         public string? Username { get; set; }
         public string? Email { get; set; }
-        public string? PersonalToken { get; set; } 
+        public string? PersonalToken { get; set; }
         public SavableRepository? SavedRepository { get; set; }
         public GitBranch? CurrentBranch { get; set; }
 
@@ -18,6 +18,7 @@
             PersonalToken = gitInfo.PersonalToken;
             SavedRepository = gitInfo.SavedRepository;
         }
+
         public string GetPath()
         {
             return SavedRepository?.FilePath ?? throw new NullReferenceException("Couldn't access repository path!");
@@ -39,6 +40,7 @@
             output = string.Empty;
             return false;
         }
+
         public string GetUrl()
         {
             return SavedRepository?.Url ?? throw new NullReferenceException("Couldn't access repository url!");
@@ -48,8 +50,9 @@
         {
             if (SavedRepository == null)
             {
-                throw new NullReferenceException("Couldn't access repository!");
+                SavedRepository = new("", "");
             }
+
             SavedRepository.FilePath = path;
         }
 
@@ -57,8 +60,9 @@
         {
             if (SavedRepository == null)
             {
-                throw new NullReferenceException("Couldn't access repository!");
+                SavedRepository = new("", "");
             }
+
             SavedRepository.Url = url;
         }
 
@@ -68,11 +72,12 @@
         /// <returns>Whether repo is null</returns>
         public bool IsSavedRepositoryValid()
         {
-            return SavedRepository != null && 
-                   SavedRepository.FilePath != null &&  
+            return SavedRepository != null &&
+                   SavedRepository.FilePath != null &&
                    SavedRepository.Url != null;
         }
     }
+
     /// <summary>
     /// Holds repository information
     /// </summary>
@@ -83,6 +88,7 @@
         public string FilePath { get; set; } = path;
         public string Url { get; set; } = url;
     }
+
     /// <summary>
     /// Move this to its own model
     /// </summary>
