@@ -1,4 +1,7 @@
-﻿using System.Windows;
+﻿using System.Diagnostics;
+using System.IO;
+using System.Net.Http;
+using System.Windows;
 using System.Windows.Threading;
 using BananaGit.EventArgExtensions;
 using BananaGit.Models;
@@ -6,6 +9,8 @@ using BananaGit.Services;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Octokit;
+using Application = System.Windows.Application;
 
 namespace BananaGit.ViewModels
 {
@@ -43,35 +48,80 @@ namespace BananaGit.ViewModels
                 return;
             }
 
-            //Wait for login method to return a value
-            var githubAccessToken = await _githubAuthService.LoginAsync((userCode, url) =>
-            {
-                //Update frontend on completion
-                Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        DisplayText = "Please enter the code below in your browser window.";
-                        UserCode = userCode;
-                    }
-                );
-            });
+            string? githubAccessToken = null;
 
-            //Successful login
-            if (!string.IsNullOrEmpty(githubAccessToken))
+            //Attempt to access users GitHub account
+            try
             {
-                DisplayText = "Successfully logged in!";
-
-                _githubUserInfo.Username = githubAccessToken;
-                _githubUserInfo.PersonalToken = githubAccessToken;
-                _githubUserInfo.Email = Email;
-                JsonDataManager.SaveUserInfo(_githubUserInfo);
-                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(true));
+                //Wait for login method to return a value
+                githubAccessToken = await _githubAuthService.LoginAsync((userCode, url) =>
+                {
+                    //Update frontend on completion
+                    Application.Current.Dispatcher.Invoke(() =>
+                        {
+                            DisplayText = "Please enter the code below in your browser window.";
+                            UserCode = userCode;
+                            Clipboard.SetText(UserCode);
+                        }
+                    );
+                });
             }
+            catch (AuthorizationException)
+            {
+                DisplayText = "Authorization failed. Please try again.";
+                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                return;
+            }
+            catch (TaskCanceledException)
+            {
+                DisplayText = "Login timed out. Please try again.";
+                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                return;
+            }
+            catch (HttpRequestException)
+            {
+                DisplayText = "Network connection failed. Check your connect and try again.";
+                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                return;
+            }
+
             //Unsuccessful login
-            else
+            if (string.IsNullOrEmpty(githubAccessToken))
             {
                 DisplayText = "Login failed or timed out. Please try again.";
                 _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                return;
             }
+
+            //Successful login
+            var userEmail = _githubAuthService.GetUserEmail();
+
+            if (string.IsNullOrEmpty(userEmail))
+            {
+                DisplayText = "Logged in, but associated GitHub email couldn't be accessed.";
+                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                return;
+            }
+
+            //Update user info locally
+            _githubUserInfo.Username = githubAccessToken;
+            _githubUserInfo.PersonalToken = githubAccessToken;
+            _githubUserInfo.Email = userEmail;
+
+            try
+            {
+                //Save updated data
+                JsonDataManager.SaveUserInfo(_githubUserInfo);
+            }
+            catch (IOException ex)
+            {
+                DisplayText = "Logged in, but credentials failed to save locally.";
+                Trace.WriteLine(ex.Message);
+                return;
+            }
+
+            _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(true));
+            DisplayText = "Successfully logged in!";
         }
 
         /// <summary>
@@ -81,6 +131,7 @@ namespace BananaGit.ViewModels
         private void CopyUserCode()
         {
             Clipboard.SetText(UserCode);
+            DisplayText = "Successfully copied code to clipboard.";
         }
     }
 }

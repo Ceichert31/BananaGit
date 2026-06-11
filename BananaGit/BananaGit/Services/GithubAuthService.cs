@@ -59,4 +59,9 @@ public class GithubAuthService
             return null;
         }
     }
+
+    public string? GetUserEmail()
+    {
+        return _githubClient.User.Email.ToString();
+    }
 }
