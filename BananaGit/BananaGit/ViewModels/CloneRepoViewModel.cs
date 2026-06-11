@@ -9,24 +9,19 @@ namespace BananaGit.ViewModels;
 
 partial class CloneRepoViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private bool _canClone;
+    [ObservableProperty] private bool _canClone;
 
-    [ObservableProperty]
-    private string _repositoryUrl = string.Empty;
-    
-    [ObservableProperty]
-    private string _repositoryPath = string.Empty;
+    [ObservableProperty] private string _repositoryUrl = string.Empty;
+
+    [ObservableProperty] private string _repositoryPath = string.Empty;
 
     private readonly GitService _gitService;
-    private readonly GitInfoModel _gitInfo;
-    
-    public CloneRepoViewModel(GitService gitService, GitInfoModel gitInfo)
+
+    public CloneRepoViewModel(GitService gitService)
     {
         _gitService = gitService;
-        _gitInfo = gitInfo;
     }
-    
+
     [RelayCommand]
     private void CallRepositoryDialog()
     {

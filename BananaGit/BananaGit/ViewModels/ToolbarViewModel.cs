@@ -13,50 +13,51 @@ namespace BananaGit.ViewModels;
 /// </summary>
 partial class ToolbarViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private bool _isTutorialOpen;
+    [ObservableProperty] private bool _isTutorialOpen;
 
-    [ObservableProperty]
-    private TerminalViewModel _terminalViewModel = new();
-    
-    [ObservableProperty]
-    private ObservableCollection<GitBranch> _localBranches = [];
+    [ObservableProperty] private TerminalViewModel _terminalViewModel = new();
 
+    [ObservableProperty] private ObservableCollection<GitBranch> _localBranches = [];
+
+    /// <summary>
+    /// The currently selected branch that Git operations will be executed on
+    /// </summary>
     public GitBranch? CurrentBranch
     {
-        get => _gitInfo.CurrentBranch;
-        set => _gitInfo.CurrentBranch = value;
+        get => _gitService.CurrentBranch;
+        set => _gitService.CurrentBranch = value;
     }
-    
+
     private readonly DialogService _dialogService;
     private readonly GitService _gitService;
-    private readonly GitInfoModel _gitInfo;
 
-    public ToolbarViewModel(DialogService dialogService, GitService gitService, GitInfoModel gitInfo)
+    public ToolbarViewModel(DialogService dialogService, GitService gitService)
     {
         _dialogService = dialogService;
         _gitService = gitService;
-        _gitInfo = gitInfo;
-        
+
         _gitService.OnRepositoryChanged += UpdateBranches;
         _gitService.OnChangesPulled += UpdateBranches;
     }
-    
+
     [RelayCommand]
     private void OpenTutorial()
     {
         IsTutorialOpen = !IsTutorialOpen;
     }
+
     [RelayCommand]
     private void OpenCloneWindow()
     {
         _dialogService.ShowCloneRepoDialog();
     }
+
     [RelayCommand]
     private void OpenRemoteWindow()
     {
         _dialogService.ShowRemoteBranchesDialog();
     }
+
     [RelayCommand]
     private void OpenSettingsWindow()
     {

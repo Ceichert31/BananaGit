@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.IO;
 using BananaGit.Models;
 using BananaGit.Services;
 using BananaGit.Utilities;
@@ -8,17 +9,13 @@ namespace BananaGit.ViewModels
 {
     partial class MainWindowViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private ToolbarViewModel? _toolbarViewModel;
-        
-        [ObservableProperty]
-        private CommitHistoryViewModel? _commitHistoryViewModel;
-        
-        [ObservableProperty]
-        private CommitViewModel? _commitViewModel;
-        
-        [ObservableProperty]
-        private GitChangesViewModel? _gitChangesViewModel;
+        [ObservableProperty] private ToolbarViewModel? _toolbarViewModel;
+
+        [ObservableProperty] private CommitHistoryViewModel? _commitHistoryViewModel;
+
+        [ObservableProperty] private CommitViewModel? _commitViewModel;
+
+        [ObservableProperty] private GitChangesViewModel? _gitChangesViewModel;
 
         //Refactor for user controls!
         //Create an observable property for each view model here
@@ -28,48 +25,45 @@ namespace BananaGit.ViewModels
         //For dialog service pass git service through so
         //dialog's that use git commands can DI the service
 
-        private readonly GitInfoModel? _userInfo;
+        private GitInfoModel? _userInfo;
 
-        public MainWindowViewModel() 
+        public MainWindowViewModel()
+        {
+            Initialize();
+        }
+
+        private void Initialize()
         {
             //Load user info
-            JsonDataManager.LoadUserInfo(ref _userInfo);
-            
-            GitService gitService = new GitService(_userInfo);
-            
-            //If no user info is loaded, display login dialog
-            if (_userInfo == null)
+            try
             {
-                DialogService tempDialogService = new DialogService(gitService, new GitInfoModel());
+                JsonDataManager.LoadUserInfo(ref _userInfo);
+            }
+            catch (IOException)
+            {
+                Trace.WriteLine("No locally saved user info.");
+
+                DialogService tempDialogService = new DialogService(new GitService(new GitInfoModel()));
                 tempDialogService.ShowCredentialsDialog();
+
                 return;
             }
-            
+
+            GitService gitService = new GitService(_userInfo);
+
             //Passed into DialogService for dialog creation
-            DialogService dialogService = new DialogService(gitService, _userInfo);
-            
-            ToolbarViewModel = new ToolbarViewModel(dialogService, gitService, _userInfo);
+            DialogService dialogService = new DialogService(gitService);
+
+            ToolbarViewModel = new ToolbarViewModel(dialogService, gitService);
 
             CommitHistoryViewModel = new CommitHistoryViewModel(gitService);
 
             CommitViewModel = new CommitViewModel(gitService);
-            
+
             GitChangesViewModel = new GitChangesViewModel(gitService, dialogService);
-            
-            Initialize(gitService);
-        }
-        
-        private void Initialize(GitService gitService)
-        {
-            try
-            {
-                //UpdateBranches(CurrentBranch);
-                gitService.OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message);
-            }
+
+            //UpdateBranches(CurrentBranch);
+            gitService.OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }

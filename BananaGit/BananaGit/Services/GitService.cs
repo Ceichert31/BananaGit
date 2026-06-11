@@ -20,6 +20,22 @@ namespace BananaGit.Services
         public EventHandler<EventArgs>? OnRepositoryChanged;
         public EventHandler<EventArgs>? OnChangesPulled;
 
+
+        /// <summary>
+        /// The currently selected branch that Git operations will be executed on
+        /// </summary>
+        public GitBranch? CurrentBranch
+        {
+            get => _gitInfo?.CurrentBranch;
+            set
+            {
+                //If no git info exists, create a new instance
+                _gitInfo ??= new GitInfoModel();
+
+                _gitInfo.CurrentBranch = value;
+            }
+        }
+
         public GitService(GitInfoModel? gitInfo)
         {
             _gitInfo = gitInfo;
