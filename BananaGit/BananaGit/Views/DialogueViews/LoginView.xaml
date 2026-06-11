@@ -4,9 +4,9 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:BananaGit.Views"
-    xmlns:models="clr-namespace:BananaGit.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
+    xmlns:valueConverters="clr-namespace:BananaGit.ValueConverters"
     Title="EnterCredentialsView"
     Width="400"
     Height="300"
@@ -22,14 +22,16 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
+        <!-- Window Header -->
         <Label
             HorizontalAlignment="Center"
-            Content="Enter Github info"
+            Content="Log in to Github"
             FontWeight="Bold" />
-
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center">
             <Label HorizontalAlignment="Center" Content="Email" />
+
+            <!-- Email entry box -->
             <TextBox
                 Width="100"
                 HorizontalAlignment="Center"
@@ -38,21 +40,23 @@
                 Foreground="White"
                 Text="{Binding Email}" />
 
+            <!-- Status text -->
             <Label HorizontalAlignment="Center"
                    Content="{Binding DisplayText, FallbackValue=Hitting Confirm will redirect to browser.}" />
 
+            <!-- User code text + Copy button -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-
                 <Button Command="{Binding CopyUserCodeCommand}"
-                        Visibility="{Binding UserCode, Converter={models:StringVisibilityConverter}}">
+                        Visibility="{Binding UserCode, Converter={valueConverters:StringVisibilityConverter}}">
                     <Image Source="pack://application:,,,/Assets/Clipboard.png" Width="15" Height="15" />
                 </Button>
-
                 <Label
                     Content="{Binding UserCode}" />
             </StackPanel>
+
         </StackPanel>
 
+        <!-- Confirmation button -->
         <Button
             Grid.Row="2"
             Width="50"

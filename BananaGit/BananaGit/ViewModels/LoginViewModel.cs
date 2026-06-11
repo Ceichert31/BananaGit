@@ -12,7 +12,6 @@ namespace BananaGit.ViewModels
     /// <summary>
     /// This view model is used to get user credentials and then save them with the <see cref="JsonDataManager"/>
     /// </summary>
-    /// <param name="eventHandler"></param>
     /// <br/><br/>
     partial class LoginViewModel : ObservableObject
     {
@@ -38,6 +37,12 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         private async Task UpdateCredentials()
         {
+            if (string.IsNullOrEmpty(Email))
+            {
+                DisplayText = "Please enter your email address.";
+                return;
+            }
+
             //Wait for login method to return a value
             var githubAccessToken = await _githubAuthService.LoginAsync((userCode, url) =>
             {

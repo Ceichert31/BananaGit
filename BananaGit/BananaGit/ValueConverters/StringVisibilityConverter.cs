@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Data;
 using System.Windows.Markup;
 
-namespace BananaGit.Models;
+namespace BananaGit.ValueConverters;
 
 /// <summary>
 /// Sets a UI elements visibility based on whether a string is null or empty
