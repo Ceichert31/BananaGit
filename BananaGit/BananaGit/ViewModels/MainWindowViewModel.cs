@@ -29,10 +29,18 @@ namespace BananaGit.ViewModels
 
         public MainWindowViewModel()
         {
-            Initialize();
+            JsonDataManager.OnUserInfoChanged += Initialize;
+
+            Initialize(this, EventArgs.Empty);
         }
 
-        private void Initialize()
+        /// <summary>
+        /// Loads user data and creates all required view models and models needed to perform git operations.
+        /// If no user data is loaded, it opens up the log in window instead.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Initialize(object? sender, EventArgs e)
         {
             //Load user info
             try
@@ -43,9 +51,9 @@ namespace BananaGit.ViewModels
             {
                 Trace.WriteLine("No locally saved user info.");
 
+                //Create empty dialog and git service for log in window creation
                 DialogService tempDialogService = new DialogService(new GitService(new GitInfoModel()));
                 tempDialogService.ShowCredentialsDialog();
-
                 return;
             }
 
