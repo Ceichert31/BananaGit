@@ -23,7 +23,7 @@ namespace BananaGit.Services
         public GitService(GitInfoModel? gitInfo)
         {
             _gitInfo = gitInfo;
-            JsonDataManager.UserInfoChanged += OnUserDataChange;
+            JsonDataManager.OnUserInfoChanged += OnUserDataChange;
         }
 
         /// <summary>

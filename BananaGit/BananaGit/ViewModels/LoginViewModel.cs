@@ -2,7 +2,6 @@
 using System.IO;
 using System.Net.Http;
 using System.Windows;
-using System.Windows.Threading;
 using BananaGit.EventArgExtensions;
 using BananaGit.Models;
 using BananaGit.Services;
