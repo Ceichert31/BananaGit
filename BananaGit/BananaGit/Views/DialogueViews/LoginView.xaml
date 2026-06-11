@@ -1,4 +1,8 @@
-﻿<Window
+﻿<!-- 
+Handles Users first log in. This is the first window a new user will see. 
+This window will redirect the user to the browser so they can log into GitHub.
+-->
+<Window
     x:Class="BananaGit.Views.DialogueViews.LoginView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
