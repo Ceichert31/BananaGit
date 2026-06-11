@@ -60,19 +60,19 @@ namespace BananaGit.ViewModels
             catch (AuthorizationException)
             {
                 DisplayText = "Authorization failed. Please try again.";
-                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                LoginFailed();
                 return;
             }
             catch (TaskCanceledException)
             {
                 DisplayText = "Login timed out. Please try again.";
-                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                LoginFailed();
                 return;
             }
             catch (HttpRequestException)
             {
                 DisplayText = "Network connection failed. Check your connect and try again.";
-                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                LoginFailed();
                 return;
             }
 
@@ -80,7 +80,7 @@ namespace BananaGit.ViewModels
             if (string.IsNullOrEmpty(githubAccessToken))
             {
                 DisplayText = "Login failed or timed out. Please try again.";
-                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                LoginFailed();
                 return;
             }
 
@@ -90,7 +90,7 @@ namespace BananaGit.ViewModels
             if (string.IsNullOrEmpty(userEmail))
             {
                 DisplayText = "Logged in, but associated GitHub email couldn't be accessed.";
-                _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+                LoginFailed();
                 return;
             }
 
@@ -123,6 +123,15 @@ namespace BananaGit.ViewModels
         {
             Clipboard.SetText(UserCode);
             DisplayText = "Successfully copied code to clipboard.";
+        }
+
+        /// <summary>
+        /// Clears user code and invokes a login failed event
+        /// </summary>
+        private void LoginFailed()
+        {
+            UserCode = string.Empty;
+            _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
         }
     }
 }
