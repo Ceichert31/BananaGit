@@ -33,20 +33,10 @@ This window will redirect the user to the browser so they can log into GitHub.
             FontWeight="Bold" />
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center">
-            <Label HorizontalAlignment="Center" Content="Email" />
-
-            <!-- Email entry box -->
-            <TextBox
-                Width="100"
-                HorizontalAlignment="Center"
-                VerticalAlignment="Center"
-                Background="Black"
-                Foreground="White"
-                Text="{Binding Email}" />
 
             <!-- Status text -->
             <Label HorizontalAlignment="Center"
-                   Content="{Binding DisplayText, FallbackValue=Hitting Confirm will redirect to browser.}" />
+                   Content="{Binding DisplayText, FallbackValue=Pressing Sign in will redirect to browser.}" />
 
             <!-- User code text + Copy button -->
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
@@ -57,7 +47,6 @@ This window will redirect the user to the browser so they can log into GitHub.
                 <Label
                     Content="{Binding UserCode}" />
             </StackPanel>
-
         </StackPanel>
 
         <!-- Confirmation button -->
@@ -69,6 +58,6 @@ This window will redirect the user to the browser so they can log into GitHub.
             VerticalAlignment="Center"
             Background="White"
             Command="{Binding UpdateCredentialsCommand}"
-            Content="Confirm" />
+            Content="Sign in" />
     </Grid>
 </Window>

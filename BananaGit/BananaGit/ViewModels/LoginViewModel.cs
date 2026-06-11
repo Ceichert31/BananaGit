@@ -20,10 +20,7 @@ namespace BananaGit.ViewModels
     /// <br/><br/>
     partial class LoginViewModel : ObservableObject
     {
-        [ObservableProperty] private string _userToken = "";
-        [ObservableProperty] private string _email = "";
-        [ObservableProperty] private string _username = "";
-        [ObservableProperty] private string _displayText = "Hitting Confirm will redirect to browser.";
+        [ObservableProperty] private string _displayText = "Pressing Sign in will redirect to browser.";
         [ObservableProperty] private string _userCode = "";
 
         private readonly GitInfoModel _githubUserInfo = new();
@@ -42,12 +39,6 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         private async Task UpdateCredentials()
         {
-            if (string.IsNullOrEmpty(Email))
-            {
-                DisplayText = "Please enter your email address.";
-                return;
-            }
-
             string? githubAccessToken = null;
 
             //Attempt to access users GitHub account
