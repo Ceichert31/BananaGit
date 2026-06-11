@@ -7,6 +7,7 @@ using BananaGit.Utilities;
 using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
 using Microsoft.Win32;
+using Version = System.Version;
 
 namespace BananaGit.Services
 {
@@ -125,7 +126,15 @@ namespace BananaGit.Services
         /// <returns>A list of remote branches</returns>
         public List<GitBranch> GetRemoteBranches()
         {
-            VerifyPath();
+            try
+            {
+                VerifyPath();
+            }
+            catch (RepoLocationException)
+            {
+                Trace.WriteLine("Repository location is missing!");
+                return new();
+            }
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
@@ -343,10 +352,7 @@ namespace BananaGit.Services
         /// <exception cref="RepoLocationException"></exception>
         private void VerifyPath()
         {
-            if (
-                _gitInfo?.SavedRepository?.FilePath == null
-                || _gitInfo.SavedRepository?.FilePath == ""
-            )
+            if (string.IsNullOrEmpty(_gitInfo?.GetPath()))
             {
                 throw new RepoLocationException("Local repository file path is empty!");
             }
@@ -703,12 +709,32 @@ namespace BananaGit.Services
         /// </summary>
         public async Task PullChanges()
         {
+            if (CurrentBranch == null)
+            {
+                try
+                {
+                    CurrentBranch = new GitBranch(_gitInfo);
+                }
+                catch (LoadDataException ex)
+                {
+                    Trace.WriteLine(ex.Message);
+                    return;
+                }
+                catch (InvalidRepoException ex)
+                {
+                    Trace.WriteLine(ex.Message);
+                    return;
+                }
+                catch (RepoLocationException ex)
+                {
+                    Trace.WriteLine(ex.Message);
+                    return;
+                }
+            }
+
             try
             {
-                if (_gitInfo?.CurrentBranch == null)
-                    throw new NullReferenceException("No Branch selected! Branch is null!");
-
-                var status = await PullFilesAsync(_gitInfo.CurrentBranch);
+                var status = await PullFilesAsync(CurrentBranch);
 
                 switch (status)
                 {
@@ -730,16 +756,6 @@ namespace BananaGit.Services
                     default:
                         Trace.WriteLine("Pulled Successfully");
                         break;
-                }
-            }
-            catch (NullReferenceException ex)
-            {
-                Trace.WriteLine(ex.Message);
-
-                if (_gitInfo != null)
-                {
-                    _gitInfo.CurrentBranch = new GitBranch(_gitInfo);
-                    JsonDataManager.SaveUserInfo(_gitInfo);
                 }
             }
             catch (Exception ex)

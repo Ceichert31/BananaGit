@@ -13,10 +13,16 @@ public static class Lib2GitSharpExt
     /// </summary>
     /// <param name="repoUrl">The repositories URL</param>
     /// <returns>The name of the default branch head</returns>
-    public static string? GetDefaultRepoName(string repoUrl)
+    public static string? GetDefaultRepoName(string? repoUrl)
     {
         try
         {
+            if (string.IsNullOrEmpty(repoUrl))
+            {
+                Trace.WriteLine("Couldn't find saved repository URL");
+                return null;
+            }
+
             var gitProcessInfo = new ProcessStartInfo
             {
                 FileName = "git",
@@ -26,10 +32,10 @@ public static class Lib2GitSharpExt
                 UseShellExecute = false,
                 CreateNoWindow = true,
             };
-            
+
             using var process = Process.Start(gitProcessInfo);
             if (process == null) throw new NullReferenceException("Git info process couldn't start!");
-            
+
             var output = process.StandardOutput.ReadToEnd();
             process.WaitForExit();
 
@@ -39,15 +45,16 @@ public static class Lib2GitSharpExt
             {
                 return output.Substring($"refs/remotes/origin/".Length);
             }
-            
-            var match = System.Text.RegularExpressions.Regex.Match(output,  @"ref:\s*refs/heads/(\S+)\s+HEAD");
-            
+
+            var match = System.Text.RegularExpressions.Regex.Match(output, @"ref:\s*refs/heads/(\S+)\s+HEAD");
+
             return match.Success ? match.Groups[1].Value : null;
         }
         catch (LibGit2SharpException e)
         {
             Trace.WriteLine(e.Message);
         }
+
         return null;
     }
 }

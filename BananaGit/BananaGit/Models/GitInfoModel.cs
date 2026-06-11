@@ -11,9 +11,9 @@
         public SavableRepository? SavedRepository { get; set; }
         public GitBranch? CurrentBranch { get; set; }
 
-        public string GetPath()
+        public string? GetPath()
         {
-            return SavedRepository?.FilePath ?? throw new NullReferenceException("Couldn't access repository path!");
+            return SavedRepository?.FilePath;
         }
 
         /// <summary>
@@ -33,27 +33,21 @@
             return false;
         }
 
-        public string GetUrl()
+        public string? GetUrl()
         {
-            return SavedRepository?.Url ?? throw new NullReferenceException("Couldn't access repository url!");
+            return SavedRepository?.Url;
         }
 
         public void SetPath(string path)
         {
-            if (SavedRepository == null)
-            {
-                SavedRepository = new("", "");
-            }
+            SavedRepository ??= new("", "");
 
             SavedRepository.FilePath = path;
         }
 
         public void SetUrl(string url)
         {
-            if (SavedRepository == null)
-            {
-                SavedRepository = new("", "");
-            }
+            SavedRepository ??= new("", "");
 
             SavedRepository.Url = url;
         }
