@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using BananaGit.EventArgExtensions;
 using BananaGit.Exceptions;
@@ -364,6 +365,38 @@ namespace BananaGit.Services
         }
 
         /// <summary>
+        /// Checks if the current branch is not null, if the current branch is null, attempt to find the default branch
+        /// </summary>
+        /// <returns>Whether the current branch is null</returns>
+        [MemberNotNullWhen(true, nameof(CurrentBranch))]
+        private bool VerifyCurrentBranch()
+        {
+            if (CurrentBranch != null) return true;
+
+            try
+            {
+                CurrentBranch = new GitBranch(_gitInfo);
+            }
+            catch (LoadDataException ex)
+            {
+                Trace.WriteLine(ex.Message);
+                return false;
+            }
+            catch (InvalidRepoException ex)
+            {
+                Trace.WriteLine(ex.Message);
+                return false;
+            }
+            catch (RepoLocationException ex)
+            {
+                Trace.WriteLine(ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        /// <summary>
         /// The callback for conflicts
         /// </summary>
         /// <param name="path">The file that conflicted</param>
@@ -589,7 +622,7 @@ namespace BananaGit.Services
         /// </summary>
         /// <param name="branch">The branch changes will be pulled from</param>
         /// <returns></returns>
-        private async Task<MergeStatus> PullFilesAsync(GitBranch branch)
+        private async Task<MergeStatus> PullFilesAsync()
         {
             await Task.Run(() =>
             {
@@ -687,12 +720,12 @@ namespace BananaGit.Services
         /// </summary>
         public async Task PushFiles()
         {
+            if (!VerifyCurrentBranch())
+                return;
+
             try
             {
-                if (_gitInfo?.CurrentBranch == null)
-                    throw new NullReferenceException("No Branch selected! Branch is null!");
-
-                await PushFilesAsync(_gitInfo.CurrentBranch);
+                await PushFilesAsync(CurrentBranch);
             }
             catch (LibGit2SharpException ex)
             {
@@ -709,32 +742,12 @@ namespace BananaGit.Services
         /// </summary>
         public async Task PullChanges()
         {
-            if (CurrentBranch == null)
-            {
-                try
-                {
-                    CurrentBranch = new GitBranch(_gitInfo);
-                }
-                catch (LoadDataException ex)
-                {
-                    Trace.WriteLine(ex.Message);
-                    return;
-                }
-                catch (InvalidRepoException ex)
-                {
-                    Trace.WriteLine(ex.Message);
-                    return;
-                }
-                catch (RepoLocationException ex)
-                {
-                    Trace.WriteLine(ex.Message);
-                    return;
-                }
-            }
+            if (!VerifyCurrentBranch())
+                return;
 
             try
             {
-                var status = await PullFilesAsync(CurrentBranch);
+                var status = await PullFilesAsync();
 
                 switch (status)
                 {
