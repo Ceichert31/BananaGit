@@ -11,14 +11,6 @@
         public SavableRepository? SavedRepository { get; set; }
         public GitBranch? CurrentBranch { get; set; }
 
-        public void CopyContents(GitInfoModel gitInfo)
-        {
-            Username = gitInfo.Username;
-            Email = gitInfo.Email;
-            PersonalToken = gitInfo.PersonalToken;
-            SavedRepository = gitInfo.SavedRepository;
-        }
-
         public string GetPath()
         {
             return SavedRepository?.FilePath ?? throw new NullReferenceException("Couldn't access repository path!");

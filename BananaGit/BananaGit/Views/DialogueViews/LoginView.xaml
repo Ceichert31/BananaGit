@@ -4,6 +4,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:local="clr-namespace:BananaGit.Views"
+    xmlns:models="clr-namespace:BananaGit.Models"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
     Title="EnterCredentialsView"
@@ -40,6 +41,16 @@
             <Label HorizontalAlignment="Center"
                    Content="{Binding DisplayText, FallbackValue=Hitting Confirm will redirect to browser.}" />
 
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+                <Button Command="{Binding CopyUserCodeCommand}"
+                        Visibility="{Binding UserCode, Converter={models:StringVisibilityConverter}}">
+                    <Image Source="pack://application:,,,/Assets/Clipboard.png" Width="15" Height="15" />
+                </Button>
+
+                <Label
+                    Content="{Binding UserCode}" />
+            </StackPanel>
         </StackPanel>
 
         <Button

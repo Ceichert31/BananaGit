@@ -20,6 +20,7 @@ namespace BananaGit.ViewModels
         [ObservableProperty] private string _email = "";
         [ObservableProperty] private string _username = "";
         [ObservableProperty] private string _displayText = "Hitting Confirm will redirect to browser.";
+        [ObservableProperty] private string _userCode = "";
 
         private readonly GitInfoModel _githubUserInfo = new();
         private readonly GithubAuthService _githubAuthService = new();
@@ -37,18 +38,14 @@ namespace BananaGit.ViewModels
         [RelayCommand]
         private async Task UpdateCredentials()
         {
-            //Run login async command
-
-            //Get access token in return
-
-            //Pass access token to GitInfoModel
-
+            //Wait for login method to return a value
             var githubAccessToken = await _githubAuthService.LoginAsync((userCode, url) =>
             {
                 //Update frontend on completion
                 Application.Current.Dispatcher.Invoke(() =>
                     {
-                        DisplayText = $"Please enter the code: {userCode} in your browser window.";
+                        DisplayText = "Please enter the code below in your browser window.";
+                        UserCode = userCode;
                     }
                 );
             });
@@ -70,13 +67,15 @@ namespace BananaGit.ViewModels
                 DisplayText = "Login failed or timed out. Please try again.";
                 _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
             }
+        }
 
-            //Deprecated
-            /*githubUserInfo.Username = Username;
-            githubUserInfo.Email = Email;
-            githubUserInfo.PersonalToken = UserToken;
-            JsonDataManager.SaveUserInfo(githubUserInfo);
-            onEnterCredentials?.Invoke(this, new EventArgs());*/
+        /// <summary>
+        /// Copies the user code to the clipboard
+        /// </summary>
+        [RelayCommand]
+        private void CopyUserCode()
+        {
+            Clipboard.SetText(UserCode);
         }
     }
 }

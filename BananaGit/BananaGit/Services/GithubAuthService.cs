@@ -13,8 +13,6 @@ public class GithubAuthService
     private const string ClientId = "Ov23liz6gkcsl8SP4P38";
     private readonly GitHubClient _githubClient;
 
-    public EventHandler<DeviceCodeEventArgs>? OnDeviceCodeAvailable;
-
     public GithubAuthService()
     {
         _githubClient = new GitHubClient(new ProductHeaderValue("BananaGit"));
@@ -40,7 +38,6 @@ public class GithubAuthService
             var codeResponse = await _githubClient.Oauth.InitiateDeviceFlow(codeRequest);
 
             //Show user device code
-            //OnDeviceCodeAvailable?.Invoke(this, new DeviceCodeEventArgs(codeResponse.DeviceCode));
             userCode?.Invoke(codeResponse.UserCode, codeResponse.VerificationUri);
 
             //Create process to open browser for validation
