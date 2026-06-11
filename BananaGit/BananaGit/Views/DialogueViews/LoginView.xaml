@@ -21,16 +21,26 @@ This window will redirect the user to the browser so they can log into GitHub.
     mc:Ignorable="d">
     <Grid>
         <Grid.RowDefinitions>
-            <RowDefinition Height="30" />
+            <RowDefinition Height="70" />
             <RowDefinition Height="1.5*" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <!-- Window Header -->
-        <Label
-            HorizontalAlignment="Center"
-            Content="Log in to Github"
-            FontWeight="Bold" />
+
+        <StackPanel>
+            <Label
+                HorizontalAlignment="Center"
+                Content="Welcome to BananaGit!"
+                FontSize="20"
+                FontWeight="Bold" />
+
+            <Label
+                HorizontalAlignment="Center"
+                Content="Please sign into GitHub to continue."
+                FontSize="12"
+                FontWeight="DemiBold" />
+        </StackPanel>
 
         <StackPanel Grid.Row="1" VerticalAlignment="Center">
 

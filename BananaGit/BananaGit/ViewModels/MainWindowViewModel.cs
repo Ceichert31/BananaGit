@@ -49,20 +49,15 @@ namespace BananaGit.ViewModels
                 return;
             }
 
-            GitService gitService = new GitService(_userInfo);
+            var gitService = new GitService(_userInfo);
+            var dialogService = new DialogService(gitService);
 
-            //Passed into DialogService for dialog creation
-            DialogService dialogService = new DialogService(gitService);
-
+            //Create view models
             ToolbarViewModel = new ToolbarViewModel(dialogService, gitService);
-
             CommitHistoryViewModel = new CommitHistoryViewModel(gitService);
-
             CommitViewModel = new CommitViewModel(gitService);
-
             GitChangesViewModel = new GitChangesViewModel(gitService, dialogService);
 
-            //UpdateBranches(CurrentBranch);
             gitService.OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
         }
     }

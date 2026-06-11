@@ -60,8 +60,14 @@ public class GithubAuthService
         }
     }
 
+    /// <summary>
+    /// Gets all emails associated with the current logged in account and returns the verified email
+    /// </summary>
+    /// <returns>Either the Users verified email or null</returns>
     public string? GetUserEmail()
     {
-        return _githubClient.User.Email.ToString();
+        var emails = _githubClient.User.Email.GetAll().Result;
+
+        return emails.FirstOrDefault(x => x.Verified)?.Email;
     }
 }

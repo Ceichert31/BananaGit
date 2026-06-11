@@ -1,5 +1,4 @@
-﻿using BananaGit.Models;
-using BananaGit.ViewModels;
+﻿using BananaGit.ViewModels;
 using BananaGit.Views;
 using BananaGit.Views.DialogueViews;
 
