@@ -27,9 +27,9 @@ public class GitServiceTests
 {
     private const string TEST_REPO = "https://github.com/Ceichert31/test-repo.git";
     private const string TEST_PATH_BASE = "C:/UnitTestRepositories/";
-    
+
     private static GitInfoModel? _userInfo;
-    
+
     /// <summary>
     /// Loads GitHub secrets user data
     /// </summary>
@@ -42,16 +42,22 @@ public class GitServiceTests
             .AddUserSecrets<GitServiceTests>()
             .AddEnvironmentVariables()
             .Build();
-        
+
         _userInfo = new GitInfoModel()
         {
             Username = config["GIT_TEST_USERNAME"],
             Email = config["GIT_TEST_EMAIL"],
-            PersonalToken =  config["GIT_TEST_TOKEN"],
+            PersonalToken = config["GIT_TEST_TOKEN"],
             SavedRepository = new SavableRepository("", TEST_REPO)
         };
     }
 
+    /// <summary>
+    /// Clones a repository locally and then deletes it
+    /// </summary>
+    /// <remarks>
+    /// If this stops passing there is a chance it is because the personal access token expired
+    /// </remarks>
     [TestMethod]
     public async Task TestCloneRepository_ReturnsTrue()
     {
@@ -66,10 +72,10 @@ public class GitServiceTests
             {
                 DeleteDirectory(testPath);
             }
-            
+
             //Act
             await gitService.CloneRepositoryAsync(TEST_REPO, testPath);
-            
+
             //Assert
             Assert.IsTrue(Directory.Exists(testPath));
             Assert.IsTrue(Directory.EnumerateFiles(testPath).Any());
@@ -79,7 +85,10 @@ public class GitServiceTests
             DeleteDirectory(testPath);
         }
     }
-    
+
+    /// <summary>
+    /// Commits files to a local repository and then clears the commits
+    /// </summary>
     [TestMethod]
     public async Task TestCommitFiles_ReturnsTrue()
     {
@@ -97,17 +106,17 @@ public class GitServiceTests
             //Arrange
             DeleteDirectory(testPath);
             await gitService.CloneRepositoryAsync(TEST_REPO, testPath);
-            
+
             //Create and add file to stage
             await File.Create(file.FilePath).DisposeAsync();
             using Repository repo = new Repository(testPath);
-            
+
             //Stage file
             await gitService.StageFileAsync(file, repo);
-            
+
             //Act
             await gitService.CommitStagedFilesAsync("Test commit");
-            
+
             //Assert
             Assert.IsTrue(gitService.HasLocalCommitedFiles());
         }
@@ -118,7 +127,7 @@ public class GitServiceTests
             DeleteDirectory(testPath);
         }
     }
-    
+
     /// <summary>
     /// Deletes a directory completely including read-only and hidden items
     /// </summary>
@@ -126,13 +135,14 @@ public class GitServiceTests
     private void DeleteDirectory(string path)
     {
         if (!Directory.Exists(path)) return;
-        
+
         var directory = new DirectoryInfo(path);
 
         foreach (var file in directory.GetFileSystemInfos("*", SearchOption.AllDirectories))
         {
             file.Attributes = FileAttributes.Normal;
         }
+
         directory.Attributes = FileAttributes.Normal;
         directory.Delete(true);
     }
