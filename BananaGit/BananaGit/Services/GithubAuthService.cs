@@ -62,15 +62,11 @@ public class GithubAuthService
     }
 
     /// <summary>
-    /// Gets all emails associated with the current logged in account and returns the verified email
+    /// Gets all emails associated with the current logged in account and returns a verified or primary email
     /// </summary>
     /// <returns>Either the Users verified email or null</returns>
     public async Task<string?> GetUserEmail(string accessToken)
     {
-        //This is throwing an error. May need to try and get both verified and primary email, and prioritize verified
-
-        //Needs authentication
-
         IReadOnlyList<EmailAddress>? emails = null;
 
         try
@@ -85,13 +81,13 @@ public class GithubAuthService
             return "Could not authenticate account";
         }
 
-        //Get verified email first and return if not null
+        //Try to get a verified email first 
         var verifiedEmail = emails.FirstOrDefault(x => x.Verified)?.Email;
 
         if (verifiedEmail != null)
             return verifiedEmail;
 
-        //If it is null try to get primary email
+        //If there are no verified emails, try to get a primary email
         var primaryEmail = emails.FirstOrDefault(x => x.Primary)?.Email;
 
         return primaryEmail;
