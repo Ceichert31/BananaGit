@@ -84,7 +84,7 @@ namespace BananaGit.ViewModels
             }
 
             //Successful login
-            var userEmail = _githubAuthService.GetUserEmail();
+            var userEmail = await _githubAuthService.GetUserEmail(githubAccessToken);
 
             if (string.IsNullOrEmpty(userEmail))
             {

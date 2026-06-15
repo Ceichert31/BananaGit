@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using BananaGit.EventArgExtensions;
+using BananaGit.Utilities;
 using Octokit;
 
 namespace BananaGit.Services;
@@ -64,10 +65,35 @@ public class GithubAuthService
     /// Gets all emails associated with the current logged in account and returns the verified email
     /// </summary>
     /// <returns>Either the Users verified email or null</returns>
-    public string? GetUserEmail()
+    public async Task<string?> GetUserEmail(string accessToken)
     {
-        var emails = _githubClient.User.Email.GetAll().Result;
+        //This is throwing an error. May need to try and get both verified and primary email, and prioritize verified
 
-        return emails.FirstOrDefault(x => x.Verified)?.Email;
+        //Needs authentication
+
+        IReadOnlyList<EmailAddress>? emails = null;
+
+        try
+        {
+            _githubClient.Credentials = new Credentials(accessToken);
+
+            emails = await _githubClient.User.Email.GetAll();
+        }
+        catch (AuthorizationException)
+        {
+            Trace.WriteLine("Could not authenticate account.");
+            return "Could not authenticate account";
+        }
+
+        //Get verified email first and return if not null
+        var verifiedEmail = emails.FirstOrDefault(x => x.Verified)?.Email;
+
+        if (verifiedEmail != null)
+            return verifiedEmail;
+
+        //If it is null try to get primary email
+        var primaryEmail = emails.FirstOrDefault(x => x.Primary)?.Email;
+
+        return primaryEmail;
     }
 }
