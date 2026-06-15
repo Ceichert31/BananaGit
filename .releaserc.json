@@ -1,29 +1,18 @@
 {
-    "branches": [
-        "main"
-    ],
+    "branches": ["main"],
     "plugins": [
         "@semantic-release/commit-analyzer",
         [
             "@semantic-release/exec",
             {
-                "prepareCmd": "echo ${nextRelease.version} > .version",
-                "publishCmd": "echo \"Version ${nextRelease.version} released\""
+                "prepareCmd": "echo ${nextRelease.version} > .version"
             }
         ],
-        [
-            "@semantic-release/changelog",
-            {
-                "changelogFile": "CHANGELOG.md"
-            }
-        ],
+        ["@semantic-release/changelog", { "changelogFile": "CHANGELOG.md" }],
         [
             "@semantic-release/git",
             {
-                "assets": [
-                    "CHANGELOG.md",
-                    "builds/BananaGit/*"
-                ],
+                "assets": ["CHANGELOG.md", "builds/BananaGit/*"],
                 "message": "chore(release): ${nextRelease.version} [skip ci]"
             }
         ],
