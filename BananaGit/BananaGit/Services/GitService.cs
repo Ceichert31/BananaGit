@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using BananaGit.EventArgExtensions;
 using BananaGit.Exceptions;
@@ -7,6 +8,7 @@ using BananaGit.Utilities;
 using LibGit2Sharp;
 using LibGit2Sharp.Handlers;
 using Microsoft.Win32;
+using Version = System.Version;
 
 namespace BananaGit.Services
 {
@@ -20,10 +22,26 @@ namespace BananaGit.Services
         public EventHandler<EventArgs>? OnRepositoryChanged;
         public EventHandler<EventArgs>? OnChangesPulled;
 
+
+        /// <summary>
+        /// The currently selected branch that Git operations will be executed on
+        /// </summary>
+        public GitBranch? CurrentBranch
+        {
+            get => _gitInfo?.CurrentBranch;
+            set
+            {
+                //If no git info exists, create a new instance
+                _gitInfo ??= new GitInfoModel();
+
+                _gitInfo.CurrentBranch = value;
+            }
+        }
+
         public GitService(GitInfoModel? gitInfo)
         {
             _gitInfo = gitInfo;
-            JsonDataManager.UserInfoChanged += OnUserDataChange;
+            JsonDataManager.OnUserInfoChanged += OnUserDataChange;
         }
 
         /// <summary>
@@ -44,11 +62,12 @@ namespace BananaGit.Services
         public void OutputToConsole(object? sender, MessageEventArgs e)
         {
             if (sender == null) return;
-            
+
             Trace.WriteLine($"{sender.GetType().ToString().Split('.').Last()}: {e.Message}");
         }
-        
+
         #region Getters
+
         /// <summary>
         /// Checks if the current repo has files commited but not pushed
         /// </summary>
@@ -76,6 +95,7 @@ namespace BananaGit.Services
         }
 
         #region Branch Getters
+
         /// <summary>
         /// Verifies repository path and returns a list of local branches
         /// </summary>
@@ -87,13 +107,14 @@ namespace BananaGit.Services
             using var repo = new Repository(_gitInfo?.GetPath());
 
             List<GitBranch> localBranches = new();
-            
+
             foreach (var branch in repo.Branches)
             {
                 if (branch.IsRemote)
                 {
                     continue;
                 }
+
                 localBranches.Add(new GitBranch(branch));
             }
 
@@ -106,20 +127,30 @@ namespace BananaGit.Services
         /// <returns>A list of remote branches</returns>
         public List<GitBranch> GetRemoteBranches()
         {
-            VerifyPath();
+            try
+            {
+                VerifyPath();
+            }
+            catch (RepoLocationException)
+            {
+                Trace.WriteLine("Repository location is missing!");
+                return new();
+            }
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
             List<GitBranch> remoteBranches = new();
-            
+
             foreach (var branch in repo.Branches)
             {
                 if (!branch.IsRemote)
                 {
                     continue;
                 }
+
                 remoteBranches.Add(new GitBranch(branch));
             }
+
             return remoteBranches;
         }
 
@@ -136,9 +167,9 @@ namespace BananaGit.Services
             {
                 throw new NullReferenceException("Couldn't access repository path!");
             }
-            
+
             VerifyPath();
-            
+
             return new DirectoryInfo(path).Name;
         }
 
@@ -152,6 +183,16 @@ namespace BananaGit.Services
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
+            if (_gitInfo?.CurrentBranch == null)
+                if (_gitInfo != null)
+                {
+                    _gitInfo.CurrentBranch = new GitBranch();
+                }
+                else
+                {
+                    JsonDataManager.LoadUserInfo(ref _gitInfo);
+                }
+
             var commits = repo.Branches[_gitInfo?.CurrentBranch?.CanonicalName].Commits.ToList();
 
             List<GitCommitInfo> commitList = new();
@@ -160,7 +201,7 @@ namespace BananaGit.Services
             {
                 historyLength = commits.Count;
             }
-            
+
             //Iterate through and convert commit info into GitCommitInfo model
             for (int i = 0; i < historyLength; i++)
             {
@@ -176,6 +217,7 @@ namespace BananaGit.Services
                 };
                 commitList.Add(commitInfo);
             }
+
             return commitList;
         }
 
@@ -188,7 +230,7 @@ namespace BananaGit.Services
             VerifyPath();
 
             using var repo = new Repository(_gitInfo?.GetPath());
-            
+
             var staged = repo.RetrieveStatus().Staged;
             var added = repo.RetrieveStatus().Added;
             var removed = repo.RetrieveStatus().Removed;
@@ -202,10 +244,10 @@ namespace BananaGit.Services
         /// </summary>
         /// <returns>A list of all unstaged local changes</returns>
         public List<ChangedFile> GetUnstagedChanges()
-        {   
+        {
             VerifyPath();
             using var repo = new Repository(_gitInfo?.GetPath());
-            
+
             var stats = repo.RetrieveStatus(new StatusOptions());
 
             List<ChangedFile> changedFiles = new();
@@ -214,13 +256,14 @@ namespace BananaGit.Services
             foreach (var file in stats)
             {
                 if (file.State is FileStatus.ModifiedInWorkdir or FileStatus.NewInWorkdir ||
-                    file.State == FileStatus.RenamedInWorkdir || 
+                    file.State == FileStatus.RenamedInWorkdir ||
                     file.State == FileStatus.DeletedFromWorkdir ||
                     file.State == (FileStatus.NewInIndex | FileStatus.ModifiedInWorkdir))
                 {
                     changedFiles.Add(new ChangedFile(this, file, file.FilePath));
                 }
             }
+
             return changedFiles;
         }
 
@@ -232,7 +275,7 @@ namespace BananaGit.Services
         {
             VerifyPath();
             using var repo = new Repository(_gitInfo?.GetPath());
-            
+
             var stats = repo.RetrieveStatus(new StatusOptions());
 
             List<ChangedFile> changedFiles = new();
@@ -240,20 +283,22 @@ namespace BananaGit.Services
             //Find all unstaged changed files and add them to list
             foreach (var file in stats)
             {
-                if (file.State == FileStatus.ModifiedInIndex || 
-                    file.State == FileStatus.NewInIndex || 
-                    file.State == FileStatus.RenamedInIndex || 
+                if (file.State == FileStatus.ModifiedInIndex ||
+                    file.State == FileStatus.NewInIndex ||
+                    file.State == FileStatus.RenamedInIndex ||
                     file.State == FileStatus.DeletedFromIndex)
                 {
                     changedFiles.Add(new ChangedFile(this, file, file.FilePath));
                 }
             }
+
             return changedFiles;
         }
-        
+
         #endregion
 
         #region Helper Methods
+
         /// <summary>
         /// Removes all local commits and reverts to the remotes last commit
         /// (Aka deletes all unpushed commits)
@@ -266,7 +311,6 @@ namespace BananaGit.Services
 
                 //Move HEAD to remotes last commit
                 repo.Reset(ResetMode.Hard, repo.Head.TrackedBranch.Tip);
-                
             });
         }
 
@@ -276,7 +320,7 @@ namespace BananaGit.Services
         public async Task ResetLocalUncommittedFilesAsync()
         {
             //May have to make custom command
-            
+
             await Task.Run(() =>
             {
                 using var repo = new Repository(_gitInfo?.GetPath());
@@ -295,8 +339,8 @@ namespace BananaGit.Services
             await Task.Run(() =>
             {
                 using var repo = new Repository(_gitInfo?.GetPath());
-                
-                repo.CheckoutPaths("HEAD", new[] {filePath}, new CheckoutOptions
+
+                repo.CheckoutPaths("HEAD", new[] { filePath }, new CheckoutOptions
                 {
                     CheckoutModifiers = CheckoutModifiers.Force
                 });
@@ -309,10 +353,7 @@ namespace BananaGit.Services
         /// <exception cref="RepoLocationException"></exception>
         private void VerifyPath()
         {
-            if (
-                _gitInfo?.SavedRepository?.FilePath == null
-                || _gitInfo.SavedRepository?.FilePath == ""
-            )
+            if (string.IsNullOrEmpty(_gitInfo?.GetPath()))
             {
                 throw new RepoLocationException("Local repository file path is empty!");
             }
@@ -321,6 +362,38 @@ namespace BananaGit.Services
             {
                 throw new RepoLocationException("Local repository file path is missing!");
             }
+        }
+
+        /// <summary>
+        /// Checks if the current branch is not null, if the current branch is null, attempt to find the default branch
+        /// </summary>
+        /// <returns>Whether the current branch is null</returns>
+        [MemberNotNullWhen(true, nameof(CurrentBranch))]
+        private bool VerifyCurrentBranch()
+        {
+            if (CurrentBranch != null) return true;
+
+            try
+            {
+                CurrentBranch = new GitBranch(_gitInfo);
+            }
+            catch (LoadDataException ex)
+            {
+                Trace.WriteLine(ex.Message);
+                return false;
+            }
+            catch (InvalidRepoException ex)
+            {
+                Trace.WriteLine(ex.Message);
+                return false;
+            }
+            catch (RepoLocationException ex)
+            {
+                Trace.WriteLine(ex.Message);
+                return false;
+            }
+
+            return true;
         }
 
         /// <summary>
@@ -335,11 +408,14 @@ namespace BananaGit.Services
             {
                 Trace.WriteLine($"Conflict found in file {path}");
             }
+
             return true;
         }
+
         #endregion
 
         #region Stage/Commit
+
         /// <summary>
         /// Commits all staged files
         /// </summary>
@@ -466,9 +542,11 @@ namespace BananaGit.Services
                 }
             });
         }
+
         #endregion
 
         #region Push/Pull
+
         /// <summary>
         /// Pushes files that are commited to the repository on the specified branch
         /// </summary>
@@ -544,7 +622,7 @@ namespace BananaGit.Services
         /// </summary>
         /// <param name="branch">The branch changes will be pulled from</param>
         /// <returns></returns>
-        private async Task<MergeStatus> PullFilesAsync(GitBranch branch)
+        private async Task<MergeStatus> PullFilesAsync()
         {
             await Task.Run(() =>
             {
@@ -554,13 +632,12 @@ namespace BananaGit.Services
                 {
                     FetchOptions = new FetchOptions
                     {
-                        CredentialsProvider = new CredentialsHandler(
-                            (url, username, types) =>
-                                new UsernamePasswordCredentials
-                                {
-                                    Username = _gitInfo?.Username,
-                                    Password = _gitInfo?.PersonalToken,
-                                }
+                        CredentialsProvider = new CredentialsHandler((url, username, types) =>
+                            new UsernamePasswordCredentials
+                            {
+                                Username = _gitInfo?.Username,
+                                Password = _gitInfo?.PersonalToken,
+                            }
                         ),
                     },
                 };
@@ -589,13 +666,16 @@ namespace BananaGit.Services
                             return "Up to date";
                     }
                 }
+
                 return "Pulled Successfully";
             });
             return MergeStatus.UpToDate;
         }
+
         #endregion
 
         #region Clone
+
         /// <summary>
         /// Clones a repository at the specified file location
         /// </summary>
@@ -605,15 +685,16 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                if (cloneLocation == null )
+                if (cloneLocation == null)
                 {
                     throw new NullReferenceException("No path found!");
                 }
+
                 if (url == null)
                 {
                     throw new NullReferenceException("No URL found!");
                 }
-                
+
                 var options = new CloneOptions
                 {
                     FetchOptions =
@@ -629,20 +710,22 @@ namespace BananaGit.Services
                 Repository.Clone(url, cloneLocation, options);
             });
         }
+
         #endregion
 
         #region Public Method Wrappers
+
         /// <summary>
         /// Calls GitService to push commited files onto selected branch, handles errors
         /// </summary>
         public async Task PushFiles()
         {
+            if (!VerifyCurrentBranch())
+                return;
+
             try
             {
-                if (_gitInfo?.CurrentBranch == null)
-                    throw new NullReferenceException("No Branch selected! Branch is null!");
-
-                await PushFilesAsync(_gitInfo.CurrentBranch);
+                await PushFilesAsync(CurrentBranch);
             }
             catch (LibGit2SharpException ex)
             {
@@ -653,17 +736,18 @@ namespace BananaGit.Services
                 Trace.WriteLine(ex.Message);
             }
         }
+
         /// <summary>
         /// Pulls changes from the repo and merges them into the local repository
         /// </summary>
         public async Task PullChanges()
         {
+            if (!VerifyCurrentBranch())
+                return;
+
             try
             {
-                if (_gitInfo?.CurrentBranch == null)
-                    throw new NullReferenceException("No Branch selected! Branch is null!");
-
-                var status = await PullFilesAsync(_gitInfo.CurrentBranch);
+                var status = await PullFilesAsync();
 
                 switch (status)
                 {
@@ -687,16 +771,6 @@ namespace BananaGit.Services
                         break;
                 }
             }
-            catch (NullReferenceException ex)
-            {
-                Trace.WriteLine(ex.Message);
-
-                if (_gitInfo != null)
-                {
-                    _gitInfo.CurrentBranch = new GitBranch(_gitInfo);
-                    JsonDataManager.SaveUserInfo(_gitInfo);
-                }
-            }
             catch (Exception ex)
             {
                 Trace.WriteLine(ex.Message);
@@ -707,6 +781,7 @@ namespace BananaGit.Services
                 OnChangesPulled?.Invoke(this, EventArgs.Empty);
             }
         }
+
         #endregion
 
         /// <summary>
@@ -714,7 +789,7 @@ namespace BananaGit.Services
         /// existing repository to open, or a directory to clone to
         /// </summary>
         /// <returns>True if the file location is empty, otherwise false</returns>
-        public Tuple<string,bool> ChooseRepositoryDialog()
+        public Tuple<string, bool> ChooseRepositoryDialog()
         {
             //Open dialog, choose path, check path validity, if path is valid save to user info, if not give message
 
@@ -730,7 +805,7 @@ namespace BananaGit.Services
 
                 //If dialog closes, check result
                 if (dialog.ShowDialog() != true) return new Tuple<string, bool>("", false);
-                
+
                 selectedFilePath = dialog.FolderName;
 
                 //Check if directory is empty and mark as cloneable
@@ -742,6 +817,7 @@ namespace BananaGit.Services
                     DirectoryHasFiles = false;*/
                     return new Tuple<string, bool>(selectedFilePath, true);
                 }
+
                 //Otherwise open if a repository already exists there
                 OpenLocalRepository(selectedFilePath);
             }
@@ -752,9 +828,10 @@ namespace BananaGit.Services
                 DirectoryHasFiles = true;*/
                 Trace.WriteLine(ex.Message);
             }
+
             return new Tuple<string, bool>(selectedFilePath, true);
         }
-        
+
         /// <summary>
         /// Verifies that a repository exists at the file location and opens it
         /// </summary>
@@ -768,9 +845,9 @@ namespace BananaGit.Services
                 Task.Run(() =>
                 {
                     //Check if file location is local repo
-                    if (!Repository.IsValid(filePath)) 
+                    if (!Repository.IsValid(filePath))
                         throw new RepositoryNotFoundException($"Repository not found at {filePath}!");
-            
+
                     var repo = new Repository(filePath);
 
                     //Set active repo as locally opened repo
@@ -787,7 +864,7 @@ namespace BananaGit.Services
                     //Save to user info
                     _gitInfo?.SetPath(filePath);
                     JsonDataManager.SaveUserInfo(_gitInfo);
-                    
+
                     //Notify view models that the repository data has changed
                     OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
                 });
@@ -797,6 +874,7 @@ namespace BananaGit.Services
                 Trace.WriteLine(ex.Message);
             }
         }
+
         /// <summary>
         /// Clones a local repository from a selected URL
         /// </summary>
@@ -804,16 +882,16 @@ namespace BananaGit.Services
         public async Task CloneRepository(string url, string path)
         {
             try
-            { 
+            {
                 VerifyPath();
 
                 if (url == string.Empty || path == string.Empty)
                     throw new NullReferenceException("No URL or Path found!");
-                
-                
+
+
                 //Clone repo using git service
                 await CloneRepositoryAsync(url, path);
-                
+
                 OpenLocalRepository(path);
             }
             catch (Exception ex)
@@ -821,5 +899,5 @@ namespace BananaGit.Services
                 Trace.WriteLine(ex.Message);
             }
         }
-   }
+    }
 }

@@ -4,46 +4,49 @@ using Newtonsoft.Json;
 
 namespace BananaGit.Utilities
 {
-    public class JsonDataManager
+    /// <summary>
+    /// Manages saving and loading data locally on the users computer
+    /// </summary>
+    public static class JsonDataManager
     {
         public static bool HasPersonalToken = false;
 
-        private const string USER_DATA_LOCATION = "C:\\ProgramData/BananaGit/";
-        private const string USER_DATA_NAME = "UserInfo.json";
+        public static EventHandler? OnUserInfoChanged;
 
-        public static EventHandler? UserInfoChanged;
+        private const string UserDataLocation = "C:\\ProgramData/BananaGit/";
+        private const string UserDataName = "UserInfo.json";
 
         /// <summary>
-        /// Saves the users personal github token to a local folder
+        /// Saves the Users GitHub credentials locally
         /// </summary>
-        /// <param name="token">The users github token</param>
+        /// <param name="userInfo">The class that holds all the users GitHub information</param>
         public static void SaveUserInfo(GitInfoModel? userInfo)
         {
             TextWriter? writer = null;
 
             if (userInfo == null) return;
-            
+
             try
             {
                 //Create directory before trying to write to file
-                if (!Directory.Exists(USER_DATA_LOCATION))
+                if (!Directory.Exists(UserDataLocation))
                 {
-                    Directory.CreateDirectory(USER_DATA_LOCATION);
+                    Directory.CreateDirectory(UserDataLocation);
                 }
 
                 string jsonString = JsonConvert.SerializeObject(userInfo, Formatting.Indented);
-                writer = new StreamWriter(USER_DATA_LOCATION + USER_DATA_NAME, false);
+                writer = new StreamWriter(UserDataLocation + UserDataName, false);
                 writer.Write(jsonString);
             }
             finally
             {
                 writer?.Close();
-                UserInfoChanged?.Invoke(nameof(JsonDataManager), EventArgs.Empty);
+                OnUserInfoChanged?.Invoke(nameof(JsonDataManager), EventArgs.Empty);
             }
         }
 
         /// <summary>
-        /// Loads the github user info into the passed in user info variable
+        /// Loads the GitHub user info into the passed in user info variable
         /// </summary>
         /// <param name="userInfo">The variable where the user info is drawn into</param>
         public static void LoadUserInfo(ref GitInfoModel? userInfo)
@@ -53,23 +56,19 @@ namespace BananaGit.Utilities
             try
             {
                 //If directory hasn't been created yet, return nothing
-                if (!File.Exists(USER_DATA_LOCATION + USER_DATA_NAME))
+                if (!File.Exists(UserDataLocation + UserDataName))
                 {
                     HasPersonalToken = false;
-                    return;
+                    throw new IOException("UserInfo.json is missing");
                 }
 
-                reader = new StreamReader(USER_DATA_LOCATION + USER_DATA_NAME);
+                reader = new StreamReader(UserDataLocation + UserDataName);
                 var fileContents = reader.ReadToEnd();
 
-                //If data couldn't be loaded, convert github info to null
+                //If data couldn't be loaded, convert GitHub info to null
                 GitInfoModel? loadedInfo = JsonConvert.DeserializeObject<GitInfoModel>(fileContents) ?? null;
-                userInfo = loadedInfo; 
+                userInfo = loadedInfo;
                 HasPersonalToken = true;
-            }
-            catch(Exception ex)
-            {
-                Console.WriteLine(ex.Message);
             }
             finally
             {

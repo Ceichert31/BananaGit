@@ -1,31 +1,32 @@
 <Project Sdk="Microsoft.NET.Sdk">
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net9.0-windows</TargetFramework>
-    <Nullable>enable</Nullable>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <UseWPF>true</UseWPF>
-    <PublishSingleFile>true</PublishSingleFile>
-    <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    <StartupObject>BananaGit.App</StartupObject>
-    <ApplicationIcon>Assets/Banana.ico</ApplicationIcon>
-    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net9.0-windows</TargetFramework>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <UseWPF>true</UseWPF>
+        <PublishSingleFile>true</PublishSingleFile>
+        <EnableWindowsTargeting>true</EnableWindowsTargeting>
+        <StartupObject>BananaGit.App</StartupObject>
+        <ApplicationIcon>Assets/Banana.ico</ApplicationIcon>
+        <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Resource Include="Assets\**\*.png" />
-    <Resource Include="Assets\**\*.ico" />
-    <InternalsVisibleTo Include="BananaGit.Test" />
-  </ItemGroup>
+    <ItemGroup>
+        <Resource Include="Assets\**\*.png"/>
+        <Resource Include="Assets\**\*.ico"/>
+        <InternalsVisibleTo Include="BananaGit.Test"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
-    <PackageReference Include="LibGit2Sharp" Version="0.31.0" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
+        <PackageReference Include="LibGit2Sharp" Version="0.31.0"/>
+        <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
+        <PackageReference Include="Octokit" Version="14.0.0"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Page Include="App.xaml" />
-  </ItemGroup>
+    <ItemGroup>
+        <Page Include="App.xaml"/>
+    </ItemGroup>
 </Project>

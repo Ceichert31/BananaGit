@@ -7,20 +7,13 @@
     {
         public string? Username { get; set; }
         public string? Email { get; set; }
-        public string? PersonalToken { get; set; } 
+        public string? PersonalToken { get; set; }
         public SavableRepository? SavedRepository { get; set; }
         public GitBranch? CurrentBranch { get; set; }
 
-        public void CopyContents(GitInfoModel gitInfo)
+        public string? GetPath()
         {
-            Username = gitInfo.Username;
-            Email = gitInfo.Email;
-            PersonalToken = gitInfo.PersonalToken;
-            SavedRepository = gitInfo.SavedRepository;
-        }
-        public string GetPath()
-        {
-            return SavedRepository?.FilePath ?? throw new NullReferenceException("Couldn't access repository path!");
+            return SavedRepository?.FilePath;
         }
 
         /// <summary>
@@ -39,26 +32,23 @@
             output = string.Empty;
             return false;
         }
-        public string GetUrl()
+
+        public string? GetUrl()
         {
-            return SavedRepository?.Url ?? throw new NullReferenceException("Couldn't access repository url!");
+            return SavedRepository?.Url;
         }
 
         public void SetPath(string path)
         {
-            if (SavedRepository == null)
-            {
-                throw new NullReferenceException("Couldn't access repository!");
-            }
+            SavedRepository ??= new("", "");
+
             SavedRepository.FilePath = path;
         }
 
         public void SetUrl(string url)
         {
-            if (SavedRepository == null)
-            {
-                throw new NullReferenceException("Couldn't access repository!");
-            }
+            SavedRepository ??= new("", "");
+
             SavedRepository.Url = url;
         }
 
@@ -68,11 +58,12 @@
         /// <returns>Whether repo is null</returns>
         public bool IsSavedRepositoryValid()
         {
-            return SavedRepository != null && 
-                   SavedRepository.FilePath != null &&  
+            return SavedRepository != null &&
+                   SavedRepository.FilePath != null &&
                    SavedRepository.Url != null;
         }
     }
+
     /// <summary>
     /// Holds repository information
     /// </summary>
@@ -83,6 +74,7 @@
         public string FilePath { get; set; } = path;
         public string Url { get; set; } = url;
     }
+
     /// <summary>
     /// Move this to its own model
     /// </summary>

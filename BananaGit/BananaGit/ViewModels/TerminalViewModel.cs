@@ -7,22 +7,30 @@ namespace BananaGit.ViewModels
 {
     partial class TerminalViewModel : ObservableObject
     {
-        [ObservableProperty]
-        private ObservableCollection<string> _output;
+        [ObservableProperty] private ObservableCollection<string> _output;
 
         private readonly TerminalListener _listener;
 
         private const string LogLocation = "C:\\ProgramData/BananaGit/Log.txt";
-        
-        public TerminalViewModel() 
+        private const string DirectoryLocation = "C:\\ProgramData/BananaGit/";
+
+        public TerminalViewModel()
         {
             Output = new ObservableCollection<string>();
             _listener = new TerminalListener();
             _listener.RecievedMessage += AddNewOutput;
             Trace.Listeners.Add(_listener);
-            
-            //Clear log
-            File.WriteAllText(LogLocation, string.Empty);
+
+            try
+            {
+                //Clear log
+                File.WriteAllText(LogLocation, string.Empty);
+            }
+            catch (IOException)
+            {
+                Directory.CreateDirectory(DirectoryLocation);
+                File.WriteAllText(LogLocation, string.Empty);
+            }
         }
 
         private void AddNewOutput(string? output)
@@ -32,13 +40,12 @@ namespace BananaGit.ViewModels
             File.AppendAllText(LogLocation, output + Environment.NewLine);
             Output.Add(output);
         }
-
     }
 
     public class TerminalListener : TraceListener
     {
         public event Action<string>? RecievedMessage;
-        
+
         public override void Write(string? message)
         {
             RecievedMessage?.Invoke(message ?? "");
