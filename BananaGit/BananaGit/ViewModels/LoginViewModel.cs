@@ -21,6 +21,7 @@ namespace BananaGit.ViewModels
     {
         [ObservableProperty] private string _displayText = "Pressing Sign in will redirect to browser.";
         [ObservableProperty] private string _userCode = "";
+        [ObservableProperty] private string _loginUrl = "";
 
         private readonly GitInfoModel _githubUserInfo = new();
         private readonly GithubAuthService _githubAuthService = new();
@@ -51,6 +52,7 @@ namespace BananaGit.ViewModels
                         {
                             DisplayText = "Please enter the code below in your browser window.";
                             UserCode = userCode;
+                            LoginUrl = url;
                             Clipboard.SetText(UserCode);
                         }
                     );
@@ -130,7 +132,24 @@ namespace BananaGit.ViewModels
         private void LoginFailed()
         {
             UserCode = string.Empty;
+            LoginUrl = string.Empty;
             _onEnterCredentials?.Invoke(this, new CredentialsEventArgs(false));
+        }
+
+        /// <summary>
+        /// Opens the login page in case the user closes the browser
+        /// </summary>
+        /// <param name="address">The page URL</param>
+        [RelayCommand]
+        private void OpenLoginPage(string address)
+        {
+            //Create process to open browser for validation
+            var validationProcess = new ProcessStartInfo(address)
+            {
+                UseShellExecute = true
+            };
+
+            Process.Start(validationProcess);
         }
     }
 }
