@@ -794,42 +794,40 @@ namespace BananaGit.Services
             //Open dialog, choose path, check path validity, if path is valid save to user info, if not give message
 
             string selectedFilePath = "";
+
+            //Open file select dialogue
+            OpenFolderDialog dialog = new OpenFolderDialog
+            {
+                Multiselect = false,
+                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
+            };
+
+            //If dialog closes, check result
+            if (dialog.ShowDialog() != true) return new Tuple<string, bool>("", false);
+
+            selectedFilePath = dialog.FolderName;
+
             try
             {
-                //Open file select dialogue
-                OpenFolderDialog dialog = new OpenFolderDialog
+                //Empty directory and directory isn't a repository
+                if (!Repository.IsValid(selectedFilePath))
                 {
-                    Multiselect = false,
-                    InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.Desktop)
-                };
-
-                //If dialog closes, check result
-                if (dialog.ShowDialog() != true) return new Tuple<string, bool>("", false);
-
-                selectedFilePath = dialog.FolderName;
-
-                //Check if directory is empty and mark as cloneable
-                if (!Directory.EnumerateFiles(selectedFilePath).Any())
-                {
-                    //Directory is empty, can clone
-                    /*CanClone = true;
-                    LocalRepoFilePath = selectedFilePath;
-                    DirectoryHasFiles = false;*/
-                    return new Tuple<string, bool>(selectedFilePath, true);
+                    //If directory is empty, return true, otherwise return false
+                    return !Directory.EnumerateFiles(selectedFilePath).Any()
+                        ? new Tuple<string, bool>(selectedFilePath, true)
+                        : new Tuple<string, bool>(selectedFilePath, false);
                 }
 
-                //Otherwise open if a repository already exists there
+                //Try to open repository if one already exists
                 OpenLocalRepository(selectedFilePath);
             }
-            catch (Exception ex)
+            catch (RepositoryNotFoundException ex)
             {
-                /*CanClone = false;
-                NoRepoCloned = true;
-                DirectoryHasFiles = true;*/
                 Trace.WriteLine(ex.Message);
+                return new Tuple<string, bool>(selectedFilePath, true);
             }
 
-            return new Tuple<string, bool>(selectedFilePath, true);
+            return new Tuple<string, bool>(selectedFilePath, false);
         }
 
         /// <summary>
@@ -844,10 +842,6 @@ namespace BananaGit.Services
             {
                 Task.Run(() =>
                 {
-                    //Check if file location is local repo
-                    if (!Repository.IsValid(filePath))
-                        throw new RepositoryNotFoundException($"Repository not found at {filePath}!");
-
                     var repo = new Repository(filePath);
 
                     //Set active repo as locally opened repo
