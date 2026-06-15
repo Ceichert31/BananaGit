@@ -1,6 +1,4 @@
 ﻿using System.Diagnostics;
-using BananaGit.EventArgExtensions;
-using BananaGit.Utilities;
 using Octokit;
 
 namespace BananaGit.Services;
@@ -20,7 +18,7 @@ public class GithubAuthService
     }
 
     /// <summary>
-    /// 
+    /// Opens a GitHub log in page in the user's default browser
     /// </summary>
     /// <param name="userCode">The user code returned by GitHub</param>
     /// <returns>The GitHub access token</returns>
