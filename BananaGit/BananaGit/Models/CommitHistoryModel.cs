@@ -1,4 +1,6 @@
-﻿using BananaGit.EventArgExtensions;
+﻿using System.Collections.ObjectModel;
+using BananaGit.EventArgExtensions;
+using BananaGit.Exceptions;
 using BananaGit.Services;
 using BananaGit.ViewModels;
 
@@ -12,34 +14,42 @@ namespace BananaGit.Models;
 /// </summary>
 public class CommitHistoryPage
 {
-    private readonly List<GitCommitInfo>? _commitHistory;
+    public ObservableCollection<GitCommitInfo>? CommitHistoryList => _commitHistory;
+
+    private readonly ObservableCollection<GitCommitInfo>? _commitHistory;
+
+    private readonly uint _pageIndex;
 
     public CommitHistoryPage(GitService gitService, int historyLength, uint pageIndex,
         ref EventHandler<PageNumberEventArgs>? onPageChanged)
     {
-        _commitHistory = new List<GitCommitInfo>(historyLength);
+        _commitHistory = new ObservableCollection<GitCommitInfo>();
+        _pageIndex = pageIndex;
         onPageChanged += OnPageChanged;
 
-        //Realized this won't work because we aren't tracking previous history lengths. We need to be able to get a range
-        //If we have the index of the current page and the length, then we can figure out what part we need
-
-        // min = index * historyLength - historyLength
-
-        // 2 * 30 - 30
-        // 60 - 30
-        // 30
-
-        //max = index * historyLength
-        // 2 * 30 = 60
-
-        //So for page to we would need the range of 30-60
-
         //Calculate min and max
-        uint min = (uint)(pageIndex * historyLength - historyLength);
-        uint max = (uint)(pageIndex * historyLength);
+        uint min = 0;
+        uint max = (uint)historyLength;
 
-        //Load specified length of history
-        _commitHistory = gitService.GetCommitHistoryRange(min, max);
+        //Index 0 edge case
+        if (pageIndex != 0)
+        {
+            min = (uint)(pageIndex * historyLength - historyLength);
+            max = (uint)(pageIndex * historyLength);
+        }
+
+        if (!gitService.IsLocalRepositoryOpen())
+            return;
+
+        try
+        {
+            //Load specified length of history
+            _commitHistory = new ObservableCollection<GitCommitInfo>(gitService.GetCommitHistoryRange(min, max));
+        }
+        catch (RepoLocationException)
+        {
+            GitService.OutputToConsole(this, new MessageEventArgs("Failed to load commit history"));
+        }
     }
 
     /// <summary>
@@ -49,7 +59,9 @@ public class CommitHistoryPage
     /// <param name="e">Empty</param>
     private void OnPageChanged(object? sender, PageNumberEventArgs e)
     {
-        //
+        /*if (_pageIndex - e.PageNumber > 1)
+        {
+        }*/
     }
 }
 

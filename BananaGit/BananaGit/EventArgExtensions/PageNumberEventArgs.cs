@@ -7,5 +7,10 @@ namespace BananaGit.EventArgExtensions;
 /// </summary>
 public class PageNumberEventArgs : EventArgs
 {
-    public int PageNumber { get; set; } = 0;
+    public PageNumberEventArgs(uint pageIndex)
+    {
+        PageNumber = pageIndex;
+    }
+
+    public uint PageNumber { get; set; } = 0;
 }

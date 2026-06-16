@@ -42,7 +42,7 @@
             CanContentScroll="True"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding CommitHistory}">
+            <ItemsControl ItemsSource="{Binding CommitHistoryList}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border
