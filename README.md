@@ -12,8 +12,3 @@ My plan for BananaGit is to make an easy-to-use, free, and open-source GitHub GU
 
 #### Changes
 <img width="1774" height="1033" alt="image" src="https://github.com/user-attachments/assets/42228643-392b-4112-b51b-066175bf41b0" />
-
-### BananaGit Setup
-I plan on overhauling the BananaGit setup process and adding the ability to log in with your GitHub account, for now you need to generate a personal access token. Instructions can be found here:
-
-[BananaGit Setup.pdf](https://github.com/user-attachments/files/24973987/BananaGit.Setup.pdf)
