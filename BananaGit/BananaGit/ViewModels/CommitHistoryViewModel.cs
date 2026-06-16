@@ -20,14 +20,14 @@ partial class CommitHistoryViewModel : ObservableObject
     /// The current commit history page information
     /// </summary>
     public ObservableCollection<GitCommitInfo>? CommitHistoryList => CommitHistoryPages.Count > 0
-        ? CommitHistoryPages[(int)_pageIndex].CommitHistoryList
+        ? CommitHistoryPages[(int)PageIndex].CommitHistoryList
         : null;
 
     public bool IsLocalRepositoryOpen => !_gitService.IsLocalRepositoryOpen();
 
     private EventHandler<PageNumberEventArgs>? _onPageChanged;
 
-    private uint _pageIndex = 0;
+    [ObservableProperty] private uint _pageIndex = 0;
 
     private readonly GitService _gitService;
 
@@ -90,7 +90,7 @@ partial class CommitHistoryViewModel : ObservableObject
         {
             //Load the first page of history
             CommitHistoryPages.Clear();
-            var updatedPage = new CommitHistoryPage(_gitService, HistoryLengthPerPage, _pageIndex, ref _onPageChanged);
+            var updatedPage = new CommitHistoryPage(_gitService, HistoryLengthPerPage, PageIndex, ref _onPageChanged);
             CommitHistoryPages.Add(updatedPage);
             NotifyPageChanged();
         }
@@ -103,9 +103,9 @@ partial class CommitHistoryViewModel : ObservableObject
     [RelayCommand]
     private void GoForward()
     {
-        _pageIndex++;
+        PageIndex++;
 
-        CommitHistoryPages.Add(new CommitHistoryPage(_gitService, HistoryLengthPerPage, _pageIndex,
+        CommitHistoryPages.Add(new CommitHistoryPage(_gitService, HistoryLengthPerPage, PageIndex,
             ref _onPageChanged));
         NotifyPageChanged();
     }
@@ -113,12 +113,12 @@ partial class CommitHistoryViewModel : ObservableObject
     [RelayCommand]
     private void GoBackward()
     {
-        if (_pageIndex <= 0)
+        if (PageIndex <= 0)
             return;
 
-        _pageIndex--;
+        PageIndex--;
 
-        CommitHistoryPages.Add(new CommitHistoryPage(_gitService, HistoryLengthPerPage, _pageIndex,
+        CommitHistoryPages.Add(new CommitHistoryPage(_gitService, HistoryLengthPerPage, PageIndex,
             ref _onPageChanged));
         NotifyPageChanged();
     }
@@ -126,6 +126,6 @@ partial class CommitHistoryViewModel : ObservableObject
     private void NotifyPageChanged()
     {
         OnPropertyChanged(nameof(CommitHistoryList));
-        _onPageChanged?.Invoke(this, new PageNumberEventArgs(_pageIndex));
+        _onPageChanged?.Invoke(this, new PageNumberEventArgs(PageIndex));
     }
 }
