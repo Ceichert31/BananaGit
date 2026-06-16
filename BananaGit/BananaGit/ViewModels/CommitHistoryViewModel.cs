@@ -16,7 +16,7 @@ partial class CommitHistoryViewModel : ObservableObject
 
     [ObservableProperty] private ObservableCollection<GitCommitInfo> _commitHistory = [];
 
-    public bool IsLocalRepositoryOpen => _gitService.IsLocalRepositoryOpen();
+    public bool IsLocalRepositoryOpen => !_gitService.IsLocalRepositoryOpen();
 
     private readonly GitService _gitService;
 
