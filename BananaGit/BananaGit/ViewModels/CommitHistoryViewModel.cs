@@ -48,9 +48,6 @@ partial class CommitHistoryViewModel : ObservableObject
         _gitService = gitService;
         _gitService.OnRepositoryChanged += RepositoryChanged;
         _gitService.OnChangesPulled += PulledChanges;
-
-        CommitHistoryPages.Add(new CommitHistoryPage(gitService, HistoryLengthPerPage, 0, ref _onPageChanged));
-        NotifyPageChanged();
     }
 
     /// <summary>
@@ -71,7 +68,6 @@ partial class CommitHistoryViewModel : ObservableObject
 
             //Display new repo name
             RepositoryName = _gitService.GetRepositoryName();
-            PulledChanges(sender, e);
         }
         catch (Exception ex)
         {

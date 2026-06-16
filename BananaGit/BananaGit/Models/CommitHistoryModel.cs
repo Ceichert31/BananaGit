@@ -34,8 +34,8 @@ public class CommitHistoryPage
         //Index 0 edge case
         if (pageIndex != 0)
         {
-            min = (uint)(pageIndex * historyLength - historyLength);
-            max = (uint)(pageIndex * historyLength);
+            min = (uint)((pageIndex + 1) * historyLength - historyLength);
+            max = (uint)((pageIndex + 1) * historyLength);
         }
 
         if (!gitService.IsLocalRepositoryOpen())
