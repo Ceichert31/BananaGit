@@ -187,12 +187,17 @@ namespace BananaGit.Services
         }
 
         /// <summary>
-        /// Returns the commit history for the current branch
+        /// Takes in a range of numbers and retrieves the commit history of that index
         /// </summary>
-        /// <returns>A list of past commits</returns>
-        public List<GitCommitInfo> GetCommitHistory(int historyLength)
+        /// <param name="min">The start of the list</param>
+        /// <param name="max">The end of the list</param>
+        /// <returns></returns>
+        public List<GitCommitInfo> GetCommitHistoryRange(uint min, uint max)
         {
             VerifyPath();
+
+            //Prevent min being greater than max
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(min, max);
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
@@ -210,14 +215,18 @@ namespace BananaGit.Services
 
             List<GitCommitInfo> commitList = new();
 
-            if (historyLength > commits.Count)
+            //Clamp
+            if (max > commits.Count)
             {
-                historyLength = commits.Count;
+                max = (uint)commits.Count;
             }
 
             //Iterate through and convert commit info into GitCommitInfo model
-            for (int i = 0; i < historyLength; i++)
+            for (var i = 0; i < max; i++)
             {
+                if (i < min)
+                    continue;
+
                 GitCommitInfo commitInfo = new()
                 {
                     Author = commits[i].Author.ToString(),

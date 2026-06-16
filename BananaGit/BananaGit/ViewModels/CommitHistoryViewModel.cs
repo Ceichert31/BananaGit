@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using BananaGit.EventArgExtensions;
 using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace BananaGit.ViewModels;
 
@@ -14,9 +14,13 @@ partial class CommitHistoryViewModel : ObservableObject
 {
     [ObservableProperty] private string _repositoryName = string.Empty;
 
-    [ObservableProperty] private ObservableCollection<GitCommitInfo> _commitHistory = [];
+    [ObservableProperty] private ObservableCollection<CommitHistoryPage> _commitHistoryList = [];
 
     public bool IsLocalRepositoryOpen => !_gitService.IsLocalRepositoryOpen();
+
+    private EventHandler<PageNumberEventArgs>? _onPageChanged;
+
+    private uint _pageIndex = 0;
 
     private readonly GitService _gitService;
 
@@ -37,6 +41,8 @@ partial class CommitHistoryViewModel : ObservableObject
         _gitService = gitService;
         _gitService.OnRepositoryChanged += RepositoryChanged;
         _gitService.OnChangesPulled += PulledChanges;
+
+        CommitHistoryList.Add(new CommitHistoryPage(gitService, HistoryLengthPerPage, 0, ref _onPageChanged));
     }
 
     /// <summary>
@@ -48,6 +54,11 @@ partial class CommitHistoryViewModel : ObservableObject
     {
         try
         {
+            //Load the first page of history
+            CommitHistoryList.Clear();
+            var pageOne = new CommitHistoryPage(_gitService, HistoryLengthPerPage, 0, ref _onPageChanged);
+            CommitHistoryList.Add(pageOne);
+
             //Display new repo name
             RepositoryName = _gitService.GetRepositoryName();
             PulledChanges(sender, e);
@@ -67,11 +78,22 @@ partial class CommitHistoryViewModel : ObservableObject
     {
         try
         {
-            CommitHistory = new(_gitService.GetCommitHistory(HistoryLengthPerPage));
+            //Load the first page of history
+            CommitHistoryList.Clear();
+            var pageOne = new CommitHistoryPage(_gitService, HistoryLengthPerPage, _pageIndex, ref _onPageChanged);
+            CommitHistoryList.Add(pageOne);
         }
         catch (Exception ex)
         {
             GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
+    }
+
+    [RelayCommand]
+    private void GoForward()
+    {
+        _pageIndex++;
+        CommitHistoryList.Add(new CommitHistoryPage(_gitService, HistoryLengthPerPage, 0, ref _onPageChanged));
+        //Update view
     }
 }
