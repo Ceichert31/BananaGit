@@ -1,8 +1,7 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.Windows;
 using System.Windows.Threading;
 using BananaGit.EventArgExtensions;
+using BananaGit.Exceptions;
 using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -15,22 +14,20 @@ namespace BananaGit.ViewModels;
 /// </summary>
 partial class GitChangesViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private ObservableCollection<ChangedFile> _currentChanges = [];
-    [ObservableProperty]
-    private ObservableCollection<ChangedFile> _stagedChanges = [];
+    [ObservableProperty] private ObservableCollection<ChangedFile> _currentChanges = [];
+    [ObservableProperty] private ObservableCollection<ChangedFile> _stagedChanges = [];
 
     private readonly GitService _gitService;
     private readonly DialogService _dialogService;
     private readonly DispatcherTimer _updateGitInfoTimer = new();
-    
+
     private const float UpdateGitInfoInterval = 1000f;
-    
+
     public GitChangesViewModel(GitService gitService, DialogService dialogService)
     {
         _gitService = gitService;
         _dialogService = dialogService;
-        
+
         _updateGitInfoTimer.Tick += UpdateLocalRepositoryChanges;
         _updateGitInfoTimer.Interval = TimeSpan.FromMilliseconds(UpdateGitInfoInterval);
         _updateGitInfoTimer.Start();
@@ -43,14 +40,18 @@ partial class GitChangesViewModel : ObservableObject
     /// <param name="e">Empty</param>
     private void UpdateLocalRepositoryChanges(object? sender, EventArgs e)
     {
+        if (!_gitService.IsLocalRepositoryOpen())
+            return;
+
         try
         {
             CurrentChanges = new ObservableCollection<ChangedFile>(_gitService.GetUnstagedChanges());
             StagedChanges = new ObservableCollection<ChangedFile>(_gitService.GetStagedChanges());
         }
-        catch (Exception ex)
+        catch (RepoLocationException ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this,
+                new MessageEventArgs($"Repository is open but could not be found! {ex.Message}"));
         }
     }
 
@@ -69,7 +70,7 @@ partial class GitChangesViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 
@@ -85,10 +86,10 @@ partial class GitChangesViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
-    
+
     /// <summary>
     /// Calls git service to stage all uncommited local changes
     /// </summary>
@@ -101,7 +102,7 @@ partial class GitChangesViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 }

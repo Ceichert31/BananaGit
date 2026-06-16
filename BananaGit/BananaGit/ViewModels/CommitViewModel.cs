@@ -11,17 +11,14 @@ namespace BananaGit.ViewModels;
 /// </summary>
 partial class CommitViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private bool _hasCommitedFiles;
-    
-    [ObservableProperty]
-    private string _commitMessage = string.Empty;
-    
-    [ObservableProperty]
-    private string _selectedCommitHeader = string.Empty;
-    
+    [ObservableProperty] private bool _hasCommitedFiles;
+
+    [ObservableProperty] private string _commitMessage = string.Empty;
+
+    [ObservableProperty] private string _selectedCommitHeader = string.Empty;
+
     private readonly GitService _gitService;
-    
+
     public CommitViewModel(GitService gitService)
     {
         _gitService = gitService;
@@ -41,7 +38,7 @@ partial class CommitViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 
@@ -65,7 +62,7 @@ partial class CommitViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 }

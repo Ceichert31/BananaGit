@@ -55,13 +55,17 @@ namespace BananaGit.Services
         }
 
         /// <summary>
-        /// Writes to the console
+        /// Outputs the name of the sender of an exception and the exception message
         /// </summary>
         /// <param name="sender">The script sending this message</param>
         /// <param name="e">The message</param>
-        public void OutputToConsole(object? sender, MessageEventArgs e)
+        public static void OutputToConsole(object? sender, MessageEventArgs e)
         {
-            if (sender == null) return;
+            if (sender == null)
+            {
+                Trace.WriteLine($"Unknown origin: {e.Message}");
+                return;
+            }
 
             Trace.WriteLine($"{sender.GetType().ToString().Split('.').Last()}: {e.Message}");
         }
