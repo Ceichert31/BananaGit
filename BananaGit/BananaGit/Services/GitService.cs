@@ -69,6 +69,15 @@ namespace BananaGit.Services
         #region Getters
 
         /// <summary>
+        /// Checks whether a local repository is currently open
+        /// </summary>
+        /// <returns></returns>
+        public bool IsLocalRepositoryOpen()
+        {
+            return !string.IsNullOrEmpty(_gitInfo?.GetPath());
+        }
+
+        /// <summary>
         /// Checks if the current repo has files commited but not pushed
         /// </summary>
         /// <returns>Whether locally commited files have been pushed</returns>

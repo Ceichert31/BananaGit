@@ -12,15 +12,15 @@ namespace BananaGit.ViewModels;
 /// </summary>
 partial class CommitHistoryViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private string _repositoryName = string.Empty;
-    
-    [ObservableProperty]
-    private ObservableCollection<GitCommitInfo> _commitHistory = [];
-    
+    [ObservableProperty] private string _repositoryName = string.Empty;
+
+    [ObservableProperty] private ObservableCollection<GitCommitInfo> _commitHistory = [];
+
+    public bool IsLocalRepositoryOpen => !_gitService.IsLocalRepositoryOpen();
+
     private readonly GitService _gitService;
-    
-    private int _maxCommitHistoryLength = 30;
+
+    private const int MaxCommitHistoryLength = 30;
 
     public CommitHistoryViewModel(GitService gitService)
     {
@@ -47,7 +47,7 @@ partial class CommitHistoryViewModel : ObservableObject
             _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
-    
+
     /// <summary>
     /// Called when the user pulls changes
     /// </summary>
@@ -57,7 +57,7 @@ partial class CommitHistoryViewModel : ObservableObject
     {
         try
         {
-            CommitHistory = new(_gitService.GetCommitHistory(_maxCommitHistoryLength));
+            CommitHistory = new(_gitService.GetCommitHistory(MaxCommitHistoryLength));
         }
         catch (Exception ex)
         {
