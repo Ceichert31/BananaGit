@@ -20,7 +20,17 @@ partial class CommitHistoryViewModel : ObservableObject
 
     private readonly GitService _gitService;
 
-    private const int MaxCommitHistoryLength = 30;
+    private const int HistoryLengthPerPage = 30;
+
+    //Create a page model that contains a list of 30 commits
+    //Create a list of page models in here
+    //Unallocate page model if it is 2 pages away from the current index
+    // Current: 3
+    // 1 - 2 - 3
+    //Current: 1
+    // 1 - 2
+    //Maybe have an on page change event that triggers that each page subscribes to
+    //That way when the page number changes each page checks internally whether it should unallocate or not
 
     public CommitHistoryViewModel(GitService gitService)
     {
@@ -57,7 +67,7 @@ partial class CommitHistoryViewModel : ObservableObject
     {
         try
         {
-            CommitHistory = new(_gitService.GetCommitHistory(MaxCommitHistoryLength));
+            CommitHistory = new(_gitService.GetCommitHistory(HistoryLengthPerPage));
         }
         catch (Exception ex)
         {

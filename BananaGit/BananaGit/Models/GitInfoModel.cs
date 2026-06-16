@@ -74,16 +74,4 @@
         public string FilePath { get; set; } = path;
         public string Url { get; set; } = url;
     }
-
-    /// <summary>
-    /// Move this to its own model
-    /// </summary>
-    public class GitCommitInfo
-    {
-        public string? Author { get; set; }
-        public string? Date { get; set; }
-        public string? Message { get; set; }
-        public string? Commit { get; set; }
-        public bool IsMergeCommit { get; set; }
-    }
 }
