@@ -14,8 +14,6 @@ partial class CommitHistoryViewModel : ObservableObject
 {
     [ObservableProperty] private string _repositoryName = string.Empty;
 
-    //We will need to showcase the list inside of CommitHistoryPage
-
     [ObservableProperty] private ObservableCollection<CommitHistoryPage> _commitHistoryPages = [];
 
     /// <summary>
@@ -23,7 +21,7 @@ partial class CommitHistoryViewModel : ObservableObject
     /// </summary>
     public ObservableCollection<GitCommitInfo>? CommitHistoryList => CommitHistoryPages.Count > 0
         ? CommitHistoryPages[(int)_pageIndex].CommitHistoryList
-        : [];
+        : null;
 
     public bool IsLocalRepositoryOpen => !_gitService.IsLocalRepositoryOpen();
 
