@@ -601,7 +601,7 @@ namespace BananaGit.Services
                         CredentialsProvider = (url, username, types) =>
                             new UsernamePasswordCredentials
                             {
-                                Username = _gitInfo?.Username,
+                                Username = _gitInfo?.PersonalToken,
                                 Password = _gitInfo?.PersonalToken,
                             },
                     };
@@ -628,11 +628,12 @@ namespace BananaGit.Services
                         CredentialsProvider = (url, username, types) =>
                             new UsernamePasswordCredentials
                             {
-                                Username = _gitInfo?.Username,
+                                Username = _gitInfo?.PersonalToken,
                                 Password = _gitInfo?.PersonalToken,
                             },
                     };
 
+                    //Need to try catch to prevent crashing bc of no access
                     repo.Network.Push(localBranch, pushOptions);
                 }
             });
@@ -657,7 +658,7 @@ namespace BananaGit.Services
                         CredentialsProvider = new CredentialsHandler((url, username, types) =>
                             new UsernamePasswordCredentials
                             {
-                                Username = _gitInfo?.Username,
+                                Username = _gitInfo?.PersonalToken,
                                 Password = _gitInfo?.PersonalToken,
                             }
                         ),
@@ -724,7 +725,7 @@ namespace BananaGit.Services
                         CredentialsProvider = (_, _, _) =>
                             new UsernamePasswordCredentials
                             {
-                                Username = _gitInfo?.Username,
+                                Username = _gitInfo?.PersonalToken,
                                 Password = _gitInfo?.PersonalToken,
                             },
                     },

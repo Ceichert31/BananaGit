@@ -90,4 +90,33 @@ public class GithubAuthService
 
         return primaryEmail;
     }
+
+    /// <summary>
+    /// Gets the users GitHub display name
+    /// </summary>
+    /// <param name="accessToken">Authentication access token</param>
+    /// <returns>GitHub username</returns>
+    public async Task<string?> GetUsername(string accessToken)
+    {
+        User? userData;
+        try
+        {
+            _githubClient.Credentials = new Credentials(accessToken);
+
+            userData = await _githubClient.User.Current();
+        }
+        catch (AuthorizationException)
+        {
+            Trace.WriteLine("Could not authenticate account.");
+            return "Could not authenticate account";
+        }
+
+        if (userData == null)
+        {
+            Trace.WriteLine("Could not access user data");
+            return "Could not access user data";
+        }
+
+        return userData.Login;
+    }
 }
