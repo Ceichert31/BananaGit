@@ -79,7 +79,7 @@ partial class ToolbarViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 
@@ -92,7 +92,7 @@ partial class ToolbarViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 
@@ -141,7 +141,7 @@ partial class ToolbarViewModel : ObservableObject
         }
         catch (Exception ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 }

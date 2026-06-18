@@ -1,9 +1,9 @@
 ﻿using System.Collections.ObjectModel;
-using System.Diagnostics;
 using BananaGit.EventArgExtensions;
 using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 
 namespace BananaGit.ViewModels;
 
@@ -14,13 +14,34 @@ partial class CommitHistoryViewModel : ObservableObject
 {
     [ObservableProperty] private string _repositoryName = string.Empty;
 
-    [ObservableProperty] private ObservableCollection<GitCommitInfo> _commitHistory = [];
+    [ObservableProperty] private ObservableCollection<CommitHistoryPage> _commitHistoryPages = [];
+
+    /// <summary>
+    /// The current commit history page information
+    /// </summary>
+    public ObservableCollection<GitCommitInfo>? CommitHistoryList => CommitHistoryPages.Count > 0
+        ? CommitHistoryPages[(int)PageIndex].CommitHistoryList
+        : null;
 
     public bool IsLocalRepositoryOpen => !_gitService.IsLocalRepositoryOpen();
 
+    private EventHandler<PageNumberEventArgs>? _onPageChanged;
+
+    [ObservableProperty] private uint _pageIndex = 0;
+
     private readonly GitService _gitService;
 
-    private const int MaxCommitHistoryLength = 30;
+    private const int HistoryLengthPerPage = 30;
+
+    //Create a page model that contains a list of 30 commits
+    //Create a list of page models in here
+    //Unallocate page model if it is 2 pages away from the current index
+    // Current: 3
+    // 1 - 2 - 3
+    //Current: 1
+    // 1 - 2
+    //Maybe have an on page change event that triggers that each page subscribes to
+    //That way when the page number changes each page checks internally whether it should unallocate or not
 
     public CommitHistoryViewModel(GitService gitService)
     {
@@ -38,13 +59,19 @@ partial class CommitHistoryViewModel : ObservableObject
     {
         try
         {
+            //Load the first page of history
+            CommitHistoryPages.Clear();
+            var pageOne = new CommitHistoryPage(_gitService, HistoryLengthPerPage, 0, ref _onPageChanged);
+            CommitHistoryPages.Add(pageOne);
+
+            NotifyPageChanged();
+
             //Display new repo name
             RepositoryName = _gitService.GetRepositoryName();
-            PulledChanges(sender, e);
         }
         catch (Exception ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 
@@ -57,11 +84,60 @@ partial class CommitHistoryViewModel : ObservableObject
     {
         try
         {
-            CommitHistory = new(_gitService.GetCommitHistory(MaxCommitHistoryLength));
+            //Load the first page of history
+            CommitHistoryPages.Clear();
+            var updatedPage = new CommitHistoryPage(_gitService, HistoryLengthPerPage, PageIndex, ref _onPageChanged);
+            CommitHistoryPages.Add(updatedPage);
+            NotifyPageChanged();
         }
         catch (Exception ex)
         {
-            _gitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
+    }
+
+    /// <summary>
+    /// Navigates the commit history page forward by one
+    /// </summary>
+    [RelayCommand]
+    private void GoForward()
+    {
+        PageIndex++;
+
+        CommitHistoryPages.Add(new CommitHistoryPage(_gitService, HistoryLengthPerPage, PageIndex,
+            ref _onPageChanged));
+
+        //Check to prevent user from navigating through empty pages
+        if (CommitHistoryPages[(int)PageIndex].IsPageEmpty())
+        {
+            CommitHistoryPages.RemoveAt((int)PageIndex);
+            PageIndex--;
+            return;
+        }
+
+        NotifyPageChanged();
+    }
+
+    /// <summary>
+    /// Navigates the commit history page backward by one
+    /// </summary>
+    [RelayCommand]
+    private void GoBackward()
+    {
+        //Prevent going into negative index
+        if (PageIndex <= 0)
+            return;
+
+        PageIndex--;
+
+        CommitHistoryPages.Add(new CommitHistoryPage(_gitService, HistoryLengthPerPage, PageIndex,
+            ref _onPageChanged));
+        NotifyPageChanged();
+    }
+
+    private void NotifyPageChanged()
+    {
+        OnPropertyChanged(nameof(CommitHistoryList));
+        _onPageChanged?.Invoke(this, new PageNumberEventArgs(PageIndex));
     }
 }

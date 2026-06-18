@@ -77,7 +77,6 @@ namespace BananaGit.ViewModels
                 return;
             }
 
-            //Unsuccessful login
             if (string.IsNullOrEmpty(githubAccessToken))
             {
                 DisplayText = "Login failed or timed out. Please try again.";
@@ -85,7 +84,6 @@ namespace BananaGit.ViewModels
                 return;
             }
 
-            //Successful login
             var userEmail = await _githubAuthService.GetUserEmail(githubAccessToken);
 
             if (string.IsNullOrEmpty(userEmail))
@@ -95,8 +93,17 @@ namespace BananaGit.ViewModels
                 return;
             }
 
+            var username = await _githubAuthService.GetUsername(githubAccessToken);
+
+            if (string.IsNullOrEmpty(username))
+            {
+                DisplayText = "Logged in, but associated GitHub username couldn't be accessed.";
+                LoginFailed();
+                return;
+            }
+
             //Update user info locally
-            _githubUserInfo.Username = githubAccessToken;
+            _githubUserInfo.Username = username;
             _githubUserInfo.PersonalToken = githubAccessToken;
             _githubUserInfo.Email = userEmail;
 

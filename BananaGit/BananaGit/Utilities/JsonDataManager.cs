@@ -65,6 +65,12 @@ namespace BananaGit.Utilities
                 reader = new StreamReader(UserDataLocation + UserDataName);
                 var fileContents = reader.ReadToEnd();
 
+                if (string.IsNullOrEmpty(fileContents))
+                {
+                    HasPersonalToken = false;
+                    throw new IOException("UserInfo.json is empty!");
+                }
+
                 //If data couldn't be loaded, convert GitHub info to null
                 GitInfoModel? loadedInfo = JsonConvert.DeserializeObject<GitInfoModel>(fileContents) ?? null;
                 userInfo = loadedInfo;

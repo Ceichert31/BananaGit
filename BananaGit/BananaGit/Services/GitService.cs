@@ -55,13 +55,17 @@ namespace BananaGit.Services
         }
 
         /// <summary>
-        /// Writes to the console
+        /// Outputs the name of the sender of an exception and the exception message
         /// </summary>
         /// <param name="sender">The script sending this message</param>
         /// <param name="e">The message</param>
-        public void OutputToConsole(object? sender, MessageEventArgs e)
+        public static void OutputToConsole(object? sender, MessageEventArgs e)
         {
-            if (sender == null) return;
+            if (sender == null)
+            {
+                Trace.WriteLine($"Unknown origin: {e.Message}");
+                return;
+            }
 
             Trace.WriteLine($"{sender.GetType().ToString().Split('.').Last()}: {e.Message}");
         }
@@ -183,12 +187,17 @@ namespace BananaGit.Services
         }
 
         /// <summary>
-        /// Returns the commit history for the current branch
+        /// Takes in a range of numbers and retrieves the commit history of that index
         /// </summary>
-        /// <returns>A list of past commits</returns>
-        public List<GitCommitInfo> GetCommitHistory(int historyLength)
+        /// <param name="min">The start of the list</param>
+        /// <param name="max">The end of the list</param>
+        /// <returns></returns>
+        public List<GitCommitInfo> GetCommitHistoryRange(uint min, uint max)
         {
             VerifyPath();
+
+            //Prevent min being greater than max
+            ArgumentOutOfRangeException.ThrowIfGreaterThan(min, max);
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
@@ -206,14 +215,18 @@ namespace BananaGit.Services
 
             List<GitCommitInfo> commitList = new();
 
-            if (historyLength > commits.Count)
+            //Clamp
+            if (max > commits.Count)
             {
-                historyLength = commits.Count;
+                max = (uint)commits.Count;
             }
 
             //Iterate through and convert commit info into GitCommitInfo model
-            for (int i = 0; i < historyLength; i++)
+            for (var i = 0; i < max; i++)
             {
+                if (i < min)
+                    continue;
+
                 GitCommitInfo commitInfo = new()
                 {
                     Author = commits[i].Author.ToString(),
@@ -588,7 +601,7 @@ namespace BananaGit.Services
                         CredentialsProvider = (url, username, types) =>
                             new UsernamePasswordCredentials
                             {
-                                Username = _gitInfo?.Username,
+                                Username = _gitInfo?.PersonalToken,
                                 Password = _gitInfo?.PersonalToken,
                             },
                     };
@@ -615,11 +628,12 @@ namespace BananaGit.Services
                         CredentialsProvider = (url, username, types) =>
                             new UsernamePasswordCredentials
                             {
-                                Username = _gitInfo?.Username,
+                                Username = _gitInfo?.PersonalToken,
                                 Password = _gitInfo?.PersonalToken,
                             },
                     };
 
+                    //Need to try catch to prevent crashing bc of no access
                     repo.Network.Push(localBranch, pushOptions);
                 }
             });
@@ -644,7 +658,7 @@ namespace BananaGit.Services
                         CredentialsProvider = new CredentialsHandler((url, username, types) =>
                             new UsernamePasswordCredentials
                             {
-                                Username = _gitInfo?.Username,
+                                Username = _gitInfo?.PersonalToken,
                                 Password = _gitInfo?.PersonalToken,
                             }
                         ),
@@ -711,7 +725,7 @@ namespace BananaGit.Services
                         CredentialsProvider = (_, _, _) =>
                             new UsernamePasswordCredentials
                             {
-                                Username = _gitInfo?.Username,
+                                Username = _gitInfo?.PersonalToken,
                                 Password = _gitInfo?.PersonalToken,
                             },
                     },

@@ -1,9 +1,9 @@
-﻿<UserControl
+﻿<!-- Controls the display of the commit history and the tutorial view -->
+<UserControl
     x:Class="BananaGit.Views.CommitHistoryView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-    xmlns:local="clr-namespace:BananaGit.Views"
     xmlns:converters="clr-namespace:BananaGit.ValueConverters"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
@@ -17,17 +17,20 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="25" />
         </Grid.RowDefinitions>
 
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
+        <!-- Repository name -->
         <Label
             VerticalAlignment="Stretch"
             Background="{StaticResource BananaAccent}"
             Content="{Binding RepositoryName}" />
 
+        <!-- Open repository message -->
         <TextBlock Grid.Row="1"
                    HorizontalAlignment="Center"
                    Visibility="{Binding IsLocalRepositoryOpen, Converter={converters:BoolVisibilityConverter}}"
@@ -35,6 +38,7 @@
             Press clone or open in the toolbar to open a new repository.
         </TextBlock>
 
+        <!-- Main Commit History/Tutorial view -->
         <ScrollViewer
             Grid.Row="1"
             HorizontalAlignment="Stretch"
@@ -42,7 +46,7 @@
             CanContentScroll="True"
             HorizontalScrollBarVisibility="Auto"
             VerticalScrollBarVisibility="Auto">
-            <ItemsControl ItemsSource="{Binding CommitHistory}">
+            <ItemsControl ItemsSource="{Binding CommitHistoryList}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Border
@@ -83,5 +87,31 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+
+        <!-- Bottom Bar -->
+        <Grid
+            Background="{StaticResource BananaAccent}"
+            Grid.Row="2">
+
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="5*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Back button -->
+            <Button HorizontalAlignment="Stretch" Content="Back" Style="{StaticResource GenericButton}"
+                    Command="{Binding GoBackwardCommand}" />
+
+            <Label
+                FontSize="12"
+                Grid.Column="1"
+                Content="{Binding PageIndex, FallbackValue=0}"
+                HorizontalAlignment="Center" />
+
+            <!-- Forward button -->
+            <Button Grid.Column="2" HorizontalAlignment="Stretch" Content="Forward"
+                    Command="{Binding GoForwardCommand}" Style="{StaticResource GenericButton}" />
+        </Grid>
     </Grid>
 </UserControl>
