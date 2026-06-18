@@ -96,6 +96,9 @@ partial class CommitHistoryViewModel : ObservableObject
         }
     }
 
+    /// <summary>
+    /// Navigates the commit history page forward by one
+    /// </summary>
     [RelayCommand]
     private void GoForward()
     {
@@ -104,6 +107,7 @@ partial class CommitHistoryViewModel : ObservableObject
         CommitHistoryPages.Add(new CommitHistoryPage(_gitService, HistoryLengthPerPage, PageIndex,
             ref _onPageChanged));
 
+        //Check to prevent user from navigating through empty pages
         if (CommitHistoryPages[(int)PageIndex].IsPageEmpty())
         {
             CommitHistoryPages.RemoveAt((int)PageIndex);
@@ -114,9 +118,13 @@ partial class CommitHistoryViewModel : ObservableObject
         NotifyPageChanged();
     }
 
+    /// <summary>
+    /// Navigates the commit history page backward by one
+    /// </summary>
     [RelayCommand]
     private void GoBackward()
     {
+        //Prevent going into negative index
         if (PageIndex <= 0)
             return;
 
