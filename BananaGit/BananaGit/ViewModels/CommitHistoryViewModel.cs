@@ -99,12 +99,18 @@ partial class CommitHistoryViewModel : ObservableObject
     [RelayCommand]
     private void GoForward()
     {
-        //Stop endless pages
-
         PageIndex++;
 
         CommitHistoryPages.Add(new CommitHistoryPage(_gitService, HistoryLengthPerPage, PageIndex,
             ref _onPageChanged));
+
+        if (CommitHistoryPages[(int)PageIndex].IsPageEmpty())
+        {
+            CommitHistoryPages.RemoveAt((int)PageIndex);
+            PageIndex--;
+            return;
+        }
+
         NotifyPageChanged();
     }
 

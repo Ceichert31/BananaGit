@@ -53,6 +53,18 @@ public class CommitHistoryPage
     }
 
     /// <summary>
+    /// Checks whether the commit history is empty or null
+    /// </summary>
+    /// <returns>Returns true if page is empty, false if it isn't</returns>
+    public bool IsPageEmpty()
+    {
+        if (_commitHistory == null)
+            return true;
+
+        return _commitHistory.Count == 0;
+    }
+
+    /// <summary>
     /// Called when the user switches pages 
     /// </summary>
     /// <param name="sender"><see cref="CommitHistoryViewModel"/></param>

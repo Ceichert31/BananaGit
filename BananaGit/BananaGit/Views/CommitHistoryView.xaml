@@ -100,7 +100,8 @@
             </Grid.ColumnDefinitions>
 
             <!-- Back button -->
-            <Button HorizontalAlignment="Stretch" Content="Back" Command="{Binding GoBackwardCommand}" />
+            <Button HorizontalAlignment="Stretch" Content="Back" Style="{StaticResource GenericButton}"
+                    Command="{Binding GoBackwardCommand}" />
 
             <Label
                 FontSize="12"
@@ -110,7 +111,7 @@
 
             <!-- Forward button -->
             <Button Grid.Column="2" HorizontalAlignment="Stretch" Content="Forward"
-                    Command="{Binding GoForwardCommand}" />
+                    Command="{Binding GoForwardCommand}" Style="{StaticResource GenericButton}" />
         </Grid>
     </Grid>
 </UserControl>
