@@ -44,6 +44,7 @@
                 <TextBox
                     MinWidth="150"
                     VerticalAlignment="Center"
+                    Text="{Binding BranchName}"
                     TextWrapping="WrapWithOverflow" />
             </StackPanel>
 
@@ -60,6 +61,7 @@
                 HorizontalAlignment="Left"
                 VerticalAlignment="Stretch"
                 ItemsSource="{Binding LocalBranches}"
+                SelectedItem="{Binding SelectedBranch, Mode=TwoWay}"
                 Style="{StaticResource ListBoxStyle}">
                 <ListBox.ItemTemplate>
                     <DataTemplate>
@@ -73,6 +75,7 @@
             Grid.Row="2"
             HorizontalAlignment="Center"
             VerticalAlignment="Center"
+            Command="{Binding CreateBranchCommand}"
             Content="Create Branch"
             FontSize="12"
             Style="{StaticResource GenericButton}" />
