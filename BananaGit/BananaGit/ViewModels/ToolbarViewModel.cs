@@ -71,6 +71,12 @@ partial class ToolbarViewModel : ObservableObject
     }
 
     [RelayCommand]
+    private void OpenCreateBranchWindow()
+    {
+        _dialogService.ShowCreateBranchDialog();
+    }
+
+    [RelayCommand]
     private async Task CallPushFiles()
     {
         try

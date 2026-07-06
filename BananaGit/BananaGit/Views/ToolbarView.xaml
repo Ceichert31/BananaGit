@@ -92,6 +92,7 @@
                             Padding="8,4"
                             HorizontalContentAlignment="Left"
                             Background="{StaticResource BananaPrimary}"
+                            Command="{Binding OpenCreateBranchWindowCommand}"
                             Content="Create new branch" />
                         <Button
                             Padding="8,4"

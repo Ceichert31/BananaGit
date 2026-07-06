@@ -842,7 +842,7 @@ namespace BananaGit.Services
                 }
 
                 //Try to open repository if one already exists
-                OpenLocalRepository(selectedFilePath);
+                _ = OpenLocalRepository(selectedFilePath);
             }
             catch (RepositoryNotFoundException ex)
             {
@@ -859,11 +859,11 @@ namespace BananaGit.Services
         /// <param name="filePath">Filepath to a local git repository</param>
         /// <exception cref="RepositoryNotFoundException"></exception>
         /// <exception cref="NullReferenceException"></exception>
-        private void OpenLocalRepository(string filePath)
+        private async Task OpenLocalRepository(string filePath)
         {
             try
             {
-                Task.Run(() =>
+                await Task.Run(() =>
                 {
                     var repo = new Repository(filePath);
 
@@ -881,10 +881,10 @@ namespace BananaGit.Services
                     //Save to user info
                     _gitInfo?.SetPath(filePath);
                     JsonDataManager.SaveUserInfo(_gitInfo);
-
-                    //Notify view models that the repository data has changed
-                    OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
                 });
+
+                //Notify view models that the repository data has changed
+                OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -909,7 +909,7 @@ namespace BananaGit.Services
                 //Clone repo using git service
                 await CloneRepositoryAsync(url, path);
 
-                OpenLocalRepository(path);
+                await OpenLocalRepository(path);
             }
             catch (Exception ex)
             {
