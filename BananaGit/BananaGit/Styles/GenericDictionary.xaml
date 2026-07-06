@@ -16,7 +16,7 @@
 
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsSelected" Value="True">
-                            <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource BananaPrimary}" />
+                            <Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource BananaDark}" />
                         </Trigger>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="ItemBorder" Property="Background" Value="#FFE8B84D" />

@@ -41,6 +41,8 @@ partial class CreateBranchViewModel : ObservableObject
     {
         try
         {
+            _dialogService.CloseCreateBranchDialog();
+
             // This is guaranteed to not be null because this command can only be 
             // executed when SelectedBranch is not null. 
             await _gitService.CreateBranchAsync(SelectedBranch!, BranchName);
@@ -64,7 +66,6 @@ partial class CreateBranchViewModel : ObservableObject
         }
 
         SelectedBranch = null;
-        _dialogService.CloseCreateBranchDialog();
     }
 
     private bool CanCreateBranch() => SelectedBranch != null;
