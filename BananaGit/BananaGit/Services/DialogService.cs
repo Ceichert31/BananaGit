@@ -25,7 +25,7 @@ namespace BananaGit.Services
             _remoteBranchViewModel = new RemoteBranchViewModel(gitService);
             _cloneRepoViewModel = new CloneRepoViewModel(gitService);
             _discardChangesViewModel = new DiscardChangesViewModel(gitService, this);
-            _createBranchViewModel = new CreateBranchViewModel(gitService);
+            _createBranchViewModel = new CreateBranchViewModel(gitService, this);
         }
 
         /// <summary>

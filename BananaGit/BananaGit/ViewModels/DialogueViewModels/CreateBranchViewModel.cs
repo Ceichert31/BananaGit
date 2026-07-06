@@ -1,29 +1,34 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using BananaGit.EventArgExtensions;
 using BananaGit.Exceptions;
 using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using LibGit2Sharp;
 
 namespace BananaGit.ViewModels.DialogueViewModels;
 
-public partial class CreateBranchViewModel : ObservableObject
+partial class CreateBranchViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<GitBranch>? _localBranches;
 
-    [ObservableProperty] private GitBranch? _selectedBranch;
+    [NotifyCanExecuteChangedFor(nameof(CreateBranchCommand))] [ObservableProperty]
+    private GitBranch? _selectedBranch;
 
     [ObservableProperty] private string _branchName = string.Empty;
 
     [ObservableProperty] private string _message = string.Empty;
 
     private readonly GitService _gitService;
+    private readonly DialogService _dialogService;
 
-    public CreateBranchViewModel(GitService gitService)
+    public CreateBranchViewModel(GitService gitService, DialogService dialogService)
     {
         _gitService = gitService;
+        _dialogService = dialogService;
         gitService.OnChangesPulled += OnChangesPulled;
         LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranches());
     }
@@ -31,20 +36,16 @@ public partial class CreateBranchViewModel : ObservableObject
     /// <summary>
     /// Creates a new branch based off an existing branch
     /// </summary>
-    [RelayCommand]
+    [RelayCommand(CanExecute = nameof(CanCreateBranch))]
     private async Task CreateBranch()
     {
-        if (SelectedBranch == null)
-        {
-            Message = "Please select a branch";
-            return;
-        }
-
         try
         {
-            _gitService.CreateBranch(SelectedBranch, BranchName);
+            // This is guaranteed to not be null because this command can only be 
+            // executed when SelectedBranch is not null. 
+            await _gitService.CreateBranchAsync(SelectedBranch!, BranchName);
 
-            await _gitService.PushFiles();
+            await _gitService.PullChanges();
         }
         catch (InvalidOperationException ex)
         {
@@ -56,7 +57,17 @@ public partial class CreateBranchViewModel : ObservableObject
             Message = "An invalid branch was selected. Please try again.";
             GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
+        catch (LibGit2SharpException ex)
+        {
+            Message = "An error occured when trying to create branch. Check Console and try again.";
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
+
+        SelectedBranch = null;
+        _dialogService.CloseCreateBranchDialog();
     }
+
+    private bool CanCreateBranch() => SelectedBranch != null;
 
     /// <summary>
     /// Called when changes are pulled
