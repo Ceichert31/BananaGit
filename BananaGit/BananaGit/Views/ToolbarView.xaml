@@ -9,47 +9,39 @@
     d:DataContext="{d:DesignInstance Type=viewmodels:ToolbarViewModel}"
     d:DesignHeight="30"
     d:DesignWidth="800"
-    mc:Ignorable="d"
-    >
+    mc:Ignorable="d">
     <Grid>
         <!--  Toolbar  -->
         <ToolBar
             Grid.ColumnSpan="3"
             Margin="-10,0,0,0"
             Background="{StaticResource BananaPrimary}"
-            ToolBarTray.IsLocked="True"
-            >
+            ToolBarTray.IsLocked="True">
             <Image Source="../Assets/Banana.png" />
             <Button
                 Command="{Binding OpenSettingsWindowCommand}"
                 Content="Settings"
-                Foreground="Black"
-                />
+                Foreground="Black" />
             <Button
                 Command="{Binding OpenTutorialCommand}"
                 Content="Tutorials"
-                Foreground="Black"
-                />
+                Foreground="Black" />
             <Button
                 Command="{Binding CallRepositoryDialogCommand}"
                 Content="Open"
-                Foreground="Black"
-                />
+                Foreground="Black" />
             <Button
                 Command="{Binding OpenCloneWindowCommand}"
                 Content="Clone"
-                Foreground="Black"
-                />
+                Foreground="Black" />
             <Button
                 Command="{Binding CallPushFilesCommand}"
                 Content="Push"
-                Foreground="Black"
-                />
+                Foreground="Black" />
             <Button
                 Command="{Binding CallPullFilesCommand}"
                 Content="Pull"
-                Foreground="Black"
-                />
+                Foreground="Black" />
             <ComboBox
                 x:Name="BranchList"
                 Width="100"
@@ -60,8 +52,7 @@
                 Foreground="Black"
                 IsSynchronizedWithCurrentItem="True"
                 ItemsSource="{Binding LocalBranches}"
-                SelectedItem="{Binding CurrentBranch}"
-                >
+                SelectedItem="{Binding CurrentBranch}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <StackPanel Orientation="Horizontal">
@@ -70,17 +61,52 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
+
             <!--  Open remote popup and add remotes as local branches  -->
             <Button
                 Command="{Binding OpenRemoteWindowCommand}"
                 Content="Remotes"
-                Foreground="Black"
-                />
+                Foreground="Black" />
+
+            <!--  Opens creation sub-menu  -->
+            <ToggleButton
+                x:Name="CreateButton"
+                Content="Create"
+                Foreground="Black" />
+
+            <!--  Sub-menu  -->
+            <Popup
+                AllowsTransparency="True"
+                Closed="Popup_OnClosed"
+                IsOpen="{Binding IsChecked, ElementName=CreateButton}"
+                Placement="Bottom"
+                PlacementTarget="{Binding ElementName=CreateButton}"
+                PopupAnimation="Fade"
+                StaysOpen="False">
+                <Border
+                    Background="{StaticResource BananaPrimary}"
+                    BorderBrush="Black"
+                    BorderThickness="1">
+                    <StackPanel Orientation="Vertical">
+                        <Button
+                            Padding="8,4"
+                            HorizontalContentAlignment="Left"
+                            Background="{StaticResource BananaPrimary}"
+                            Content="Create new branch" />
+                        <Button
+                            Padding="8,4"
+                            HorizontalContentAlignment="Left"
+                            Background="{StaticResource BananaPrimary}"
+                            Content="Create new Pull-Request" />
+                    </StackPanel>
+                </Border>
+            </Popup>
+
+
             <Button
                 Command="{Binding OpenConsoleWindowCommand}"
                 Content="Console"
-                Foreground="Black"
-                />
+                Foreground="Black" />
         </ToolBar>
     </Grid>
 </UserControl>

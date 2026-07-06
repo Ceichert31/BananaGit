@@ -24,5 +24,11 @@ namespace BananaGit.Views
         {
             InitializeComponent();
         }
+
+        private void Popup_OnClosed(object? sender, EventArgs e)
+        {
+            // Ensure that create button is unchecked when user clicks off of sub-menu
+            CreateButton.IsChecked = false;
+        }
     }
 }
