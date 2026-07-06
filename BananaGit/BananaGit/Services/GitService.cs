@@ -169,6 +169,20 @@ namespace BananaGit.Services
 
         #endregion
 
+        public void CreateBranch(GitBranch origin, string branchName)
+        {
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            var originBranch = repo.Branches[origin.Name] ??
+                               throw new InvalidOperationException("Failed to find origin branch");
+
+            // Create new branch off of origin branch
+            Branch newBranch = repo.CreateBranch(branchName, originBranch.Tip);
+
+            // Checkout the new branch right after creation
+            Commands.Checkout(repo, newBranch);
+        }
+
         /// <summary>
         /// Checks if the repository is accessible, and gets the repository name
         /// </summary>
@@ -746,18 +760,7 @@ namespace BananaGit.Services
             if (!VerifyCurrentBranch())
                 return;
 
-            try
-            {
-                await PushFilesAsync(CurrentBranch);
-            }
-            catch (LibGit2SharpException ex)
-            {
-                Trace.WriteLine($"Failed to Push {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message);
-            }
+            await PushFilesAsync(CurrentBranch);
         }
 
         /// <summary>

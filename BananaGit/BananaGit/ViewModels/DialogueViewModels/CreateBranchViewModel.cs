@@ -1,5 +1,7 @@
 ﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
+using BananaGit.EventArgExtensions;
+using BananaGit.Exceptions;
 using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -15,6 +17,8 @@ public partial class CreateBranchViewModel : ObservableObject
 
     [ObservableProperty] private string _branchName = string.Empty;
 
+    [ObservableProperty] private string _message = string.Empty;
+
     private readonly GitService _gitService;
 
     public CreateBranchViewModel(GitService gitService)
@@ -28,10 +32,30 @@ public partial class CreateBranchViewModel : ObservableObject
     /// Creates a new branch based off an existing branch
     /// </summary>
     [RelayCommand]
-    private void CreateBranch()
+    private async Task CreateBranch()
     {
-        var temp = SelectedBranch?.Name;
-        Trace.WriteLine(temp);
+        if (SelectedBranch == null)
+        {
+            Message = "Please select a branch";
+            return;
+        }
+
+        try
+        {
+            _gitService.CreateBranch(SelectedBranch, BranchName);
+
+            await _gitService.PushFiles();
+        }
+        catch (InvalidOperationException ex)
+        {
+            Message = "Couldn't find selected branch.";
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
+        catch (InvalidBranchException ex)
+        {
+            Message = "An invalid branch was selected. Please try again.";
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
     }
 
     /// <summary>
@@ -41,6 +65,8 @@ public partial class CreateBranchViewModel : ObservableObject
     /// <param name="e">Empty</param>
     private void OnChangesPulled(object? sender, EventArgs e)
     {
+        var selectedName = SelectedBranch?.Name;
         LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranches());
+        SelectedBranch = LocalBranches.FirstOrDefault(x => string.Equals(x.Name, selectedName));
     }
 }
