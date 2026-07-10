@@ -1,9 +1,55 @@
-﻿name: Build
+﻿## Builds the .NET solution and runs tests
+## First step in the workflow, if this succeeds it triggers versioning and then release
+name: Build
 
 on:
   push:
     branches: [ "main" ]
 jobs:
-  version:
-    uses: ./.github/workflows/version.yml
-    secrets: inherit
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ ubuntu-latest, windows-latest ]
+    env:
+      SOLUTION_PATH: BananaGit/BananaGit.sln
+      PROJECT_PATH: BananaGit/BananaGit/BananaGit.csproj
+      DEPLOY_PATH: builds/BananaGit/
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+          token: ${{ secrets.GIT_TEST_TOKEN }}
+          persist-credentials: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore
+
+      - name: Test
+        run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
+        env:
+          GIT_TEST_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
+          GIT_TEST_USERNAME: ${{ secrets.GIT_TEST_USERNAME }}
+          GIT_TEST_EMAIL: ${{ secrets.GIT_TEST_EMAIL }}
+
+      # Publish and upload application so release can re-download it
+      - name: Publish application
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: |
+          $version = "${{ steps.semantic.outputs.new_release_version }}"
+          dotnet publish ${{env.PROJECT_PATH}} -c Release -r win-x64 --self-contained true -o ${{env.DEPLOY_PATH}} /p:Version=$version
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        if: matrix.os == 'windows_latest'
+        with:
+          name: BananaGit-v${{ steps.semantic.outputs.new_release_version }}-win-x64
+          path: ${{ env.DEPLOY_PATH }}
