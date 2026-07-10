@@ -2,7 +2,7 @@ name: .NET
 on:
   push:
     branches: [ "main" ]
-    
+
 jobs:
   build:
     runs-on: windows-latest
@@ -10,71 +10,70 @@ jobs:
       SOLUTION_PATH: BananaGit/BananaGit.sln
       PROJECT_PATH: BananaGit/BananaGit/BananaGit.csproj
       DEPLOY_PATH: builds/BananaGit/
-      
+    
     steps:
-    - uses: actions/checkout@v4
-      with:
-        fetch-depth: 0
-        token: ${{ secrets.GIT_TEST_TOKEN }}
-        persist-credentials: true
-        
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: 8.0.x
-        
-    - name: Setup Node.js
-      uses: actions/setup-node@v4
-      with:
-        node-version: '20'
-        
-    - name: Semantic Release
-      id: semantic
-      uses: cycjimmy/semantic-release-action@v4
-      env:
-        GITHUB_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
-      with:
-        extra_plugins: |
-          @semantic-release/git
-          @semantic-release/changelog
-          @semantic-release/exec
-        
-    - name: Restore dependencies
-      run: dotnet restore ${{ env.SOLUTION_PATH }}
-      
-    - name: Build
-      run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore 
-      
-    - name: Test
-      run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
-      env: 
-        GIT_TEST_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
-        GIT_TEST_USERNAME: ${{ secrets.GIT_TEST_USERNAME }}
-        GIT_TEST_EMAIL: ${{ secrets.GIT_TEST_EMAIL }}
-        
-    - name: Publish application
-      if: steps.semantic.outputs.new_release_published == 'true'
-      run: |
-        $version = "${{ steps.semantic.outputs.new_release_version }}"
-        dotnet publish ${{env.PROJECT_PATH}} -c Release -r win-x64 --self-contained true -o ${{env.DEPLOY_PATH}} /p:Version=$version
-        
-    - name: Zip release
-      if: steps.semantic.outputs.new_release_published == 'true'
-      run: Compress-Archive -Path ${{ env.DEPLOY_PATH }}* -DestinationPath BananaGit-v${{ steps.semantic.outputs.new_release_version }}-win-x64.zip
-    
-    - name: Upload Release Asset
-      if: steps.semantic.outputs.new_release_published == 'true'
-      uses: softprops/action-gh-release@v1
-      with:
-        files: BananaGit-v${{ steps.semantic.outputs.new_release_version }}-win-x64.zip
-        tag_name: v${{ steps.semantic.outputs.new_release_version }}
-      env:
-        GITHUB_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
-    
-    - name: Upload artifact
-      if: steps.semantic.outputs.new_release_published != 'true'
-      uses: actions/upload-artifact@v4
-      with:
-        name: BananaGit
-        path: ${{env.DEPLOY_PATH}}
-        retention-days: 3
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GIT_TEST_TOKEN }}
+          persist-credentials: true
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Semantic Release
+        id: semantic
+        uses: cycjimmy/semantic-release-action@v4
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
+        with:
+          extra_plugins: |
+            @semantic-release/git
+            @semantic-release/changelog
+
+      - name: Restore dependencies
+        run: dotnet restore ${{ env.SOLUTION_PATH }}
+
+      - name: Build
+        run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore
+
+      - name: Test
+        run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
+        env:
+          GIT_TEST_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
+          GIT_TEST_USERNAME: ${{ secrets.GIT_TEST_USERNAME }}
+          GIT_TEST_EMAIL: ${{ secrets.GIT_TEST_EMAIL }}
+
+      - name: Publish application
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: |
+          $version = "${{ steps.semantic.outputs.new_release_version }}"
+          dotnet publish ${{env.PROJECT_PATH}} -c Release -r win-x64 --self-contained true -o ${{env.DEPLOY_PATH}} /p:Version=$version
+
+      - name: Zip release
+        if: steps.semantic.outputs.new_release_published == 'true'
+        run: Compress-Archive -Path ${{ env.DEPLOY_PATH }}* -DestinationPath BananaGit-v${{ steps.semantic.outputs.new_release_version }}-win-x64.zip
+
+      - name: Upload Release Asset
+        if: steps.semantic.outputs.new_release_published == 'true'
+        uses: softprops/action-gh-release@v1
+        with:
+          files: BananaGit-v${{ steps.semantic.outputs.new_release_version }}-win-x64.zip
+          tag_name: v${{ steps.semantic.outputs.new_release_version }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
+
+      - name: Upload artifact
+        if: steps.semantic.outputs.new_release_published != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: BananaGit
+          path: ${{env.DEPLOY_PATH}}
+          retention-days: 3

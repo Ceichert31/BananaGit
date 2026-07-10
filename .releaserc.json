@@ -3,8 +3,8 @@
     "main"
   ],
   "plugins": [
-    "@semantic-release/commit-analyzer",
     [
+      "@semantic-release/commit-analyzer",
       {
         "preset": "angular",
         "releaseRules": [
@@ -31,10 +31,6 @@
             "release": false
           }
         ]
-      },
-      "@semantic-release/exec",
-      {
-        "prepareCmd": "echo ${nextRelease.version} > .version"
       }
     ],
     [
