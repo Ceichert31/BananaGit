@@ -42,7 +42,7 @@ jobs:
             @semantic-release/changelog
   
   
-  # Builds, runs tests, and publishes a new build if version is bumped
+  # Builds, runs tests, and publishes a new build if the version is bumped
   build:
     runs-on: ${{ matrix.os }}
     needs: [ version ]
@@ -70,7 +70,7 @@ jobs:
       - name: Build
         run: dotnet build ${{ env.SOLUTION_PATH }} --no-restore
 
-      # Fix later to run test on ubuntu
+      # Fix later to run test on Ubuntu
       - name: Test
         run: dotnet test --no-build --verbosity normal ${{ env.SOLUTION_PATH }}
         if: matrix.os == 'windows-latest'
@@ -79,14 +79,14 @@ jobs:
           GIT_TEST_USERNAME: ${{ secrets.GIT_TEST_USERNAME }}
           GIT_TEST_EMAIL: ${{ secrets.GIT_TEST_EMAIL }}
 
-      # Publish application only on window's runner
+      # Publish application only on Windows runner
       - name: Publish application
         if: matrix.os == 'windows-latest' && needs.version.outputs.new_release == 'true'
         run: |
           $version = "${{ needs.version.outputs.version }}"
           dotnet publish ${{env.PROJECT_PATH}} -c Release -r win-x64 --self-contained true -o ${{env.DEPLOY_PATH}} /p:Version=$version
       
-      # Upload artifact only if version is bumped and it's on window's action runner
+      # Upload artifact only if version is bumped, and it's on Windows action runner
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         if: matrix.os == 'windows-latest' && needs.version.outputs.new_release == 'true'
