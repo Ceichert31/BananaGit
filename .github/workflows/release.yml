@@ -1,18 +1,1 @@
-﻿name: Release
-
-on:
-  workflow_run:
-    workflows: [ "Build", "Version" ]
-    types: [ completed ]
-
-jobs:
-  release:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Download build artifact
-        uses: dawidd6/action-download-artifact@v3
-        with:
-          workflow: build.yml
-          name: WebGL
-          path: builds/WebGL
-          run_id: ${{ github.event.workflow_run.id }}
+﻿

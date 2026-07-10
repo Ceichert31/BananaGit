@@ -4,7 +4,6 @@ on:
     branches: [ "main" ]
 
 jobs:
-  
   # Handles calculating whether a new version is released
   version:
     runs-on: [ ubuntu-latest ]
@@ -36,7 +35,7 @@ jobs:
             @semantic-release/changelog
   
   
-  # Builds and runs tests
+  # Builds, runs tests, and publishes a new build if version is bumped
   build:
     runs-on: ${{ matrix.os }}
     needs: [ version ]
@@ -53,7 +52,6 @@ jobs:
         with:
           fetch-depth: 1 # Only need depth 1 for build, not depth 0
           token: ${{ secrets.GIT_TEST_TOKEN }}
-          persist-credentials: true
 
       - name: Setup .NET
         uses: actions/setup-dotnet@v4
@@ -73,43 +71,44 @@ jobs:
           GIT_TEST_USERNAME: ${{ secrets.GIT_TEST_USERNAME }}
           GIT_TEST_EMAIL: ${{ secrets.GIT_TEST_EMAIL }}
 
+      # Publish application only on window's runner
       - name: Publish application
-        if: ${{ needs.build.outputs.new_release == 'true' }}
+        if: matrix.os == 'windows-latest' && needs.version.outputs.new_release == 'true'
         run: |
-          $version = "${{ needs.build.outputs.version }}"
+          $version = "${{ needs.version.outputs.version }}"
           dotnet publish ${{env.PROJECT_PATH}} -c Release -r win-x64 --self-contained true -o ${{env.DEPLOY_PATH}} /p:Version=$version
       
-      # Upload artifact
+      # Upload artifact only if version is bumped and it's on window's action runner
       - name: Upload artifact
         uses: actions/upload-artifact@v4
-        if: ${{ needs.build.outputs.new_release == 'true' }}
+        if: matrix.os == 'windows-latest' && needs.version.outputs.new_release == 'true'
         with:
-          name: BananaGit-v${{ needs.build.outputs.version }}-win-x64
+          name: BananaGit-v${{ needs.version.outputs.version }}-win-x64
           path: ${{ env.DEPLOY_PATH }}
-  
-  # Version -> Build/pub -> release
   
   # Releases new build
   release:
     runs-on: [ windows-latest ] # Migrate to ubuntu-latest eventually
     needs: [ version, build ] # Wait for build to succeed
+    if: needs.version.outputs.new_release == 'true'
     env:
       PROJECT_PATH: BananaGit/BananaGit/BananaGit.csproj
       DEPLOY_PATH: builds/BananaGit/
     steps:
-      # Download uploaded artifact (GitHub will automatically zip this)
       - name: Download artifact
-        uses: dawidd6/action-download-artifact@v3
+        uses: actions/download-artifact@v4
         with:
-          name: BananaGit-v${{ needs.build.outputs.version }}-win-x64
+          name: BananaGit-v${{ needs.version.outputs.version }}-win-x64
           path: ${{ env.DEPLOY_PATH }}
 
+      - name: Zip release
+        run: Compress-Archive -Path ${{ env.DEPLOY_PATH }}* -DestinationPath BananaGit-v${{ needs.version.outputs.version }}-win-x64.zip
+
       - name: Upload release asset
-        if: ${{ needs.build.outputs.new_release == 'true' }}
         uses: softprops/action-gh-release@v1
         with:
-          files: BananaGit-v${{ needs.build.outputs.version }}-win-x64.zip
-          tag_name: v${{ needs.build.outputs.version }}
-          body: ${{ needs.build.outputs.release_notes }}
+          files: BananaGit-v${{ needs.version.outputs.version }}-win-x64.zip
+          tag_name: v${{ needs.version.outputs.version }}
+          body: ${{ needs.version.outputs.release_notes }}
         env:
           GITHUB_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
