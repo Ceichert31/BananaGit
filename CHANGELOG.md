@@ -1,3 +1,14 @@
+## [1.4.1](https://github.com/Ceichert31/BananaGit/compare/v1.4.0...v1.4.1) (2026-07-10)
+
+
+### Bug Fixes
+
+* Added integrated app key ([01e8d6f](https://github.com/Ceichert31/BananaGit/commit/01e8d6fc714db3fd524dd513fa2315e20dd5bc13))
+* Change log commit now has ruleset bypass ([61f4448](https://github.com/Ceichert31/BananaGit/commit/61f4448312db1cbf7640d5c512e42e737765358d))
+* old plugin caused early release ([611578f](https://github.com/Ceichert31/BananaGit/commit/611578f74ee2007b5ec27c8be23e005e173ec704))
+* test csproj missing use windows target tag ([4f1000f](https://github.com/Ceichert31/BananaGit/commit/4f1000f87ebd2bbef8a167fe991ec8c4955246e1))
+* Test issues with ubuntu ([e8a63d0](https://github.com/Ceichert31/BananaGit/commit/e8a63d0db93e164fe70d5c7f8eab52cbde1ac2ab))
+
 ## [1.4.2](https://github.com/Ceichert31/BananaGit/compare/v1.4.1...v1.4.2) (2026-07-10)
 
 
