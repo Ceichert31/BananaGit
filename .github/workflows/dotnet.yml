@@ -98,6 +98,8 @@ jobs:
   release:
     runs-on: [ windows-latest ] # Migrate to ubuntu-latest eventually
     needs: [ version, build ] # Wait for build to succeed
+    permissions:
+      contents: write
     if: needs.version.outputs.new_release == 'true'
     env:
       PROJECT_PATH: BananaGit/BananaGit/BananaGit.csproj
