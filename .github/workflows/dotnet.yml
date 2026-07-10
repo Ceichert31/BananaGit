@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: '20'
 
-      - name: Semantic Release
+      - name: Semantic Version
         id: semantic
         uses: cycjimmy/semantic-release-action@v4
         env:
@@ -57,10 +57,10 @@ jobs:
   
   
   release:
-    runs-on: ${{ matrix.os }}
+    runs-on: [ windows-latest ] # Migrate to ubuntu-latest eventually
+    needs: build # Wait for build to succeed 
     strategy:
       matrix:
-        os: [ ubuntu-latest, windows-latest ]
         steps:
           - name: Publish application
             if: steps.semantic.outputs.new_release_published == 'true'
@@ -78,13 +78,6 @@ jobs:
             with:
               files: BananaGit-v${{ steps.semantic.outputs.new_release_version }}-win-x64.zip
               tag_name: v${{ steps.semantic.outputs.new_release_version }}
+              body: ${{ steps.semantic.outputs.new_release_notes }}
             env:
               GITHUB_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
-
-          - name: Upload artifact
-            if: steps.semantic.outputs.new_release_published != 'true'
-            uses: actions/upload-artifact@v4
-            with:
-              name: BananaGit
-              path: ${{env.DEPLOY_PATH}}
-              retention-days: 3
