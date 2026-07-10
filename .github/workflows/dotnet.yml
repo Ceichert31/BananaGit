@@ -40,7 +40,6 @@ jobs:
           extra_plugins: |
             @semantic-release/git
             @semantic-release/changelog
-            @semantic-release/exec
 
       - name: Restore dependencies
         run: dotnet restore ${{ env.SOLUTION_PATH }}
