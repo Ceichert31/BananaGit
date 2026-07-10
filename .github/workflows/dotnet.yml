@@ -117,4 +117,4 @@ jobs:
           tag_name: v${{ needs.version.outputs.version }}
           body: ${{ needs.version.outputs.release_notes }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GIT_TEST_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
