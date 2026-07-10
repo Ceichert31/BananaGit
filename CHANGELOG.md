@@ -1,3 +1,11 @@
+## [1.4.1](https://github.com/Ceichert31/BananaGit/compare/v1.4.0...v1.4.1) (2026-07-10)
+
+
+### Bug Fixes
+
+* Added integrated app key ([01e8d6f](https://github.com/Ceichert31/BananaGit/commit/01e8d6fc714db3fd524dd513fa2315e20dd5bc13))
+* Change log commit now has ruleset bypass ([61f4448](https://github.com/Ceichert31/BananaGit/commit/61f4448312db1cbf7640d5c512e42e737765358d))
+
 # 1.0.0 (2026-03-24)
 
 
