@@ -170,6 +170,64 @@ namespace BananaGit.Services
         #endregion
 
         /// <summary>
+        /// Creates a new branch and pushes it to the remote repository
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="branchName"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task CreateBranchAsync(GitBranch origin, string branchName)
+        {
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            Branch originBranch = repo.Branches[origin.Name] ??
+                                  throw new InvalidOperationException($"Failed to find {origin.Name} branch");
+
+            // Create new branch off of origin branch
+            Branch newBranch = repo.CreateBranch(branchName, originBranch.Tip);
+
+            // Checkout the new branch right after creation
+            Commands.Checkout(repo, newBranch);
+
+            await PushBranchAsync(branchName);
+        }
+
+        /// <summary>
+        /// Finds a branch by name and pushes it to the remote repository
+        /// </summary>
+        /// <param name="branchName">Name of the target branch</param>
+        /// <exception cref="InvalidOperationException"></exception>
+        private async Task PushBranchAsync(string branchName)
+        {
+            // Push new local branch to the remote
+
+            // Get credentials/push options
+
+            await Task.Run(() =>
+            {
+                using var repo = new Repository(_gitInfo?.GetPath());
+
+                var branch = repo.Branches[branchName] ??
+                             throw new InvalidOperationException($"Failed to find {branchName} branch");
+
+                Remote remote = repo.Network.Remotes[Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl())];
+
+                var pushOptions = new PushOptions
+                {
+                    CredentialsProvider = (_url, _user, _cred) =>
+                        new UsernamePasswordCredentials
+                        {
+                            Username = _gitInfo?.PersonalToken,
+                            Password = _gitInfo?.PersonalToken
+                        }
+                };
+
+                repo.Branches.Update(branch, x => x.Remote = remote.Name, x => x.UpstreamBranch = branch.CanonicalName);
+
+                repo.Network.Push(branch, pushOptions);
+            });
+        }
+
+        /// <summary>
         /// Checks if the repository is accessible, and gets the repository name
         /// </summary>
         /// <returns>The name of the current repository name</returns>
@@ -746,18 +804,7 @@ namespace BananaGit.Services
             if (!VerifyCurrentBranch())
                 return;
 
-            try
-            {
-                await PushFilesAsync(CurrentBranch);
-            }
-            catch (LibGit2SharpException ex)
-            {
-                Trace.WriteLine($"Failed to Push {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message);
-            }
+            await PushFilesAsync(CurrentBranch);
         }
 
         /// <summary>
@@ -842,7 +889,7 @@ namespace BananaGit.Services
                 }
 
                 //Try to open repository if one already exists
-                OpenLocalRepository(selectedFilePath);
+                _ = OpenLocalRepository(selectedFilePath);
             }
             catch (RepositoryNotFoundException ex)
             {
@@ -859,11 +906,11 @@ namespace BananaGit.Services
         /// <param name="filePath">Filepath to a local git repository</param>
         /// <exception cref="RepositoryNotFoundException"></exception>
         /// <exception cref="NullReferenceException"></exception>
-        private void OpenLocalRepository(string filePath)
+        private async Task OpenLocalRepository(string filePath)
         {
             try
             {
-                Task.Run(() =>
+                await Task.Run(() =>
                 {
                     var repo = new Repository(filePath);
 
@@ -881,10 +928,10 @@ namespace BananaGit.Services
                     //Save to user info
                     _gitInfo?.SetPath(filePath);
                     JsonDataManager.SaveUserInfo(_gitInfo);
-
-                    //Notify view models that the repository data has changed
-                    OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
                 });
+
+                //Notify view models that the repository data has changed
+                OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
             }
             catch (Exception ex)
             {
@@ -909,7 +956,7 @@ namespace BananaGit.Services
                 //Clone repo using git service
                 await CloneRepositoryAsync(url, path);
 
-                OpenLocalRepository(path);
+                await OpenLocalRepository(path);
             }
             catch (Exception ex)
             {

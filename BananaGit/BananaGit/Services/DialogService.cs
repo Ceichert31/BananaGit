@@ -1,4 +1,5 @@
 ﻿using BananaGit.ViewModels;
+using BananaGit.ViewModels.DialogueViewModels;
 using BananaGit.Views;
 using BananaGit.Views.DialogueViews;
 
@@ -14,12 +15,17 @@ namespace BananaGit.Services
         private readonly RemoteBranchViewModel _remoteBranchViewModel;
         private readonly CloneRepoViewModel _cloneRepoViewModel;
         private readonly DiscardChangesViewModel _discardChangesViewModel;
+        private readonly CreateBranchViewModel _createBranchViewModel;
+
+        private CreateBranchView? _createBranchView;
+        private DiscardChangesConfirmationView? _discardChangesView;
 
         public DialogService(GitService gitService)
         {
             _remoteBranchViewModel = new RemoteBranchViewModel(gitService);
             _cloneRepoViewModel = new CloneRepoViewModel(gitService);
             _discardChangesViewModel = new DiscardChangesViewModel(gitService, this);
+            _createBranchViewModel = new CreateBranchViewModel(gitService, this);
         }
 
         /// <summary>
@@ -74,24 +80,37 @@ namespace BananaGit.Services
             view.Show();
         }
 
-        private DiscardChangesConfirmationView? discardChangesView;
-
         /// <summary>
         /// Opens a dialog confirming discarding local changes
         /// </summary>
         public void ShowDiscardChangesDialog()
         {
-            discardChangesView = new()
+            _discardChangesView = new()
             {
                 DataContext = _discardChangesViewModel,
                 Owner = System.Windows.Application.Current.MainWindow
             };
-            discardChangesView.ShowDialog();
+            _discardChangesView.ShowDialog();
         }
 
         public void CloseDiscardChangesDialog()
         {
-            discardChangesView?.Close();
+            _discardChangesView?.Close();
+        }
+
+        public void ShowCreateBranchDialog()
+        {
+            _createBranchView = new()
+            {
+                DataContext = _createBranchViewModel,
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+            _createBranchView.ShowDialog();
+        }
+
+        public void CloseCreateBranchDialog()
+        {
+            _createBranchView?.Close();
         }
     }
 }
