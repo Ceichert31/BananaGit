@@ -1,3 +1,11 @@
+## [1.4.2](https://github.com/Ceichert31/BananaGit/compare/v1.4.1...v1.4.2) (2026-07-10)
+
+
+### Bug Fixes
+
+* old plugin caused early release ([611578f](https://github.com/Ceichert31/BananaGit/commit/611578f74ee2007b5ec27c8be23e005e173ec704))
+* test csproj missing use windows target tag ([4f1000f](https://github.com/Ceichert31/BananaGit/commit/4f1000f87ebd2bbef8a167fe991ec8c4955246e1))
+
 ## [1.4.1](https://github.com/Ceichert31/BananaGit/compare/v1.4.0...v1.4.1) (2026-07-10)
 
 
