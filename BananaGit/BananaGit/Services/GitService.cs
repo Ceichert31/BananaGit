@@ -146,7 +146,7 @@ namespace BananaGit.Services
             if (_gitInfo?.CurrentBranch == null)
                 if (_gitInfo != null)
                 {
-                    _gitInfo.CurrentBranch = new GitBranch();
+                    _gitInfo.CurrentBranch = new GitBranch(this);
                 }
                 else
                 {
@@ -284,7 +284,7 @@ namespace BananaGit.Services
                     continue;
                 }
 
-                localBranches.Add(new GitBranch(branch));
+                localBranches.Add(new GitBranch(branch, this));
             }
 
             return localBranches;
@@ -317,7 +317,7 @@ namespace BananaGit.Services
                     continue;
                 }
 
-                remoteBranches.Add(new GitBranch(branch));
+                remoteBranches.Add(new GitBranch(branch, this));
             }
 
             return remoteBranches;
@@ -568,7 +568,7 @@ namespace BananaGit.Services
 
             try
             {
-                CurrentBranch = new GitBranch(_gitInfo);
+                CurrentBranch = new GitBranch(_gitInfo, this);
             }
             catch (LoadDataException ex)
             {

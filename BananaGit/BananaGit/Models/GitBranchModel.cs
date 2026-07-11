@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.IO;
 using BananaGit.Exceptions;
 using BananaGit.Services;
 using BananaGit.Utilities;
@@ -15,8 +14,11 @@ namespace BananaGit.Models
         public string CanonicalName { get; set; }
         public bool IsRemote { get; set; }
 
-        public GitBranch()
+        private readonly GitService _gitService;
+
+        public GitBranch(GitService gitService)
         {
+            _gitService = gitService;
             Name = "";
             CanonicalName = "";
         }
@@ -30,8 +32,10 @@ namespace BananaGit.Models
         /// An overarching git exception, if thrown something 
         /// relating to git operations or repositories has gone wrong 
         /// </exception>
-        public GitBranch(GitInfoModel? gitInfo)
+        public GitBranch(GitInfoModel? gitInfo, GitService gitService)
         {
+            _gitService = gitService;
+
             //Check user info has loaded
             if (gitInfo == null)
             {
@@ -55,14 +59,6 @@ namespace BananaGit.Models
             {
                 throw new InvalidRepoException("Saved file path is an invalid repo");
             }
-
-            //Setup credentials for accessing remote branch info
-            var options = new FetchOptions();
-            options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
-            {
-                Username = gitInfo.Username,
-                Password = gitInfo.PersonalToken
-            };
 
             //Get the name of the HEAD branch
             string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.GetUrl());
@@ -88,8 +84,9 @@ namespace BananaGit.Models
         /// Caches a branch into a model
         /// </summary>
         /// <param name="branch">The branch to cache</param>
-        public GitBranch(Branch branch)
+        public GitBranch(Branch branch, GitService gitService)
         {
+            _gitService = gitService;
             Name = branch.FriendlyName;
             IsRemote = branch.IsRemote;
             CanonicalName = branch.CanonicalName;
