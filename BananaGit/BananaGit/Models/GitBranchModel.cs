@@ -10,11 +10,11 @@ namespace BananaGit.Models
 {
     public partial class GitBranch : ObservableObject
     {
-        public string Name { get; }
-        public string CanonicalName { get; }
-        public bool IsRemote { get; }
+        public string Name { get; set; }
+        public string CanonicalName { get; set; }
+        public bool IsRemote { get; set; }
 
-        [JsonIgnore] private readonly GitService _gitService;
+        [JsonIgnore] private GitService _gitService;
 
         /// <summary>
         /// Empty constructor used to serialize JSON
@@ -28,6 +28,12 @@ namespace BananaGit.Models
             Name = "";
             CanonicalName = "";
         }
+
+        /// <summary>
+        /// Attaches the <see cref="GitService"/> to the branch after it is loaded from file
+        /// </summary>
+        /// <param name="gitService"></param>
+        public void AttachService(GitService gitService) => _gitService = gitService;
 
         /// <summary>
         /// Caches a branch into a model

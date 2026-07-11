@@ -41,6 +41,9 @@ namespace BananaGit.Services
         {
             _gitInfo = gitInfo;
             JsonDataManager.OnUserInfoChanged += OnUserDataChange;
+
+            // Attach this service to the current branch after its been loaded
+            _gitInfo?.CurrentBranch?.AttachService(this);
         }
 
         /// <summary>
@@ -51,6 +54,7 @@ namespace BananaGit.Services
         private void OnUserDataChange(object? sender, EventArgs e)
         {
             JsonDataManager.LoadUserInfo(ref _gitInfo);
+            _gitInfo?.CurrentBranch?.AttachService(this);
         }
 
         /// <summary>
