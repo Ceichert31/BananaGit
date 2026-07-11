@@ -1,14 +1,13 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Windows;
 using BananaGit.EventArgExtensions;
 using BananaGit.Exceptions;
 using BananaGit.Models;
 using BananaGit.Utilities;
 using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
 using Microsoft.Win32;
-using Version = System.Version;
 
 namespace BananaGit.Services
 {
@@ -61,13 +60,16 @@ namespace BananaGit.Services
         /// <param name="e">The message</param>
         public static void OutputToConsole(object? sender, MessageEventArgs e)
         {
-            if (sender == null)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Trace.WriteLine($"Unknown origin: {e.Message}");
-                return;
-            }
+                if (sender == null)
+                {
+                    Trace.WriteLine($"Unknown origin: {e.Message}");
+                    return;
+                }
 
-            Trace.WriteLine($"{sender.GetType().ToString().Split('.').Last()}: {e.Message}");
+                Trace.WriteLine($"{sender.GetType().ToString().Split('.').Last()}: {e.Message}");
+            });
         }
 
         #region Repository Status Methods
@@ -144,14 +146,16 @@ namespace BananaGit.Services
             using var repo = new Repository(_gitInfo?.GetPath());
 
             if (_gitInfo?.CurrentBranch == null)
+            {
                 if (_gitInfo != null)
                 {
-                    _gitInfo.CurrentBranch = new GitBranch(this);
+                    _gitInfo.CurrentBranch = InitializeMainBranch();
                 }
                 else
                 {
                     JsonDataManager.LoadUserInfo(ref _gitInfo);
                 }
+            }
 
             var commits = repo.Branches[_gitInfo?.CurrentBranch?.CanonicalName].Commits.ToList();
 
@@ -324,6 +328,32 @@ namespace BananaGit.Services
         }
 
         #endregion
+
+
+        /// <summary>
+        /// Initializes the default main branch
+        /// </summary>
+        /// <returns>The main branch as a GitBranch model</returns>
+        /// <exception cref="InvalidRepoException">Thrown if default branch can't be found</exception>
+        private GitBranch InitializeMainBranch()
+        {
+            //Get the name of the HEAD branch
+            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+
+            if (branchName == null)
+            {
+                throw new InvalidRepoException("Couldn't find default branch name");
+            }
+
+            //Update branch info
+            using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+
+            var branch = repo.Branches[branchName];
+
+            Commands.Checkout(repo, branch);
+
+            return new GitBranch(branch, this);
+        }
 
         /// <summary>
         /// Creates a new branch and pushes it to the remote repository
@@ -542,7 +572,7 @@ namespace BananaGit.Services
             {
                 using var repo = new Repository(_gitInfo?.GetPath());
 
-                repo.CheckoutPaths("HEAD", new[] { filePath }, new CheckoutOptions
+                repo.CheckoutPaths("HEAD", [filePath], new CheckoutOptions
                 {
                     CheckoutModifiers = CheckoutModifiers.Force
                 });
@@ -577,7 +607,7 @@ namespace BananaGit.Services
 
             try
             {
-                CurrentBranch = new GitBranch(_gitInfo, this);
+                CurrentBranch = InitializeMainBranch();
             }
             catch (LoadDataException ex)
             {
@@ -734,14 +764,12 @@ namespace BananaGit.Services
             {
                 VerifyPath();
 
-                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
-                {
-                    var status = repo.RetrieveStatus();
-                    if (!status.IsDirty)
-                        return;
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty)
+                    return;
 
-                    Commands.Unstage(repo, fileToUnstage.FilePath);
-                }
+                Commands.Unstage(repo, fileToUnstage.FilePath);
             });
         }
 
@@ -832,39 +860,35 @@ namespace BananaGit.Services
                 {
                     FetchOptions = new FetchOptions
                     {
-                        CredentialsProvider = new CredentialsHandler((url, username, types) =>
+                        CredentialsProvider = (_, _, _) =>
                             new UsernamePasswordCredentials
                             {
                                 Username = _gitInfo?.PersonalToken,
                                 Password = _gitInfo?.PersonalToken,
-                            }
-                        ),
+                            },
                     },
-                };
-
-                options.MergeOptions = new MergeOptions
-                {
-                    FastForwardStrategy = FastForwardStrategy.Default,
-                    OnCheckoutNotify = new CheckoutNotifyHandler(ShowConflict),
-                    CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict,
-                };
-
-                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
-                {
-                    //Create signature and pull
-                    Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
-                    var result = Commands.Pull(repo, signature, options);
-
-                    switch (result.Status)
+                    MergeOptions = new MergeOptions
                     {
-                        //Check for merge conflicts
-                        case MergeStatus.Conflicts:
-                            //Display in front end eventually
-                            return "Conflict detected";
-                        case MergeStatus.UpToDate:
-                            //Display in front end eventually
-                            return "Up to date";
+                        FastForwardStrategy = FastForwardStrategy.Default,
+                        OnCheckoutNotify = ShowConflict,
+                        CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict,
                     }
+                };
+
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+                //Create signature and pull
+                Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
+                var result = Commands.Pull(repo, signature, options);
+
+                switch (result.Status)
+                {
+                    //Check for merge conflicts
+                    case MergeStatus.Conflicts:
+                        //Display in front end eventually
+                        return "Conflict detected";
+                    case MergeStatus.UpToDate:
+                        //Display in front end eventually
+                        return "Up to date";
                 }
 
                 return "Pulled Successfully";
@@ -943,20 +967,20 @@ namespace BananaGit.Services
                     //Check for merge conflicts
                     case MergeStatus.Conflicts:
                         //Display in front end eventually
-                        Trace.WriteLine("Conflict detected");
+                        OutputToConsole(this, new("Conflict detected"));
                         return;
                     case MergeStatus.UpToDate:
                         //Display in front end eventually
-                        Trace.WriteLine("Up to date");
+                        OutputToConsole(this, new("Up to date"));
                         return;
                     case MergeStatus.FastForward:
-                        Trace.WriteLine("Fast Forward");
+                        OutputToConsole(this, new("Fast forward"));
                         break;
                     case MergeStatus.NonFastForward:
-                        Trace.WriteLine("Non-Fast Forward");
+                        OutputToConsole(this, new("Non-fast forward"));
                         break;
                     default:
-                        Trace.WriteLine("Pulled Successfully");
+                        OutputToConsole(this, new("Pulled successfully"));
                         break;
                 }
             }
@@ -982,8 +1006,6 @@ namespace BananaGit.Services
         {
             //Open dialog, choose path, check path validity, if path is valid save to user info, if not give message
 
-            string selectedFilePath = "";
-
             //Open file select dialogue
             OpenFolderDialog dialog = new OpenFolderDialog
             {
@@ -994,7 +1016,7 @@ namespace BananaGit.Services
             //If dialog closes, check result
             if (dialog.ShowDialog() != true) return new Tuple<string, bool>("", false);
 
-            selectedFilePath = dialog.FolderName;
+            var selectedFilePath = dialog.FolderName;
 
             try
             {

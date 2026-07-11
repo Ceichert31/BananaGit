@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Text.Json.Serialization;
 using BananaGit.Exceptions;
 using BananaGit.Services;
 using BananaGit.Utilities;
@@ -14,70 +15,13 @@ namespace BananaGit.Models
         public string CanonicalName { get; set; }
         public bool IsRemote { get; set; }
 
-        private readonly GitService _gitService;
+        [JsonIgnore] private readonly GitService _gitService;
 
-        public GitBranch(GitService gitService)
+        public GitBranch()
         {
-            _gitService = gitService;
+            _gitService = new GitService(null);
             Name = "";
             CanonicalName = "";
-        }
-
-        /// <summary>
-        /// Default constructor creates branch from HEAD
-        /// </summary>
-        /// <exception cref="RepoLocationException"> The repository saved no longer exists at that location </exception>
-        /// <exception cref="LoadDataException"> Thrown if the user info is missing or can't be loaded </exception>
-        /// <exception cref="GitException"> 
-        /// An overarching git exception, if thrown something 
-        /// relating to git operations or repositories has gone wrong 
-        /// </exception>
-        public GitBranch(GitInfoModel? gitInfo, GitService gitService)
-        {
-            _gitService = gitService;
-
-            //Check user info has loaded
-            if (gitInfo == null)
-            {
-                throw new LoadDataException("Couldn't load user info");
-            }
-
-            //Check if saved repository exists
-            if (gitInfo.SavedRepository == null)
-            {
-                throw new InvalidRepoException("No saved repository after loading!");
-            }
-
-            //Check if repo location exists
-            if (!Directory.Exists(gitInfo.SavedRepository?.FilePath))
-            {
-                throw new RepoLocationException("Local repository file location missing!");
-            }
-
-            //Check if file path is still valid
-            if (!Repository.IsValid(gitInfo.SavedRepository?.FilePath))
-            {
-                throw new InvalidRepoException("Saved file path is an invalid repo");
-            }
-
-            //Get the name of the HEAD branch
-            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.GetUrl());
-
-            if (branchName == null)
-            {
-                throw new InvalidRepoException("Couldn't find default branch name");
-            }
-
-            //Update branch info
-            using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-
-            var branch = repo.Branches[branchName];
-
-            Commands.Checkout(repo, branch);
-
-            Name = branch.FriendlyName;
-            IsRemote = branch.IsRemote;
-            CanonicalName = branch.CanonicalName;
         }
 
         /// <summary>
@@ -118,6 +62,7 @@ namespace BananaGit.Models
             try
             {
                 await _gitService.DeleteLocalBranch(Name);
+                await _gitService.PullChanges();
             }
             catch (InvalidRepoException ex)
             {
@@ -134,6 +79,7 @@ namespace BananaGit.Models
             try
             {
                 await _gitService.DeleteRemoteBranch(Name);
+                await _gitService.PullChanges();
             }
             catch (InvalidRepoException ex)
             {

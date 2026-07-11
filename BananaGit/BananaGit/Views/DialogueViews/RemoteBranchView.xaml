@@ -45,8 +45,15 @@
                                 <Button
                                     Width="20"
                                     HorizontalAlignment="Right"
+                                    Background="Red"
+                                    Command="{Binding DeleteLocalBranchCommand}"
+                                    Content="-"
+                                    Foreground="White" />
+                                <Button
+                                    Width="20"
+                                    HorizontalAlignment="Right"
                                     Background="DarkRed"
-                                    Command="{Binding CheckoutBranchCommand}"
+                                    Command="{Binding DeleteRemoteBranchCommand}"
                                     Content="-"
                                     Foreground="White" />
                             </DockPanel>
