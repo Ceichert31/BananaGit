@@ -383,9 +383,44 @@ namespace BananaGit.Services
             });
         }
 
-        public void CheckoutRemoteBranch()
+
+        /// <summary>
+        /// Checks out a remote branch locally
+        /// </summary>
+        /// <param name="branch">The branch to check out </param>
+        /// <exception cref="InvalidBranchException">Thrown if remote can't be found</exception>
+        public void CheckoutRemoteBranch(GitBranch branch)
         {
-            
+            if (!branch.IsRemote) return;
+
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            var options = new FetchOptions
+            {
+                CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials
+                {
+                    Username = _gitInfo?.Username,
+                    Password = _gitInfo?.PersonalToken
+                }
+            };
+
+            //Fetch latest
+            Commands.Fetch(repo, "origin", Array.Empty<string>(), options, "");
+
+            var remoteBranch = repo.Branches[branch.CanonicalName] ??
+                               throw new InvalidBranchException(
+                                   $"Couldn't find branch: {branch.Name}");
+
+            string localName = branch.Name.Replace("origin/", "");
+
+            //Create a local tracking branch
+            Branch localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
+
+            //Update local branch
+            repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = branch.CanonicalName);
+
+            //Checkout branch
+            Commands.Checkout(repo, localTrackingBranch);
         }
 
         /// <summary>

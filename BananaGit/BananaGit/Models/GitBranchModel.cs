@@ -98,48 +98,6 @@ namespace BananaGit.Models
         [RelayCommand]
         private void CheckoutBranch()
         {
-            if (!IsRemote) return;
-
-            try
-            {
-                GitInfoModel? gitInfo = new();
-                JsonDataManager.LoadUserInfo(ref gitInfo);
-
-                if (gitInfo != null)
-                {
-                    using var repo = new Repository(gitInfo.GetPath());
-
-                    var options = new FetchOptions();
-
-                    options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
-                    {
-                        Username = gitInfo.Username,
-                        Password = gitInfo.PersonalToken
-                    };
-
-                    //Fetch latest
-                    Commands.Fetch(repo, "origin", Array.Empty<string>(), options, "");
-
-                    var remoteBranch = repo.Branches[CanonicalName] ??
-                                       throw new NullReferenceException(
-                                           "No remote branch accessed from saved branch data");
-
-                    string localName = Name.Replace("origin/", "");
-
-                    //Create a local tracking branch
-                    Branch localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
-
-                    //Update local branch
-                    repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = CanonicalName);
-
-                    //Checkout branch
-                    Commands.Checkout(repo, localTrackingBranch);
-                }
-            }
-            catch (Exception ex)
-            {
-                Trace.WriteLine(ex.Message);
-            }
         }
     }
 }
