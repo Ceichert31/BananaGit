@@ -395,7 +395,7 @@ namespace BananaGit.Services
                 var branch = repo.Branches[branchName] ??
                              throw new InvalidOperationException($"Failed to find {branchName} branch");
 
-                Remote remote = repo.Network.Remotes[Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl())];
+                Remote remote = repo.Network.Remotes["origin"];
 
                 var pushOptions = new PushOptions
                 {
@@ -412,7 +412,6 @@ namespace BananaGit.Services
                 repo.Network.Push(branch, pushOptions);
             });
         }
-
 
         /// <summary>
         /// Checks out a remote branch locally
