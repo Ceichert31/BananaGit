@@ -383,6 +383,71 @@ namespace BananaGit.Services
             });
         }
 
+        /// <summary>
+        /// Deletes a specified local branch, remote branch remains untouched
+        /// </summary>
+        /// <param name="branchName">The friendly name of the branch</param>
+        public void DeleteLocalBranch(string branchName)
+        {
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            // Switch branches if we are on the branch we want to delete
+            if (string.Equals(repo.Head.FriendlyName, branchName))
+            {
+                var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+
+                if (mainBranch == null)
+                    throw new InvalidBranchException($"Failed to find default branch");
+
+                Commands.Checkout(repo, mainBranch);
+            }
+
+            // Local branch deletion
+            if (repo.Branches[branchName] == null) return;
+
+            repo.Branches.Remove(branchName);
+            OutputToConsole(this, new($"Successfully deleted local branch: {branchName}"));
+        }
+
+        /// <summary>
+        /// Deletes a specified remote branch, cleans up any associated local branches
+        /// </summary>
+        /// <param name="branchName">The branch to delete</param>
+        /// <exception cref="InvalidBranchException">Thrown if the default branch (ex. main) can't be found</exception>
+        public void DeleteRemoteBranch(string branchName)
+        {
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+
+            if (mainBranch == null)
+                throw new InvalidBranchException($"Failed to find default branch");
+
+            var remote = repo.Network.Remotes[mainBranch];
+
+            // Command to delete remote
+            string pushRefSpec = $":refs/heads/{branchName}";
+
+            // Setup credentials to push changes
+            PushOptions pushOptions = new()
+            {
+                CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials()
+                {
+                    Username = _gitInfo?.PersonalToken,
+                    Password = _gitInfo?.PersonalToken,
+                }
+            };
+
+            repo.Network.Push(remote, pushRefSpec, pushOptions);
+            OutputToConsole(this, new($"Successfully deleted remote branch: {branchName}"));
+
+            // Cleanup local branch if it exists
+            if (repo.Branches[$"origin/{branchName}"] == null) return;
+
+            repo.Branches.Remove($"origin/{branchName}");
+            OutputToConsole(this, new($"Successfully deleted local branch: {branchName}"));
+        }
+
         #endregion
 
         #region Helper Methods
