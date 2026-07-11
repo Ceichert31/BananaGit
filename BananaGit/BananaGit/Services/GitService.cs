@@ -788,33 +788,12 @@ namespace BananaGit.Services
                 VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
-                var remote = repo.Network.Remotes[branch.Name];
-                if (remote != null)
-                {
-                    repo.Network.Remotes.Remove(branch.Name);
-                }
+                var remote = repo.Network.Remotes["origin"];
+                if (remote == null)
+                    throw new InvalidBranchException("No 'origin' remote configured for this repository!");
 
                 repo.Network.Remotes.Add(branch.Name, _gitInfo?.SavedRepository?.Url);
                 remote = repo.Network.Remotes[branch.Name];
-
-                if (remote == null)
-                    throw new InvalidBranchException(
-                        "Invalid branch inputted! Cannot push files!"
-                    );
-
-                //User credentials
-                FetchOptions options = new FetchOptions
-                {
-                    CredentialsProvider = (_, _, _) =>
-                        new UsernamePasswordCredentials
-                        {
-                            Username = _gitInfo?.PersonalToken,
-                            Password = _gitInfo?.PersonalToken,
-                        },
-                };
-
-                var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
-                Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
 
                 var localBranchName = string.IsNullOrEmpty(branch.Name)
                     ? repo.Head.FriendlyName
@@ -840,7 +819,6 @@ namespace BananaGit.Services
                         },
                 };
 
-                //Need to try catch to prevent crashing bc of no access
                 repo.Network.Push(localBranch, pushOptions);
             });
         }

@@ -1,5 +1,4 @@
-﻿using System.IO;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using BananaGit.Exceptions;
 using BananaGit.Services;
 using BananaGit.Utilities;
@@ -11,12 +10,18 @@ namespace BananaGit.Models
 {
     public partial class GitBranch : ObservableObject
     {
-        public string Name { get; set; }
-        public string CanonicalName { get; set; }
-        public bool IsRemote { get; set; }
+        public string Name { get; }
+        public string CanonicalName { get; }
+        public bool IsRemote { get; }
 
         [JsonIgnore] private readonly GitService _gitService;
 
+        /// <summary>
+        /// Empty constructor used to serialize JSON
+        /// </summary>
+        /// <remarks>
+        /// If you need to initialize a branch, use <see cref="GitService"/>
+        /// </remarks>
         public GitBranch()
         {
             _gitService = new GitService(null);
@@ -61,7 +66,7 @@ namespace BananaGit.Models
         {
             try
             {
-                await _gitService.DeleteLocalBranch(Name);
+                await _gitService.DeleteLocalBranch(Name.GetName());
                 await _gitService.PullChanges();
             }
             catch (InvalidRepoException ex)
@@ -78,7 +83,7 @@ namespace BananaGit.Models
         {
             try
             {
-                await _gitService.DeleteRemoteBranch(Name);
+                await _gitService.DeleteRemoteBranch(Name.GetName());
                 await _gitService.PullChanges();
             }
             catch (InvalidRepoException ex)
