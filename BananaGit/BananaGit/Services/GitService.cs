@@ -389,64 +389,70 @@ namespace BananaGit.Services
         /// </summary>
         /// <param name="branch">The branch to check out </param>
         /// <exception cref="InvalidBranchException">Thrown if remote can't be found</exception>
-        public void CheckoutRemoteBranch(GitBranch branch)
+        public async Task CheckoutRemoteBranch(GitBranch branch)
         {
-            if (!branch.IsRemote) return;
-
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            var options = new FetchOptions
+            await Task.Run(() =>
             {
-                CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials
+                if (!branch.IsRemote) return;
+
+                using var repo = new Repository(_gitInfo?.GetPath());
+
+                var options = new FetchOptions
                 {
-                    Username = _gitInfo?.Username,
-                    Password = _gitInfo?.PersonalToken
-                }
-            };
+                    CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials
+                    {
+                        Username = _gitInfo?.Username,
+                        Password = _gitInfo?.PersonalToken
+                    }
+                };
 
-            //Fetch latest
-            Commands.Fetch(repo, "origin", Array.Empty<string>(), options, "");
+                //Fetch latest
+                Commands.Fetch(repo, "origin", Array.Empty<string>(), options, "");
 
-            var remoteBranch = repo.Branches[branch.CanonicalName] ??
-                               throw new InvalidBranchException(
-                                   $"Couldn't find branch: {branch.Name}");
+                var remoteBranch = repo.Branches[branch.CanonicalName] ??
+                                   throw new InvalidBranchException(
+                                       $"Couldn't find branch: {branch.Name}");
 
-            string localName = branch.Name.Replace("origin/", "");
+                string localName = branch.Name.Replace("origin/", "");
 
-            //Create a local tracking branch
-            Branch localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
+                //Create a local tracking branch
+                Branch localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
 
-            //Update local branch
-            repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = branch.CanonicalName);
+                //Update local branch
+                repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = branch.CanonicalName);
 
-            //Checkout branch
-            Commands.Checkout(repo, localTrackingBranch);
+                //Checkout branch
+                Commands.Checkout(repo, localTrackingBranch);
+            });
         }
 
         /// <summary>
         /// Deletes a specified local branch, remote branch remains untouched
         /// </summary>
         /// <param name="branchName">The friendly name of the branch</param>
-        public void DeleteLocalBranch(string branchName)
+        public async Task DeleteLocalBranch(string branchName)
         {
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            // Switch branches if we are on the branch we want to delete
-            if (string.Equals(repo.Head.FriendlyName, branchName))
+            await Task.Run(() =>
             {
-                var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+                using var repo = new Repository(_gitInfo?.GetPath());
 
-                if (mainBranch == null)
-                    throw new InvalidBranchException($"Failed to find default branch");
+                // Switch branches if we are on the branch we want to delete
+                if (string.Equals(repo.Head.FriendlyName, branchName))
+                {
+                    var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
 
-                Commands.Checkout(repo, mainBranch);
-            }
+                    if (mainBranch == null)
+                        throw new InvalidBranchException($"Failed to find default branch");
 
-            // Local branch deletion
-            if (repo.Branches[branchName] == null) return;
+                    Commands.Checkout(repo, mainBranch);
+                }
 
-            repo.Branches.Remove(branchName);
-            OutputToConsole(this, new($"Successfully deleted local branch: {branchName}"));
+                // Local branch deletion
+                if (repo.Branches[branchName] == null) return;
+
+                repo.Branches.Remove(branchName);
+                OutputToConsole(this, new($"Successfully deleted local branch: {branchName}"));
+            });
         }
 
         /// <summary>
@@ -454,38 +460,41 @@ namespace BananaGit.Services
         /// </summary>
         /// <param name="branchName">The branch to delete</param>
         /// <exception cref="InvalidBranchException">Thrown if the default branch (ex. main) can't be found</exception>
-        public void DeleteRemoteBranch(string branchName)
+        public async Task DeleteRemoteBranch(string branchName)
         {
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
-
-            if (mainBranch == null)
-                throw new InvalidBranchException($"Failed to find default branch");
-
-            var remote = repo.Network.Remotes[mainBranch];
-
-            // Command to delete remote
-            string pushRefSpec = $":refs/heads/{branchName}";
-
-            // Setup credentials to push changes
-            PushOptions pushOptions = new()
+            await Task.Run(() =>
             {
-                CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials()
+                using var repo = new Repository(_gitInfo?.GetPath());
+
+                var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+
+                if (mainBranch == null)
+                    throw new InvalidBranchException($"Failed to find default branch");
+
+                var remote = repo.Network.Remotes[mainBranch];
+
+                // Command to delete remote
+                string pushRefSpec = $":refs/heads/{branchName}";
+
+                // Setup credentials to push changes
+                PushOptions pushOptions = new()
                 {
-                    Username = _gitInfo?.PersonalToken,
-                    Password = _gitInfo?.PersonalToken,
-                }
-            };
+                    CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials()
+                    {
+                        Username = _gitInfo?.PersonalToken,
+                        Password = _gitInfo?.PersonalToken,
+                    }
+                };
 
-            repo.Network.Push(remote, pushRefSpec, pushOptions);
-            OutputToConsole(this, new($"Successfully deleted remote branch: {branchName}"));
+                repo.Network.Push(remote, pushRefSpec, pushOptions);
+                OutputToConsole(this, new($"Successfully deleted remote branch: {branchName}"));
 
-            // Cleanup local branch if it exists
-            if (repo.Branches[$"origin/{branchName}"] == null) return;
+                // Cleanup local branch if it exists
+                if (repo.Branches[$"origin/{branchName}"] == null) return;
 
-            repo.Branches.Remove($"origin/{branchName}");
-            OutputToConsole(this, new($"Successfully deleted local branch: {branchName}"));
+                repo.Branches.Remove($"origin/{branchName}");
+                OutputToConsole(this, new($"Successfully deleted local branch: {branchName}"));
+            });
         }
 
         #endregion

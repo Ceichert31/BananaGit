@@ -84,6 +84,7 @@ namespace BananaGit.Models
         /// Caches a branch into a model
         /// </summary>
         /// <param name="branch">The branch to cache</param>
+        /// <param name="gitService">The Git Service that handles Git operations</param>
         public GitBranch(Branch branch, GitService gitService)
         {
             _gitService = gitService;
@@ -92,9 +93,52 @@ namespace BananaGit.Models
             CanonicalName = branch.CanonicalName;
         }
 
+        /// <summary>
+        /// Checks out a remote branch through the <see cref="GitService"/>
+        /// </summary>
         [RelayCommand]
-        private void CheckoutBranch()
+        private async Task CheckoutBranch()
         {
+            try
+            {
+                await _gitService.CheckoutRemoteBranch(this);
+            }
+            catch (InvalidRepoException ex)
+            {
+                GitService.OutputToConsole(this, new(ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// Deletes this branch locally through the <see cref="GitService"/>
+        /// </summary>
+        [RelayCommand]
+        private async Task DeleteLocalBranch()
+        {
+            try
+            {
+                await _gitService.DeleteLocalBranch(Name);
+            }
+            catch (InvalidRepoException ex)
+            {
+                GitService.OutputToConsole(this, new(ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// Deletes this branch on the remote through the <see cref="GitService"/>
+        /// </summary>
+        [RelayCommand]
+        private async Task DeleteRemoteBranch()
+        {
+            try
+            {
+                await _gitService.DeleteRemoteBranch(Name);
+            }
+            catch (InvalidRepoException ex)
+            {
+                GitService.OutputToConsole(this, new(ex.Message));
+            }
         }
     }
 }
