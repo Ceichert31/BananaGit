@@ -383,6 +383,11 @@ namespace BananaGit.Services
             });
         }
 
+        public void CheckoutRemoteBranch()
+        {
+            
+        }
+
         /// <summary>
         /// Deletes a specified local branch, remote branch remains untouched
         /// </summary>

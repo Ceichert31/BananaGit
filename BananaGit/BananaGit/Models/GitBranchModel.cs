@@ -1,6 +1,7 @@
 ﻿using System.Diagnostics;
 using System.IO;
 using BananaGit.Exceptions;
+using BananaGit.Services;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -19,7 +20,7 @@ namespace BananaGit.Models
             Name = "";
             CanonicalName = "";
         }
-        
+
         /// <summary>
         /// Default constructor creates branch from HEAD
         /// </summary>
@@ -70,14 +71,14 @@ namespace BananaGit.Models
             {
                 throw new InvalidRepoException("Couldn't find default branch name");
             }
-            
+
             //Update branch info
             using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-            
+
             var branch = repo.Branches[branchName];
-            
+
             Commands.Checkout(repo, branch);
-            
+
             Name = branch.FriendlyName;
             IsRemote = branch.IsRemote;
             CanonicalName = branch.CanonicalName;
@@ -115,20 +116,22 @@ namespace BananaGit.Models
                         Username = gitInfo.Username,
                         Password = gitInfo.PersonalToken
                     };
-                    
+
                     //Fetch latest
                     Commands.Fetch(repo, "origin", Array.Empty<string>(), options, "");
-                    
-                    var remoteBranch = repo.Branches[CanonicalName] ?? throw new NullReferenceException("No remote branch accessed from saved branch data");
+
+                    var remoteBranch = repo.Branches[CanonicalName] ??
+                                       throw new NullReferenceException(
+                                           "No remote branch accessed from saved branch data");
 
                     string localName = Name.Replace("origin/", "");
-                    
+
                     //Create a local tracking branch
                     Branch localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
-                    
+
                     //Update local branch
                     repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = CanonicalName);
-                    
+
                     //Checkout branch
                     Commands.Checkout(repo, localTrackingBranch);
                 }
