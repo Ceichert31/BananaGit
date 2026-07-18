@@ -375,6 +375,12 @@ namespace BananaGit.Services
             // Create new branch off of origin branch
             Branch newBranch = repo.CreateBranch(branchName, originBranch.Tip);
 
+            // Set tracking
+            if (originBranch.IsRemote)
+            {
+                newBranch = repo.Branches.Update(newBranch, b => b.TrackedBranch = originBranch.CanonicalName);
+            }
+
             // Checkout the new branch right after creation
             Commands.Checkout(repo, newBranch);
 
@@ -504,10 +510,10 @@ namespace BananaGit.Services
                 if (mainBranch == null)
                     throw new InvalidBranchException($"Failed to find default branch");
 
-                var remote = repo.Network.Remotes[mainBranch];
+                var remote = repo.Network.Remotes["origin"];
 
                 // Command to delete remote
-                string pushRefSpec = $":refs/heads/{branchName}";
+                string pushRefSpec = $":refs/heads/{branchName.GetName()}";
 
                 // Setup credentials to push changes
                 PushOptions pushOptions = new()
@@ -519,6 +525,14 @@ namespace BananaGit.Services
                     }
                 };
 
+                // Switch branches if we are on the branch we want to delete
+                if (string.Equals(repo.Head.FriendlyName, branchName))
+                {
+                    Commands.Checkout(repo, mainBranch);
+                    CurrentBranch = InitializeMainBranch();
+                }
+
+                // Error being thrown because remote is null?
                 repo.Network.Push(remote, pushRefSpec, pushOptions);
                 OutputToConsole(this, new($"Successfully deleted remote branch: {branchName}"));
 
@@ -791,12 +805,10 @@ namespace BananaGit.Services
                 VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+
                 var remote = repo.Network.Remotes["origin"];
                 if (remote == null)
                     throw new InvalidBranchException("No 'origin' remote configured for this repository!");
-
-                repo.Network.Remotes.Add(branch.Name, _gitInfo?.SavedRepository?.Url);
-                remote = repo.Network.Remotes[branch.Name];
 
                 var localBranchName = string.IsNullOrEmpty(branch.Name)
                     ? repo.Head.FriendlyName
@@ -806,7 +818,7 @@ namespace BananaGit.Services
                 if (localBranch == null)
                     return;
 
-                repo.Branches.Update(
+                localBranch = repo.Branches.Update(
                     localBranch,
                     b => b.Remote = remote.Name,
                     b => b.UpstreamBranch = localBranch.CanonicalName
@@ -837,6 +849,14 @@ namespace BananaGit.Services
             {
                 VerifyPath();
 
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+
+                if (repo.Head.TrackedBranch == null)
+                {
+                    throw new InvalidBranchException(
+                        $"'{repo.Head.FriendlyName}' has no upstream branch configured. Push this branch first, or check out a tracked remote branch.");
+                }
+
                 var options = new PullOptions
                 {
                     FetchOptions = new FetchOptions
@@ -856,7 +876,6 @@ namespace BananaGit.Services
                     }
                 };
 
-                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
                 //Create signature and pull
                 Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
                 var result = Commands.Pull(repo, signature, options);

@@ -2,6 +2,7 @@
     x:Class="BananaGit.Views.DialogueViews.RemoteBranchView"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="clr-namespace:BananaGit.Views.UserControls"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     xmlns:viewmodels="clr-namespace:BananaGit.ViewModels"
@@ -32,7 +33,8 @@
                 ItemsSource="{Binding RemoteBranches}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
+                        <controls:BranchControl DataContext="{Binding}" />
+                        <!--<Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
                             <DockPanel Background="{StaticResource BananaGradient}">
                                 <Button
                                     Width="20"
@@ -57,7 +59,7 @@
                                     Content="-"
                                     Foreground="White" />
                             </DockPanel>
-                        </Border>
+                        </Border>-->
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

@@ -7,9 +7,10 @@ namespace BananaGit.ViewModels;
 
 partial class RemoteBranchViewModel : ObservableObject
 {
-    [ObservableProperty]
-    private ObservableCollection<GitBranch> _remoteBranches = new();
-    
+    [ObservableProperty] private ObservableCollection<GitBranch> _remoteBranches = new();
+
+    [ObservableProperty] private bool _showBranchOptions;
+
     private readonly GitService _gitService;
 
     public RemoteBranchViewModel(GitService gitService)

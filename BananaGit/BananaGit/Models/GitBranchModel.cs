@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using System.Windows;
 using BananaGit.Exceptions;
 using BananaGit.Services;
 using BananaGit.Utilities;
@@ -70,6 +71,14 @@ namespace BananaGit.Models
         [RelayCommand]
         private async Task DeleteLocalBranch()
         {
+            var result = MessageBox.Show(
+                "Are you sure you want to delete this branch locally? The branch will still be remote.",
+                "Confirm Deletion",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.No)
+                return;
+
             try
             {
                 await _gitService.DeleteLocalBranch(Name.GetName());
@@ -87,6 +96,12 @@ namespace BananaGit.Models
         [RelayCommand]
         private async Task DeleteRemoteBranch()
         {
+            var result = MessageBox.Show("Are you sure you want to delete this branch?", "Confirm Deletion",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.No)
+                return;
+
             try
             {
                 await _gitService.DeleteRemoteBranch(Name.GetName());

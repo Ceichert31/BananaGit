@@ -1,0 +1,79 @@
+﻿<!--  A user control used to display remote branches and git actions associated with them (checkout, delete)  -->
+<UserControl
+    x:Class="BananaGit.Views.UserControls.BranchControl"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    d:DesignHeight="40"
+    d:DesignWidth="460"
+    mc:Ignorable="d">
+
+    <Border
+        x:Name="RootBorder"
+        Margin="6,3"
+        Padding="12,8"
+        CornerRadius="4">
+
+        <Border.Style>
+            <Style TargetType="Border">
+                <Setter Property="Background" Value="{StaticResource BananaPrimary}" />
+                <Style.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True">
+                        <Setter Property="Background" Value="{StaticResource BananaAccent}" />
+                    </Trigger>
+                </Style.Triggers>
+            </Style>
+        </Border.Style>
+
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <TextBlock
+                Grid.Column="0"
+                VerticalAlignment="Center"
+                FontSize="13"
+                Foreground="Black"
+                Text="{Binding Name}" />
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <StackPanel.Style>
+                    <Style TargetType="StackPanel">
+                        <Setter Property="Visibility" Value="Collapsed" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsMouseOver, ElementName=RootBorder}" Value="True">
+                                <Setter Property="Visibility" Value="Visible" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </StackPanel.Style>
+
+                <Button
+                    Margin="4,0,0,0"
+                    Background="{StaticResource BananaAccent}"
+                    Command="{Binding CheckoutBranchCommand}"
+                    Content="Checkout"
+                    FontSize="10"
+                    Style="{StaticResource GenericButton}" />
+                <Button
+                    Margin="4,0,0,0"
+                    Background="IndianRed"
+                    Command="{Binding DeleteLocalBranchCommand}"
+                    Content="Delete Local"
+                    FontSize="10"
+                    Style="{StaticResource GenericButton}" />
+                <Button
+                    Margin="4,0,0,0"
+                    Background="DarkRed"
+                    Command="{Binding DeleteRemoteBranchCommand}"
+                    Content="Delete Remote"
+                    FontSize="10"
+                    Foreground="White"
+                    Style="{StaticResource GenericButton}" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</UserControl>
