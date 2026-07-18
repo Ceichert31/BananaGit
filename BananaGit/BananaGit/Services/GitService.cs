@@ -310,7 +310,8 @@ namespace BananaGit.Services
             }
             catch (RepoLocationException)
             {
-                Trace.WriteLine("Repository location is missing!");
+                OutputToConsole(this,
+                    new MessageEventArgs("No repository found! Please open or clone a local repository to continue."));
                 return new();
             }
 
@@ -602,14 +603,10 @@ namespace BananaGit.Services
         /// <exception cref="RepoLocationException"></exception>
         private void VerifyPath()
         {
-            if (string.IsNullOrEmpty(_gitInfo?.GetPath()))
+            if (string.IsNullOrEmpty(_gitInfo?.GetPath()) || !Directory.Exists(_gitInfo?.GetPath()))
             {
-                throw new RepoLocationException("Local repository file path is empty!");
-            }
-
-            if (!Directory.Exists(_gitInfo?.SavedRepository?.FilePath))
-            {
-                throw new RepoLocationException("Local repository file path is missing!");
+                throw new RepoLocationException(
+                    "Local repository file path is missing. Please clone or open a local repository before performing git operations.");
             }
         }
 
@@ -673,7 +670,16 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                VerifyPath();
+                try
+                {
+                    VerifyPath();
+                }
+                catch (RepoLocationException ex)
+                {
+                    OutputToConsole(this,
+                        new(
+                            ex.Message));
+                }
 
                 using var repo = new Repository(_gitInfo?.GetPath());
 
@@ -690,7 +696,16 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                VerifyPath();
+                try
+                {
+                    VerifyPath();
+                }
+                catch (RepoLocationException ex)
+                {
+                    OutputToConsole(this,
+                        new(
+                            ex.Message));
+                }
 
                 using var repo = new Repository(_gitInfo?.GetPath());
                 //Get status and return if no changes have been made
@@ -715,7 +730,16 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                VerifyPath();
+                try
+                {
+                    VerifyPath();
+                }
+                catch (RepoLocationException ex)
+                {
+                    OutputToConsole(this,
+                        new(
+                            ex.Message));
+                }
 
                 using var repo = new Repository(_gitInfo?.GetPath());
                 //Get status and return if no changes have been made

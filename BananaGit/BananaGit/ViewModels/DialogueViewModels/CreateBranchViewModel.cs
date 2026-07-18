@@ -30,7 +30,15 @@ partial class CreateBranchViewModel : ObservableObject
         _gitService = gitService;
         _dialogService = dialogService;
         gitService.OnChangesPulled += OnChangesPulled;
-        LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranches());
+
+        try
+        {
+            LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranches());
+        }
+        catch (RepoLocationException)
+        {
+            LocalBranches = null;
+        }
     }
 
     /// <summary>

@@ -12,16 +12,19 @@ namespace BananaGit.Services
     /// that is currently being used by the main window </param>
     class DialogService
     {
-        private readonly RemoteBranchViewModel _remoteBranchViewModel;
-        private readonly CloneRepoViewModel _cloneRepoViewModel;
-        private readonly DiscardChangesViewModel _discardChangesViewModel;
-        private readonly CreateBranchViewModel _createBranchViewModel;
+        private readonly RemoteBranchViewModel? _remoteBranchViewModel;
+        private readonly CloneRepoViewModel? _cloneRepoViewModel;
+        private readonly DiscardChangesViewModel? _discardChangesViewModel;
+        private readonly CreateBranchViewModel? _createBranchViewModel;
 
         private CreateBranchView? _createBranchView;
         private DiscardChangesConfirmationView? _discardChangesView;
 
-        public DialogService(GitService gitService)
+        public DialogService(GitService? gitService)
         {
+            if (gitService == null)
+                return;
+
             _remoteBranchViewModel = new RemoteBranchViewModel(gitService);
             _cloneRepoViewModel = new CloneRepoViewModel(gitService);
             _discardChangesViewModel = new DiscardChangesViewModel(gitService, this);

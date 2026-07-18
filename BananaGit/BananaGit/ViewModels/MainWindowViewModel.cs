@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using BananaGit.Exceptions;
 using BananaGit.Models;
 using BananaGit.Services;
 using BananaGit.Utilities;
@@ -52,13 +53,30 @@ namespace BananaGit.ViewModels
                 Trace.WriteLine("No locally saved user info.");
 
                 //Create empty dialog and git service for log in window creation
-                DialogService tempDialogService = new DialogService(new GitService(new GitInfoModel()));
+                DialogService tempDialogService = new DialogService(null);
                 tempDialogService.ShowCredentialsDialog();
                 return;
             }
 
-            var gitService = new GitService(_userInfo);
-            var dialogService = new DialogService(gitService);
+            GitService? gitService = null;
+            DialogService? dialogService = null;
+
+            try
+            {
+                gitService = new GitService(_userInfo);
+                dialogService = new DialogService(gitService);
+            }
+            catch (RepoLocationException)
+            {
+                GitService.OutputToConsole(this, new("No repository cloned"));
+            }
+
+            if (gitService == null || dialogService == null)
+            {
+                GitService.OutputToConsole(this, new("Something went wrong while initializing BananaGit!"));
+                return;
+            }
+
 
             //Create view models
             ToolbarViewModel = new ToolbarViewModel(dialogService, gitService);
