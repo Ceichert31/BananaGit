@@ -1,3 +1,18 @@
+# [1.5.0](https://github.com/Ceichert31/BananaGit/compare/v1.4.1...v1.5.0) (2026-07-18)
+
+
+### Bug Fixes
+
+* **branchmodel:** Bug where git service was being serialized ([b30e08d](https://github.com/Ceichert31/BananaGit/commit/b30e08ddd226205caae12dea033a0e68dff694c2))
+* Filtering branch remote name to just the name ([b30b74c](https://github.com/Ceichert31/BananaGit/commit/b30b74caff8efab53b234165b71d81856103f855))
+* **startup:** Fixed a bug where last open branch wouldn't load on startup ([4c7e95e](https://github.com/Ceichert31/BananaGit/commit/4c7e95ef94038fdd0d393066b7079bd98f674296))
+
+
+### Features
+
+* **gitbranch:** Created new method wrappers for branch deletion ([16b392a](https://github.com/Ceichert31/BananaGit/commit/16b392a566dd8c60631397a030ee5b37f12c061e))
+* **gitservice:** Created remote and local branch deletion methods ([72e91b5](https://github.com/Ceichert31/BananaGit/commit/72e91b5d7153fac0afa3c72fa124d7fb635f8153))
+
 ## [1.4.1](https://github.com/Ceichert31/BananaGit/compare/v1.4.0...v1.4.1) (2026-07-10)
 
 
