@@ -1,6 +1,7 @@
-﻿using System.Diagnostics;
-using System.IO;
+﻿using System.Text.Json.Serialization;
+using System.Windows;
 using BananaGit.Exceptions;
+using BananaGit.Services;
 using BananaGit.Utilities;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -14,128 +15,101 @@ namespace BananaGit.Models
         public string CanonicalName { get; set; }
         public bool IsRemote { get; set; }
 
+        [JsonIgnore] private GitService _gitService;
+
+        /// <summary>
+        /// Empty constructor used to serialize JSON
+        /// </summary>
+        /// <remarks>
+        /// If you need to initialize a branch, use <see cref="GitService"/>
+        /// </remarks>
         public GitBranch()
         {
+            _gitService = new GitService(null);
             Name = "";
             CanonicalName = "";
         }
-        
+
         /// <summary>
-        /// Default constructor creates branch from HEAD
+        /// Attaches the <see cref="GitService"/> to the branch after it is loaded from file
         /// </summary>
-        /// <exception cref="RepoLocationException"> The repository saved no longer exists at that location </exception>
-        /// <exception cref="LoadDataException"> Thrown if the user info is missing or can't be loaded </exception>
-        /// <exception cref="GitException"> 
-        /// An overarching git exception, if thrown something 
-        /// relating to git operations or repositories has gone wrong 
-        /// </exception>
-        public GitBranch(GitInfoModel? gitInfo)
-        {
-            //Check user info has loaded
-            if (gitInfo == null)
-            {
-                throw new LoadDataException("Couldn't load user info");
-            }
-
-            //Check if saved repository exists
-            if (gitInfo.SavedRepository == null)
-            {
-                throw new InvalidRepoException("No saved repository after loading!");
-            }
-
-            //Check if repo location exists
-            if (!Directory.Exists(gitInfo.SavedRepository?.FilePath))
-            {
-                throw new RepoLocationException("Local repository file location missing!");
-            }
-
-            //Check if file path is still valid
-            if (!Repository.IsValid(gitInfo.SavedRepository?.FilePath))
-            {
-                throw new InvalidRepoException("Saved file path is an invalid repo");
-            }
-
-            //Setup credentials for accessing remote branch info
-            var options = new FetchOptions();
-            options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
-            {
-                Username = gitInfo.Username,
-                Password = gitInfo.PersonalToken
-            };
-
-            //Get the name of the HEAD branch
-            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(gitInfo.GetUrl());
-
-            if (branchName == null)
-            {
-                throw new InvalidRepoException("Couldn't find default branch name");
-            }
-            
-            //Update branch info
-            using var repo = new Repository(gitInfo.SavedRepository?.FilePath);
-            
-            var branch = repo.Branches[branchName];
-            
-            Commands.Checkout(repo, branch);
-            
-            Name = branch.FriendlyName;
-            IsRemote = branch.IsRemote;
-            CanonicalName = branch.CanonicalName;
-        }
+        /// <param name="gitService"></param>
+        public void AttachService(GitService gitService) => _gitService = gitService;
 
         /// <summary>
         /// Caches a branch into a model
         /// </summary>
         /// <param name="branch">The branch to cache</param>
-        public GitBranch(Branch branch)
+        /// <param name="gitService">The Git Service that handles Git operations</param>
+        public GitBranch(Branch branch, GitService gitService)
         {
+            _gitService = gitService;
             Name = branch.FriendlyName;
             IsRemote = branch.IsRemote;
             CanonicalName = branch.CanonicalName;
         }
 
+        /// <summary>
+        /// Checks out a remote branch through the <see cref="GitService"/>
+        /// </summary>
         [RelayCommand]
-        private void CheckoutBranch()
+        private async Task CheckoutBranch()
         {
-            if (!IsRemote) return;
+            try
+            {
+                await _gitService.CheckoutRemoteBranch(this);
+            }
+            catch (InvalidRepoException ex)
+            {
+                GitService.OutputToConsole(this, new(ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// Deletes this branch locally through the <see cref="GitService"/>
+        /// </summary>
+        [RelayCommand]
+        private async Task DeleteLocalBranch()
+        {
+            var result = MessageBox.Show(
+                "Are you sure you want to delete this branch locally? The branch will still be remote.",
+                "Confirm Deletion",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.No)
+                return;
 
             try
             {
-                GitInfoModel? gitInfo = new();
-                JsonDataManager.LoadUserInfo(ref gitInfo);
-
-                if (gitInfo != null)
-                {
-                    using var repo = new Repository(gitInfo.GetPath());
-
-                    var options = new FetchOptions();
-
-                    options.CredentialsProvider = (_url, _user, _cred) => new UsernamePasswordCredentials
-                    {
-                        Username = gitInfo.Username,
-                        Password = gitInfo.PersonalToken
-                    };
-                    
-                    //Fetch latest
-                    Commands.Fetch(repo, "origin", Array.Empty<string>(), options, "");
-                    
-                    var remoteBranch = repo.Branches[CanonicalName] ?? throw new NullReferenceException("No remote branch accessed from saved branch data");
-
-                    string localName = Name.Replace("origin/", "");
-                    
-                    //Create a local tracking branch
-                    Branch localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
-                    
-                    //Update local branch
-                    repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = CanonicalName);
-                    
-                    //Checkout branch
-                    Commands.Checkout(repo, localTrackingBranch);
-                }
+                await _gitService.DeleteLocalBranch(Name.GetName());
+                await _gitService.PullChanges();
             }
-            catch (Exception ex)
+            catch (InvalidRepoException ex)
             {
-                Trace.WriteLine(ex.Message);
+                GitService.OutputToConsole(this, new(ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// Deletes this branch on the remote through the <see cref="GitService"/>
+        /// </summary>
+        [RelayCommand]
+        private async Task DeleteRemoteBranch()
+        {
+            var result = MessageBox.Show("Are you sure you want to delete this branch?", "Confirm Deletion",
+                MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.No)
+                return;
+
+            try
+            {
+                await _gitService.DeleteRemoteBranch(Name.GetName());
+                await _gitService.PullChanges();
+            }
+            catch (InvalidRepoException ex)
+            {
+                GitService.OutputToConsole(this, new(ex.Message));
             }
         }
     }

@@ -1,14 +1,13 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Windows;
 using BananaGit.EventArgExtensions;
 using BananaGit.Exceptions;
 using BananaGit.Models;
 using BananaGit.Utilities;
 using LibGit2Sharp;
-using LibGit2Sharp.Handlers;
 using Microsoft.Win32;
-using Version = System.Version;
 
 namespace BananaGit.Services
 {
@@ -42,6 +41,9 @@ namespace BananaGit.Services
         {
             _gitInfo = gitInfo;
             JsonDataManager.OnUserInfoChanged += OnUserDataChange;
+
+            // Attach this service to the current branch after its been loaded
+            _gitInfo?.CurrentBranch?.AttachService(this);
         }
 
         /// <summary>
@@ -52,6 +54,7 @@ namespace BananaGit.Services
         private void OnUserDataChange(object? sender, EventArgs e)
         {
             JsonDataManager.LoadUserInfo(ref _gitInfo);
+            _gitInfo?.CurrentBranch?.AttachService(this);
         }
 
         /// <summary>
@@ -61,16 +64,19 @@ namespace BananaGit.Services
         /// <param name="e">The message</param>
         public static void OutputToConsole(object? sender, MessageEventArgs e)
         {
-            if (sender == null)
+            Application.Current.Dispatcher.Invoke(() =>
             {
-                Trace.WriteLine($"Unknown origin: {e.Message}");
-                return;
-            }
+                if (sender == null)
+                {
+                    Trace.WriteLine($"Unknown origin: {e.Message}");
+                    return;
+                }
 
-            Trace.WriteLine($"{sender.GetType().ToString().Split('.').Last()}: {e.Message}");
+                Trace.WriteLine($"{sender.GetType().ToString().Split('.').Last()}: {e.Message}");
+            });
         }
 
-        #region Getters
+        #region Repository Status Methods
 
         /// <summary>
         /// Checks whether a local repository is currently open
@@ -107,125 +113,9 @@ namespace BananaGit.Services
             return localCommits.Any();
         }
 
-        #region Branch Getters
-
-        /// <summary>
-        /// Verifies repository path and returns a list of local branches
-        /// </summary>
-        /// <returns>A list of local branches</returns>
-        public List<GitBranch> GetLocalBranches()
-        {
-            VerifyPath();
-
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            List<GitBranch> localBranches = new();
-
-            foreach (var branch in repo.Branches)
-            {
-                if (branch.IsRemote)
-                {
-                    continue;
-                }
-
-                localBranches.Add(new GitBranch(branch));
-            }
-
-            return localBranches;
-        }
-
-        /// <summary>
-        /// Verifies repository path and returns a list of remote branches
-        /// </summary>
-        /// <returns>A list of remote branches</returns>
-        public List<GitBranch> GetRemoteBranches()
-        {
-            try
-            {
-                VerifyPath();
-            }
-            catch (RepoLocationException)
-            {
-                Trace.WriteLine("Repository location is missing!");
-                return new();
-            }
-
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            List<GitBranch> remoteBranches = new();
-
-            foreach (var branch in repo.Branches)
-            {
-                if (!branch.IsRemote)
-                {
-                    continue;
-                }
-
-                remoteBranches.Add(new GitBranch(branch));
-            }
-
-            return remoteBranches;
-        }
-
         #endregion
 
-        /// <summary>
-        /// Creates a new branch and pushes it to the remote repository
-        /// </summary>
-        /// <param name="origin"></param>
-        /// <param name="branchName"></param>
-        /// <exception cref="InvalidOperationException"></exception>
-        public async Task CreateBranchAsync(GitBranch origin, string branchName)
-        {
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            Branch originBranch = repo.Branches[origin.Name] ??
-                                  throw new InvalidOperationException($"Failed to find {origin.Name} branch");
-
-            // Create new branch off of origin branch
-            Branch newBranch = repo.CreateBranch(branchName, originBranch.Tip);
-
-            // Checkout the new branch right after creation
-            Commands.Checkout(repo, newBranch);
-
-            await PushBranchAsync(branchName);
-        }
-
-        /// <summary>
-        /// Finds a branch by name and pushes it to the remote repository
-        /// </summary>
-        /// <param name="branchName">Name of the target branch</param>
-        /// <exception cref="InvalidOperationException"></exception>
-        private async Task PushBranchAsync(string branchName)
-        {
-            // Push new local branch to the remote
-
-            // Get credentials/push options
-
-            await Task.Run(() =>
-            {
-                using var repo = new Repository(_gitInfo?.GetPath());
-
-                var branch = repo.Branches[branchName] ??
-                             throw new InvalidOperationException($"Failed to find {branchName} branch");
-
-                Remote remote = repo.Network.Remotes[Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl())];
-
-                var pushOptions = new PushOptions
-                {
-                    CredentialsProvider = (_url, _user, _cred) =>
-                        new UsernamePasswordCredentials
-                        {
-                            Username = _gitInfo?.PersonalToken,
-                            Password = _gitInfo?.PersonalToken
-                        }
-                };
-
-                repo.Branches.Update(branch, x => x.Remote = remote.Name, x => x.UpstreamBranch = branch.CanonicalName);
-
-                repo.Network.Push(branch, pushOptions);
-            });
-        }
+        #region Repository Query Methods
 
         /// <summary>
         /// Checks if the repository is accessible, and gets the repository name
@@ -260,14 +150,16 @@ namespace BananaGit.Services
             using var repo = new Repository(_gitInfo?.GetPath());
 
             if (_gitInfo?.CurrentBranch == null)
+            {
                 if (_gitInfo != null)
                 {
-                    _gitInfo.CurrentBranch = new GitBranch();
+                    _gitInfo.CurrentBranch = InitializeMainBranch();
                 }
                 else
                 {
                     JsonDataManager.LoadUserInfo(ref _gitInfo);
                 }
+            }
 
             var commits = repo.Branches[_gitInfo?.CurrentBranch?.CanonicalName].Commits.ToList();
 
@@ -377,6 +269,283 @@ namespace BananaGit.Services
 
         #endregion
 
+        #region Branch Methods
+
+        #region Branch Getters
+
+        /// <summary>
+        /// Verifies repository path and returns a list of local branches
+        /// </summary>
+        /// <returns>A list of local branches</returns>
+        public List<GitBranch> GetLocalBranches()
+        {
+            VerifyPath();
+
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            List<GitBranch> localBranches = new();
+
+            foreach (var branch in repo.Branches)
+            {
+                if (branch.IsRemote)
+                {
+                    continue;
+                }
+
+                localBranches.Add(new GitBranch(branch, this));
+            }
+
+            return localBranches;
+        }
+
+        /// <summary>
+        /// Verifies repository path and returns a list of remote branches
+        /// </summary>
+        /// <returns>A list of remote branches</returns>
+        public List<GitBranch> GetRemoteBranches()
+        {
+            try
+            {
+                VerifyPath();
+            }
+            catch (RepoLocationException)
+            {
+                Trace.WriteLine("Repository location is missing!");
+                return new();
+            }
+
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            List<GitBranch> remoteBranches = new();
+
+            foreach (var branch in repo.Branches)
+            {
+                if (!branch.IsRemote)
+                {
+                    continue;
+                }
+
+                remoteBranches.Add(new GitBranch(branch, this));
+            }
+
+            return remoteBranches;
+        }
+
+        #endregion
+
+
+        /// <summary>
+        /// Initializes the default main branch
+        /// </summary>
+        /// <returns>The main branch as a GitBranch model</returns>
+        /// <exception cref="InvalidRepoException">Thrown if default branch can't be found</exception>
+        private GitBranch InitializeMainBranch()
+        {
+            //Get the name of the HEAD branch
+            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+
+            if (branchName == null)
+            {
+                throw new InvalidRepoException("Couldn't find default branch name");
+            }
+
+            //Update branch info
+            using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+
+            var branch = repo.Branches[branchName];
+
+            Commands.Checkout(repo, branch);
+
+            return new GitBranch(branch, this);
+        }
+
+        /// <summary>
+        /// Creates a new branch and pushes it to the remote repository
+        /// </summary>
+        /// <param name="origin"></param>
+        /// <param name="branchName"></param>
+        /// <exception cref="InvalidOperationException"></exception>
+        public async Task CreateBranchAsync(GitBranch origin, string branchName)
+        {
+            using var repo = new Repository(_gitInfo?.GetPath());
+
+            Branch originBranch = repo.Branches[origin.Name] ??
+                                  throw new InvalidOperationException($"Failed to find {origin.Name} branch");
+
+            // Create new branch off of origin branch
+            Branch newBranch = repo.CreateBranch(branchName, originBranch.Tip);
+
+            // Set tracking
+            if (originBranch.IsRemote)
+            {
+                newBranch = repo.Branches.Update(newBranch, b => b.TrackedBranch = originBranch.CanonicalName);
+            }
+
+            // Checkout the new branch right after creation
+            Commands.Checkout(repo, newBranch);
+
+            await PushBranchAsync(branchName);
+        }
+
+        /// <summary>
+        /// Finds a branch by name and pushes it to the remote repository
+        /// </summary>
+        /// <param name="branchName">Name of the target branch</param>
+        /// <exception cref="InvalidOperationException"></exception>
+        private async Task PushBranchAsync(string branchName)
+        {
+            // Push new local branch to the remote
+
+            // Get credentials/push options
+
+            await Task.Run(() =>
+            {
+                using var repo = new Repository(_gitInfo?.GetPath());
+
+                var branch = repo.Branches[branchName] ??
+                             throw new InvalidOperationException($"Failed to find {branchName} branch");
+
+                Remote remote = repo.Network.Remotes["origin"];
+
+                var pushOptions = new PushOptions
+                {
+                    CredentialsProvider = (_, _, _) =>
+                        new UsernamePasswordCredentials
+                        {
+                            Username = _gitInfo?.PersonalToken,
+                            Password = _gitInfo?.PersonalToken
+                        }
+                };
+
+                repo.Branches.Update(branch, x => x.Remote = remote.Name, x => x.UpstreamBranch = branch.CanonicalName);
+
+                repo.Network.Push(branch, pushOptions);
+            });
+        }
+
+        /// <summary>
+        /// Checks out a remote branch locally
+        /// </summary>
+        /// <param name="branch">The branch to check out </param>
+        /// <exception cref="InvalidBranchException">Thrown if remote can't be found</exception>
+        public async Task CheckoutRemoteBranch(GitBranch branch)
+        {
+            await Task.Run(() =>
+            {
+                if (!branch.IsRemote) return;
+
+                using var repo = new Repository(_gitInfo?.GetPath());
+
+                var options = new FetchOptions
+                {
+                    CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials
+                    {
+                        Username = _gitInfo?.Username,
+                        Password = _gitInfo?.PersonalToken
+                    }
+                };
+
+                //Fetch latest
+                Commands.Fetch(repo, "origin", Array.Empty<string>(), options, "");
+
+                var remoteBranch = repo.Branches[branch.CanonicalName] ??
+                                   throw new InvalidBranchException(
+                                       $"Couldn't find branch: {branch.Name}");
+
+                string localName = branch.Name.Replace("origin/", "");
+
+                //Create a local tracking branch
+                Branch localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
+
+                //Update local branch
+                repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = branch.CanonicalName);
+
+                //Checkout branch
+                Commands.Checkout(repo, localTrackingBranch);
+            });
+        }
+
+        /// <summary>
+        /// Deletes a specified local branch, remote branch remains untouched
+        /// </summary>
+        /// <param name="branchName">The friendly name of the branch</param>
+        public async Task DeleteLocalBranch(string branchName)
+        {
+            await Task.Run(() =>
+            {
+                using var repo = new Repository(_gitInfo?.GetPath());
+
+                // Switch branches if we are on the branch we want to delete
+                if (string.Equals(repo.Head.FriendlyName, branchName))
+                {
+                    var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+
+                    if (mainBranch == null)
+                        throw new InvalidBranchException($"Failed to find default branch");
+
+                    Commands.Checkout(repo, mainBranch);
+                }
+
+                // Local branch deletion
+                if (repo.Branches[branchName] == null) return;
+
+                repo.Branches.Remove(branchName);
+                OutputToConsole(this, new($"Successfully deleted local branch: {branchName}"));
+            });
+        }
+
+        /// <summary>
+        /// Deletes a specified remote branch, cleans up any associated local branches
+        /// </summary>
+        /// <param name="branchName">The branch to delete</param>
+        /// <exception cref="InvalidBranchException">Thrown if the default branch (ex. main) can't be found</exception>
+        public async Task DeleteRemoteBranch(string branchName)
+        {
+            await Task.Run(() =>
+            {
+                using var repo = new Repository(_gitInfo?.GetPath());
+
+                var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+
+                if (mainBranch == null)
+                    throw new InvalidBranchException($"Failed to find default branch");
+
+                var remote = repo.Network.Remotes["origin"];
+
+                // Command to delete remote
+                string pushRefSpec = $":refs/heads/{branchName.GetName()}";
+
+                // Setup credentials to push changes
+                PushOptions pushOptions = new()
+                {
+                    CredentialsProvider = (_, _, _) => new UsernamePasswordCredentials()
+                    {
+                        Username = _gitInfo?.PersonalToken,
+                        Password = _gitInfo?.PersonalToken,
+                    }
+                };
+
+                // Switch branches if we are on the branch we want to delete
+                if (string.Equals(repo.Head.FriendlyName, branchName))
+                {
+                    Commands.Checkout(repo, mainBranch);
+                    CurrentBranch = InitializeMainBranch();
+                }
+
+                // Error being thrown because remote is null?
+                repo.Network.Push(remote, pushRefSpec, pushOptions);
+                OutputToConsole(this, new($"Successfully deleted remote branch: {branchName}"));
+
+                // Cleanup local branch if it exists
+                if (repo.Branches[$"origin/{branchName}"] == null) return;
+
+                repo.Branches.Remove($"origin/{branchName}");
+                OutputToConsole(this, new($"Successfully deleted local branch: {branchName}"));
+            });
+        }
+
+        #endregion
+
         #region Helper Methods
 
         /// <summary>
@@ -420,7 +589,7 @@ namespace BananaGit.Services
             {
                 using var repo = new Repository(_gitInfo?.GetPath());
 
-                repo.CheckoutPaths("HEAD", new[] { filePath }, new CheckoutOptions
+                repo.CheckoutPaths("HEAD", [filePath], new CheckoutOptions
                 {
                     CheckoutModifiers = CheckoutModifiers.Force
                 });
@@ -455,7 +624,7 @@ namespace BananaGit.Services
 
             try
             {
-                CurrentBranch = new GitBranch(_gitInfo);
+                CurrentBranch = InitializeMainBranch();
             }
             catch (LoadDataException ex)
             {
@@ -612,14 +781,12 @@ namespace BananaGit.Services
             {
                 VerifyPath();
 
-                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
-                {
-                    var status = repo.RetrieveStatus();
-                    if (!status.IsDirty)
-                        return;
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+                var status = repo.RetrieveStatus();
+                if (!status.IsDirty)
+                    return;
 
-                    Commands.Unstage(repo, fileToUnstage.FilePath);
-                }
+                Commands.Unstage(repo, fileToUnstage.FilePath);
             });
         }
 
@@ -637,63 +804,37 @@ namespace BananaGit.Services
             {
                 VerifyPath();
 
-                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+
+                var remote = repo.Network.Remotes["origin"];
+                if (remote == null)
+                    throw new InvalidBranchException("No 'origin' remote configured for this repository!");
+
+                var localBranchName = string.IsNullOrEmpty(branch.Name)
+                    ? repo.Head.FriendlyName
+                    : branch.Name;
+                var localBranch = repo.Branches[localBranchName];
+
+                if (localBranch == null)
+                    return;
+
+                localBranch = repo.Branches.Update(
+                    localBranch,
+                    b => b.Remote = remote.Name,
+                    b => b.UpstreamBranch = localBranch.CanonicalName
+                );
+
+                var pushOptions = new PushOptions
                 {
-                    var remote = repo.Network.Remotes[branch.Name];
-                    if (remote != null)
-                    {
-                        repo.Network.Remotes.Remove(branch.Name);
-                    }
+                    CredentialsProvider = (_, _, _) =>
+                        new UsernamePasswordCredentials
+                        {
+                            Username = _gitInfo?.PersonalToken,
+                            Password = _gitInfo?.PersonalToken,
+                        },
+                };
 
-                    repo.Network.Remotes.Add(branch.Name, _gitInfo?.SavedRepository?.Url);
-                    remote = repo.Network.Remotes[branch.Name];
-
-                    if (remote == null)
-                        throw new InvalidBranchException(
-                            "Invalid branch inputted! Cannot push files!"
-                        );
-
-                    //User credentials
-                    FetchOptions options = new FetchOptions
-                    {
-                        CredentialsProvider = (url, username, types) =>
-                            new UsernamePasswordCredentials
-                            {
-                                Username = _gitInfo?.PersonalToken,
-                                Password = _gitInfo?.PersonalToken,
-                            },
-                    };
-
-                    var refSpecs = remote.FetchRefSpecs.Select(x => x.Specification);
-                    Commands.Fetch(repo, remote.Name, refSpecs, options, string.Empty);
-
-                    var localBranchName = string.IsNullOrEmpty(branch.Name)
-                        ? repo.Head.FriendlyName
-                        : branch.Name;
-                    var localBranch = repo.Branches[localBranchName];
-
-                    if (localBranch == null)
-                        return;
-
-                    repo.Branches.Update(
-                        localBranch,
-                        b => b.Remote = remote.Name,
-                        b => b.UpstreamBranch = localBranch.CanonicalName
-                    );
-
-                    var pushOptions = new PushOptions
-                    {
-                        CredentialsProvider = (url, username, types) =>
-                            new UsernamePasswordCredentials
-                            {
-                                Username = _gitInfo?.PersonalToken,
-                                Password = _gitInfo?.PersonalToken,
-                            },
-                    };
-
-                    //Need to try catch to prevent crashing bc of no access
-                    repo.Network.Push(localBranch, pushOptions);
-                }
+                repo.Network.Push(localBranch, pushOptions);
             });
         }
 
@@ -701,7 +842,6 @@ namespace BananaGit.Services
         /// Pulls changes from the selected branch
         /// and updates the local repository
         /// </summary>
-        /// <param name="branch">The branch changes will be pulled from</param>
         /// <returns></returns>
         private async Task<MergeStatus> PullFilesAsync()
         {
@@ -709,43 +849,46 @@ namespace BananaGit.Services
             {
                 VerifyPath();
 
+                using var repo = new Repository(_gitInfo?.SavedRepository?.FilePath);
+
+                if (repo.Head.TrackedBranch == null)
+                {
+                    throw new InvalidBranchException(
+                        $"'{repo.Head.FriendlyName}' has no upstream branch configured. Push this branch first, or check out a tracked remote branch.");
+                }
+
                 var options = new PullOptions
                 {
                     FetchOptions = new FetchOptions
                     {
-                        CredentialsProvider = new CredentialsHandler((url, username, types) =>
+                        CredentialsProvider = (_, _, _) =>
                             new UsernamePasswordCredentials
                             {
                                 Username = _gitInfo?.PersonalToken,
                                 Password = _gitInfo?.PersonalToken,
-                            }
-                        ),
+                            },
                     },
-                };
-
-                options.MergeOptions = new MergeOptions
-                {
-                    FastForwardStrategy = FastForwardStrategy.Default,
-                    OnCheckoutNotify = new CheckoutNotifyHandler(ShowConflict),
-                    CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict,
-                };
-
-                using (var repo = new Repository(_gitInfo?.SavedRepository?.FilePath))
-                {
-                    //Create signature and pull
-                    Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
-                    var result = Commands.Pull(repo, signature, options);
-
-                    switch (result.Status)
+                    MergeOptions = new MergeOptions
                     {
-                        //Check for merge conflicts
-                        case MergeStatus.Conflicts:
-                            //Display in front end eventually
-                            return "Conflict detected";
-                        case MergeStatus.UpToDate:
-                            //Display in front end eventually
-                            return "Up to date";
+                        FastForwardStrategy = FastForwardStrategy.Default,
+                        OnCheckoutNotify = ShowConflict,
+                        CheckoutNotifyFlags = CheckoutNotifyFlags.Conflict,
                     }
+                };
+
+                //Create signature and pull
+                Signature signature = repo.Config.BuildSignature(DateTimeOffset.Now);
+                var result = Commands.Pull(repo, signature, options);
+
+                switch (result.Status)
+                {
+                    //Check for merge conflicts
+                    case MergeStatus.Conflicts:
+                        //Display in front end eventually
+                        return "Conflict detected";
+                    case MergeStatus.UpToDate:
+                        //Display in front end eventually
+                        return "Up to date";
                 }
 
                 return "Pulled Successfully";
@@ -824,20 +967,20 @@ namespace BananaGit.Services
                     //Check for merge conflicts
                     case MergeStatus.Conflicts:
                         //Display in front end eventually
-                        Trace.WriteLine("Conflict detected");
+                        OutputToConsole(this, new("Conflict detected"));
                         return;
                     case MergeStatus.UpToDate:
                         //Display in front end eventually
-                        Trace.WriteLine("Up to date");
+                        OutputToConsole(this, new("Up to date"));
                         return;
                     case MergeStatus.FastForward:
-                        Trace.WriteLine("Fast Forward");
+                        OutputToConsole(this, new("Fast forward"));
                         break;
                     case MergeStatus.NonFastForward:
-                        Trace.WriteLine("Non-Fast Forward");
+                        OutputToConsole(this, new("Non-fast forward"));
                         break;
                     default:
-                        Trace.WriteLine("Pulled Successfully");
+                        OutputToConsole(this, new("Pulled successfully"));
                         break;
                 }
             }
@@ -863,8 +1006,6 @@ namespace BananaGit.Services
         {
             //Open dialog, choose path, check path validity, if path is valid save to user info, if not give message
 
-            string selectedFilePath = "";
-
             //Open file select dialogue
             OpenFolderDialog dialog = new OpenFolderDialog
             {
@@ -875,7 +1016,7 @@ namespace BananaGit.Services
             //If dialog closes, check result
             if (dialog.ShowDialog() != true) return new Tuple<string, bool>("", false);
 
-            selectedFilePath = dialog.FolderName;
+            var selectedFilePath = dialog.FolderName;
 
             try
             {

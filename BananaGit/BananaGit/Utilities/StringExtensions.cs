@@ -2,7 +2,7 @@
 
 namespace BananaGit.Utilities
 {
-    public static class StringExceptions
+    public static class StringExtensions
     {
         public static string GetName(this string filePath)
         {
