@@ -1,3 +1,11 @@
+## [1.5.1](https://github.com/Ceichert31/BananaGit/compare/v1.5.0...v1.5.1) (2026-07-21)
+
+
+### Bug Fixes
+
+* **git-service:** Repository valid method not checking local repo file location ([a050c61](https://github.com/Ceichert31/BananaGit/commit/a050c61e086b95f7193bbd62047aeca631077aa6))
+* **repo-location:** Repo location exception not being caught ([527880d](https://github.com/Ceichert31/BananaGit/commit/527880ddfd6aaf47b0abd88a3f26c94d090ee132))
+
 # [1.5.0](https://github.com/Ceichert31/BananaGit/compare/v1.4.1...v1.5.0) (2026-07-18)
 
 
