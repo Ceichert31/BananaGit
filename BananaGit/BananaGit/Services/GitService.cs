@@ -84,7 +84,7 @@ namespace BananaGit.Services
         /// <returns></returns>
         public bool IsLocalRepositoryOpen()
         {
-            return !string.IsNullOrEmpty(_gitInfo?.GetPath());
+            return !string.IsNullOrEmpty(_gitInfo?.GetPath()) && Repository.IsValid(_gitInfo?.GetPath());
         }
 
         /// <summary>

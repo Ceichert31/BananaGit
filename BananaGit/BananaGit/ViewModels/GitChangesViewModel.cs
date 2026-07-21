@@ -18,12 +18,12 @@ partial class GitChangesViewModel : ObservableObject
     [ObservableProperty] private ObservableCollection<ChangedFile> _stagedChanges = [];
 
     private readonly GitService _gitService;
-    private readonly DialogService _dialogService;
+    private readonly GitDialogService _dialogService;
     private readonly DispatcherTimer _updateGitInfoTimer = new();
 
     private const float UpdateGitInfoInterval = 1000f;
 
-    public GitChangesViewModel(GitService gitService, DialogService dialogService)
+    public GitChangesViewModel(GitService gitService, GitDialogService dialogService)
     {
         _gitService = gitService;
         _dialogService = dialogService;
