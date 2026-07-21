@@ -304,16 +304,7 @@ namespace BananaGit.Services
         /// <returns>A list of remote branches</returns>
         public List<GitBranch> GetRemoteBranches()
         {
-            try
-            {
-                VerifyPath();
-            }
-            catch (RepoLocationException)
-            {
-                OutputToConsole(this,
-                    new MessageEventArgs("No repository found! Please open or clone a local repository to continue."));
-                return new();
-            }
+            VerifyPath();
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
@@ -670,16 +661,7 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                try
-                {
-                    VerifyPath();
-                }
-                catch (RepoLocationException ex)
-                {
-                    OutputToConsole(this,
-                        new(
-                            ex.Message));
-                }
+                VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.GetPath());
 
@@ -696,16 +678,7 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                try
-                {
-                    VerifyPath();
-                }
-                catch (RepoLocationException ex)
-                {
-                    OutputToConsole(this,
-                        new(
-                            ex.Message));
-                }
+                VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.GetPath());
                 //Get status and return if no changes have been made
@@ -730,16 +703,7 @@ namespace BananaGit.Services
         {
             await Task.Run(() =>
             {
-                try
-                {
-                    VerifyPath();
-                }
-                catch (RepoLocationException ex)
-                {
-                    OutputToConsole(this,
-                        new(
-                            ex.Message));
-                }
+                VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.GetPath());
                 //Get status and return if no changes have been made
