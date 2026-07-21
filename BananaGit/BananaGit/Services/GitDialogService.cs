@@ -5,6 +5,10 @@ using BananaGit.Views.DialogueViews;
 
 namespace BananaGit.Services;
 
+/// <summary>
+/// Used to create views and set their view models. This depends on the <see cref="GitService"/> in order to create these dialogs.
+/// </summary>
+/// <remarks>Inherits <see cref="DialogService"/></remarks>
 public class GitDialogService : DialogService
 {
     private readonly GitService _gitService;
