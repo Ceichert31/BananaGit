@@ -84,7 +84,7 @@ namespace BananaGit.Services
         /// <returns></returns>
         public bool IsLocalRepositoryOpen()
         {
-            return !string.IsNullOrEmpty(_gitInfo?.GetPath());
+            return !string.IsNullOrEmpty(_gitInfo?.GetPath()) && Repository.IsValid(_gitInfo?.GetPath());
         }
 
         /// <summary>
@@ -304,15 +304,7 @@ namespace BananaGit.Services
         /// <returns>A list of remote branches</returns>
         public List<GitBranch> GetRemoteBranches()
         {
-            try
-            {
-                VerifyPath();
-            }
-            catch (RepoLocationException)
-            {
-                Trace.WriteLine("Repository location is missing!");
-                return new();
-            }
+            VerifyPath();
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
@@ -602,14 +594,10 @@ namespace BananaGit.Services
         /// <exception cref="RepoLocationException"></exception>
         private void VerifyPath()
         {
-            if (string.IsNullOrEmpty(_gitInfo?.GetPath()))
+            if (string.IsNullOrEmpty(_gitInfo?.GetPath()) || !Directory.Exists(_gitInfo?.GetPath()))
             {
-                throw new RepoLocationException("Local repository file path is empty!");
-            }
-
-            if (!Directory.Exists(_gitInfo?.SavedRepository?.FilePath))
-            {
-                throw new RepoLocationException("Local repository file path is missing!");
+                throw new RepoLocationException(
+                    "Local repository file path is missing. Please clone or open a local repository before performing git operations.");
             }
         }
 

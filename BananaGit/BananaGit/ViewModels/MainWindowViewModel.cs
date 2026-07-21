@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using BananaGit.Exceptions;
 using BananaGit.Models;
 using BananaGit.Services;
 using BananaGit.Utilities;
@@ -17,13 +18,8 @@ namespace BananaGit.ViewModels
 
         [ObservableProperty] private GitChangesViewModel? _gitChangesViewModel;
 
-        //Refactor for user controls!
-        //Create an observable property for each view model here
-        //Pass Git service to each vm during creation
+        private readonly DialogService _dialogService = new();
 
-        //Refactor for dialogs!
-        //For dialog service pass git service through so
-        //dialog's that use git commands can DI the service
 
         private GitInfoModel? _userInfo;
 
@@ -49,22 +45,38 @@ namespace BananaGit.ViewModels
             }
             catch (IOException)
             {
-                Trace.WriteLine("No locally saved user info.");
+                GitService.OutputToConsole(this, new("No locally saved user info. Please sign in."));
 
                 //Create empty dialog and git service for log in window creation
-                DialogService tempDialogService = new DialogService(new GitService(new GitInfoModel()));
-                tempDialogService.ShowCredentialsDialog();
+                _dialogService.ShowCredentialsDialog();
                 return;
             }
 
-            var gitService = new GitService(_userInfo);
-            var dialogService = new DialogService(gitService);
+            GitService? gitService = null;
+            GitDialogService? gitDialogService = null;
+
+            try
+            {
+                gitService = new GitService(_userInfo);
+                gitDialogService = new GitDialogService(gitService);
+            }
+            catch (RepoLocationException)
+            {
+                GitService.OutputToConsole(this, new("No repository cloned"));
+            }
+
+            if (gitService == null || gitDialogService == null)
+            {
+                GitService.OutputToConsole(this, new("Something went wrong while initializing BananaGit!"));
+                return;
+            }
+
 
             //Create view models
-            ToolbarViewModel = new ToolbarViewModel(dialogService, gitService);
+            ToolbarViewModel = new ToolbarViewModel(gitDialogService, gitService);
             CommitHistoryViewModel = new CommitHistoryViewModel(gitService);
             CommitViewModel = new CommitViewModel(gitService);
-            GitChangesViewModel = new GitChangesViewModel(gitService, dialogService);
+            GitChangesViewModel = new GitChangesViewModel(gitService, gitDialogService);
 
             gitService.OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
         }

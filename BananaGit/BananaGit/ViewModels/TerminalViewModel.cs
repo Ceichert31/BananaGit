@@ -5,7 +5,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace BananaGit.ViewModels
 {
-    partial class TerminalViewModel : ObservableObject
+    public partial class TerminalViewModel : ObservableObject
     {
         [ObservableProperty] private ObservableCollection<string> _output;
 

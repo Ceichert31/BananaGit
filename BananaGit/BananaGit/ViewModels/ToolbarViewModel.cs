@@ -28,10 +28,10 @@ partial class ToolbarViewModel : ObservableObject
         set => _gitService.CurrentBranch = value;
     }
 
-    private readonly DialogService _dialogService;
+    private readonly GitDialogService _dialogService;
     private readonly GitService _gitService;
 
-    public ToolbarViewModel(DialogService dialogService, GitService gitService)
+    public ToolbarViewModel(GitDialogService dialogService, GitService gitService)
     {
         _dialogService = dialogService;
         _gitService = gitService;

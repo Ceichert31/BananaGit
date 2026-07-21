@@ -16,14 +16,14 @@ namespace BananaGit.ViewModels;
 partial class DiscardChangesViewModel : ObservableObject
 {
     private readonly GitService _gitService;
-    private readonly DialogService _dialogService;
-    
-    public DiscardChangesViewModel(GitService gitService, DialogService dialogService)
+    private readonly GitDialogService _dialogService;
+
+    public DiscardChangesViewModel(GitService gitService, GitDialogService dialogService)
     {
         _gitService = gitService;
-        _dialogService = dialogService; 
+        _dialogService = dialogService;
     }
-    
+
     /// <summary>
     /// Calls git service to discard all local changes (Not including local commits)
     /// </summary>
@@ -34,7 +34,7 @@ partial class DiscardChangesViewModel : ObservableObject
         {
             _dialogService.CloseDiscardChangesDialog();
             await _gitService.ResetLocalUncommittedFilesAsync();
-   
+
             Trace.WriteLine("Discarded Local Changes!");
         }
         catch (Exception ex)
@@ -42,7 +42,7 @@ partial class DiscardChangesViewModel : ObservableObject
             GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
-    
+
     [RelayCommand]
     private void CloseDialog() => _dialogService.CloseDiscardChangesDialog();
 }

@@ -23,14 +23,22 @@ partial class CreateBranchViewModel : ObservableObject
     [ObservableProperty] private string _message = string.Empty;
 
     private readonly GitService _gitService;
-    private readonly DialogService _dialogService;
+    private readonly GitDialogService _dialogService;
 
-    public CreateBranchViewModel(GitService gitService, DialogService dialogService)
+    public CreateBranchViewModel(GitService gitService, GitDialogService dialogService)
     {
         _gitService = gitService;
         _dialogService = dialogService;
         gitService.OnChangesPulled += OnChangesPulled;
-        LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranches());
+
+        try
+        {
+            LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranches());
+        }
+        catch (RepoLocationException)
+        {
+            LocalBranches = null;
+        }
     }
 
     /// <summary>

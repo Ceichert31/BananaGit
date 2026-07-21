@@ -29,6 +29,7 @@
         {
         }
     }
+
     internal class InvalidRepoException : GitException
     {
         public InvalidRepoException()
