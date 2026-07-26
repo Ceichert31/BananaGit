@@ -283,19 +283,11 @@ namespace BananaGit.Services
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
-            List<GitBranch> localBranches = new();
+            var visibleBranches = GetVisibleBranchNames(repo);
 
-            foreach (var branch in repo.Branches)
-            {
-                if (branch.IsRemote)
-                {
-                    continue;
-                }
-
-                localBranches.Add(new GitBranch(branch, this));
-            }
-
-            return localBranches;
+            // Only return branches that are local and in the visible branch list
+            return repo.Branches.Where(x => !x.IsRemote && visibleBranches.Contains(x.FriendlyName))
+                .Select(x => new GitBranch(x, this)).ToList();
         }
 
         /// <summary>
@@ -308,23 +300,64 @@ namespace BananaGit.Services
 
             using var repo = new Repository(_gitInfo?.GetPath());
 
-            List<GitBranch> remoteBranches = new();
+            var visible = GetVisibleBranchNames(repo);
 
-            foreach (var branch in repo.Branches)
-            {
-                if (!branch.IsRemote)
-                {
-                    continue;
-                }
-
-                remoteBranches.Add(new GitBranch(branch, this));
-            }
-
-            return remoteBranches;
+            // Filter remote branches
+            return repo.Branches.Where(x => x.IsRemote)
+                .Where(x => !x.FriendlyName.EndsWith("/HEAD", StringComparison.Ordinal))
+                .Where(x => !visible.Contains(x.FriendlyName.GetName())).Select(x => new GitBranch(x, this)).ToList();
         }
 
         #endregion
 
+        #region Branch Visibility
+
+        /// <summary>
+        /// Gets all the local branches that the user has checked out
+        /// </summary>
+        /// <param name="repo">The local repository</param>
+        /// <returns>A hashset of branch names</returns>
+        private HashSet<string> GetVisibleBranchNames(Repository repo)
+        {
+            var visible = new HashSet<string>(_gitInfo?.VisibleBranches ?? [], StringComparer.Ordinal);
+
+            // Add current branch is user is not on the head of the branch
+            if (!repo.Info.IsHeadDetached)
+                visible.Add(repo.Head.FriendlyName);
+
+            var defaultBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl()?.GetName());
+            if (!string.IsNullOrWhiteSpace(defaultBranch))
+                visible.Add(defaultBranch);
+
+            return visible;
+        }
+
+        /// <summary>
+        /// Adds a branch to the list of locally checked out branches
+        /// </summary>
+        /// <param name="branchName">Friendly name of the target branch</param>
+        private void MarkBranchVisible(string branchName)
+        {
+            if (_gitInfo == null || string.IsNullOrWhiteSpace(branchName)) return;
+            if (_gitInfo.VisibleBranches.Contains(branchName)) return;
+
+            _gitInfo.VisibleBranches.Add(branchName);
+            JsonDataManager.SaveUserInfo(_gitInfo);
+        }
+
+        /// <summary>
+        /// Removes a branch from the list of locally checked out branches
+        /// </summary>
+        /// <param name="branchName">Friendly name of the target branch</param>
+        private void MarkBranchHidden(string branchName)
+        {
+            if (_gitInfo == null) return;
+            if (!_gitInfo.VisibleBranches.Remove(branchName)) return;
+
+            JsonDataManager.SaveUserInfo(_gitInfo);
+        }
+
+        #endregion
 
         /// <summary>
         /// Initializes the default main branch
@@ -375,6 +408,9 @@ namespace BananaGit.Services
 
             // Checkout the new branch right after creation
             Commands.Checkout(repo, newBranch);
+
+            // Cache branch as a locally checked out branch
+            MarkBranchVisible(branchName);
 
             await PushBranchAsync(branchName);
         }
@@ -482,6 +518,7 @@ namespace BananaGit.Services
                 if (repo.Branches[branchName] == null) return;
 
                 repo.Branches.Remove(branchName);
+                MarkBranchHidden(branchName);
                 OutputToConsole(this, new($"Successfully deleted local branch: {branchName}"));
             });
         }
@@ -664,6 +701,8 @@ namespace BananaGit.Services
                 VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.GetPath());
+
+                MarkBranchVisible(repo.Head.FriendlyName);
 
                 //Set author for commiting
                 Signature author = new(_gitInfo?.Username, _gitInfo?.Email, DateTime.Now);
@@ -1053,6 +1092,8 @@ namespace BananaGit.Services
                     {
                         throw new NullReferenceException("Couldn't find any remotes!");
                     }
+
+                    MarkBranchVisible(repo.Head.FriendlyName);
 
                     //Save to user info
                     _gitInfo?.SetPath(filePath);
