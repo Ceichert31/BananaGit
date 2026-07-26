@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using BananaGit.EventArgExtensions;
 using BananaGit.Models;
 using BananaGit.Services;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -17,6 +18,8 @@ partial class RemoteBranchViewModel : ObservableObject
     {
         _gitService = gitService;
 
+        UpdateRemoteBranches(this, EventArgs.Empty);
+
         _gitService.OnRepositoryChanged += UpdateRemoteBranches;
         _gitService.OnChangesPulled += UpdateRemoteBranches;
     }
@@ -26,9 +29,19 @@ partial class RemoteBranchViewModel : ObservableObject
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private void UpdateRemoteBranches(object? sender, EventArgs e)
+    private async void UpdateRemoteBranches(object? sender, EventArgs e)
     {
-        RemoteBranches.Clear();
-        RemoteBranches = new(_gitService.GetRemoteBranches());
+        try
+        {
+            var branches = await _gitService.GetRemoteBranchesAsync();
+
+            RemoteBranches.Clear();
+            foreach (var branch in branches)
+                RemoteBranches.Add(branch);
+        }
+        catch (Exception ex)
+        {
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
+        }
     }
 }

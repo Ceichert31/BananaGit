@@ -33,7 +33,7 @@ partial class CreateBranchViewModel : ObservableObject
 
         try
         {
-            LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranches());
+            LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranchesAsync());
         }
         catch (RepoLocationException)
         {
@@ -86,7 +86,7 @@ partial class CreateBranchViewModel : ObservableObject
     private void OnChangesPulled(object? sender, EventArgs e)
     {
         var selectedName = SelectedBranch?.Name;
-        LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranches());
+        LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranchesAsync());
         SelectedBranch = LocalBranches.FirstOrDefault(x => string.Equals(x.Name, selectedName));
     }
 }

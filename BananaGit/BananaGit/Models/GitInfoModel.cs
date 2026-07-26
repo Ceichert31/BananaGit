@@ -35,6 +35,8 @@
         /// </summary>
         public List<string> VisibleBranches { get; set; } = [];
 
+        public string? DefaultBranchName { get; set; }
+
         /// <summary>
         /// Gets the cached local repositories path
         /// </summary>
