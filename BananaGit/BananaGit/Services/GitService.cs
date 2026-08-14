@@ -21,6 +21,8 @@ namespace BananaGit.Services
         public EventHandler<EventArgs>? OnRepositoryChanged;
         public EventHandler<EventArgs>? OnChangesPulled;
 
+        private string? _defaultBranchName;
+
 
         /// <summary>
         /// The currently selected branch that Git operations will be executed on
@@ -42,8 +44,10 @@ namespace BananaGit.Services
             _gitInfo = gitInfo;
             JsonDataManager.OnUserInfoChanged += OnUserDataChange;
 
-            // Attach this service to the current branch after its been loaded
+            // Attach this service to the current branch after it's been loaded
             _gitInfo?.CurrentBranch?.AttachService(this);
+
+            _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
         }
 
         private bool _hasUserInfoReloaded;
@@ -352,7 +356,7 @@ namespace BananaGit.Services
             if (!repo.Info.IsHeadDetached)
                 visible.Add(repo.Head.FriendlyName);
 
-            var defaultBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl())?.GetName();
+            var defaultBranch = _defaultBranchName;
             if (!string.IsNullOrWhiteSpace(defaultBranch))
                 visible.Add(defaultBranch);
 
@@ -430,7 +434,7 @@ namespace BananaGit.Services
         private GitBranch InitializeMainBranch()
         {
             //Get the name of the HEAD branch
-            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+            string? branchName = _defaultBranchName;
 
             if (branchName == null)
             {
@@ -560,6 +564,7 @@ namespace BananaGit.Services
                 MarkBranchVisible(localName);
             });
             OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
+            _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
         }
 
         /// <summary>
@@ -575,7 +580,7 @@ namespace BananaGit.Services
                 // Switch branches if we are on the branch we want to delete
                 if (string.Equals(repo.Head.FriendlyName, branchName))
                 {
-                    var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+                    var mainBranch = _defaultBranchName;
 
                     if (mainBranch == null)
                         throw new InvalidBranchException($"Failed to find default branch");
@@ -603,7 +608,7 @@ namespace BananaGit.Services
             {
                 using var repo = new Repository(_gitInfo?.GetPath());
 
-                var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+                var mainBranch = _defaultBranchName;
 
                 if (mainBranch == null)
                     throw new InvalidBranchException($"Failed to find default branch");
@@ -1171,6 +1176,7 @@ namespace BananaGit.Services
 
                 //Notify view models that the repository data has changed
                 OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
+                _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
             }
             catch (Exception ex)
             {

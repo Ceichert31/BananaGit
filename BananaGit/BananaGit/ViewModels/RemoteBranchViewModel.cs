@@ -33,7 +33,12 @@ partial class RemoteBranchViewModel : ObservableObject
     {
         try
         {
-            var branches = await _gitService.GetRemoteBranchesAsync();
+            List<GitBranch>? branches = null;
+
+            await Task.Run(async () => { branches = await _gitService.GetRemoteBranchesAsync(); });
+
+            if (branches == null)
+                throw new NullReferenceException("No remote branches found");
 
             RemoteBranches.Clear();
             foreach (var branch in branches)

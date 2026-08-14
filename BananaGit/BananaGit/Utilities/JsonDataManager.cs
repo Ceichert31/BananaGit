@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using BananaGit.Models;
+using BananaGit.Services;
 using Newtonsoft.Json;
 
 namespace BananaGit.Utilities
@@ -16,33 +17,48 @@ namespace BananaGit.Utilities
         private const string UserDataLocation = "C:\\ProgramData/BananaGit/";
         private const string UserDataName = "UserInfo.json";
 
+        private static SynchronizationContext? _uiThread;
+
+        static JsonDataManager()
+        {
+            _uiThread = SynchronizationContext.Current;
+        }
+
         /// <summary>
         /// Saves the Users GitHub credentials locally
         /// </summary>
         /// <param name="userInfo">The class that holds all the users GitHub information</param>
         public static void SaveUserInfo(GitInfoModel? userInfo)
         {
-            TextWriter? writer = null;
-
-            if (userInfo == null) return;
-
-            try
+            if (_uiThread == null)
             {
-                //Create directory before trying to write to file
-                if (!Directory.Exists(UserDataLocation))
+                GitService.OutputToConsole(nameof(JsonDataManager), new("ERROR UI THREAD NULL"));
+            }
+
+            _uiThread?.Post(_ =>
+            {
+                TextWriter? writer = null;
+
+                if (userInfo == null) return;
+
+                try
                 {
-                    Directory.CreateDirectory(UserDataLocation);
-                }
+                    //Create directory before trying to write to file
+                    if (!Directory.Exists(UserDataLocation))
+                    {
+                        Directory.CreateDirectory(UserDataLocation);
+                    }
 
-                string jsonString = JsonConvert.SerializeObject(userInfo, Formatting.Indented);
-                writer = new StreamWriter(UserDataLocation + UserDataName, false);
-                writer.Write(jsonString);
-            }
-            finally
-            {
-                writer?.Close();
-                OnUserInfoChanged?.Invoke(nameof(JsonDataManager), EventArgs.Empty);
-            }
+                    string jsonString = JsonConvert.SerializeObject(userInfo, Formatting.Indented);
+                    writer = new StreamWriter(UserDataLocation + UserDataName, false);
+                    writer.Write(jsonString);
+                }
+                finally
+                {
+                    writer?.Close();
+                    OnUserInfoChanged?.Invoke(nameof(JsonDataManager), EventArgs.Empty);
+                }
+            }, null);
         }
 
         /// <summary>
