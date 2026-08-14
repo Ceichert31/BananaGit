@@ -9,6 +9,7 @@ namespace BananaGit.ViewModels;
 partial class RemoteBranchViewModel : ObservableObject
 {
     [ObservableProperty] private ObservableCollection<GitBranch> _remoteBranches = new();
+    [ObservableProperty] private ObservableCollection<GitBranch> _localBranches = new();
 
     [ObservableProperty] private bool _showBranchOptions;
 
@@ -18,31 +19,40 @@ partial class RemoteBranchViewModel : ObservableObject
     {
         _gitService = gitService;
 
-        UpdateRemoteBranches(this, EventArgs.Empty);
+        UpdateBranches(this, EventArgs.Empty);
 
-        _gitService.OnRepositoryChanged += UpdateRemoteBranches;
-        _gitService.OnChangesPulled += UpdateRemoteBranches;
+        _gitService.OnRepositoryChanged += UpdateBranches;
+        _gitService.OnChangesPulled += UpdateBranches;
     }
 
     /// <summary>
-    /// Updates the remote branches dialog
+    /// Updates both the local and remote branches in the remote branch view
     /// </summary>
     /// <param name="sender"></param>
     /// <param name="e"></param>
-    private async void UpdateRemoteBranches(object? sender, EventArgs e)
+    private async void UpdateBranches(object? sender, EventArgs e)
     {
         try
         {
-            List<GitBranch>? branches = null;
+            List<GitBranch>? remoteBranches = null;
+            List<GitBranch>? localBranches = null;
 
-            await Task.Run(async () => { branches = await _gitService.GetRemoteBranchesAsync(); });
+            await Task.Run(async () => { remoteBranches = await _gitService.GetRemoteBranchesAsync(); });
+            await Task.Run(async () => { localBranches = await _gitService.GetLocalBranchesAsync(); });
 
-            if (branches == null)
+            if (remoteBranches == null)
                 throw new NullReferenceException("No remote branches found");
 
             RemoteBranches.Clear();
-            foreach (var branch in branches)
+            foreach (var branch in remoteBranches)
                 RemoteBranches.Add(branch);
+
+            if (localBranches == null)
+                throw new NullReferenceException("No local branches found");
+
+            LocalBranches.Clear();
+            foreach (var branch in localBranches)
+                LocalBranches.Add(branch);
         }
         catch (Exception ex)
         {

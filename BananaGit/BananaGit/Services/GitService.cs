@@ -578,7 +578,7 @@ namespace BananaGit.Services
                 using var repo = new Repository(_gitInfo?.GetPath());
 
                 // Switch branches if we are on the branch we want to delete
-                if (string.Equals(repo.Head.FriendlyName, branchName))
+                if (string.Equals(CurrentBranch?.Name, branchName))
                 {
                     var mainBranch = _defaultBranchName;
 
@@ -586,6 +586,7 @@ namespace BananaGit.Services
                         throw new InvalidBranchException($"Failed to find default branch");
 
                     Commands.Checkout(repo, mainBranch);
+                    CurrentBranch = InitializeMainBranch();
                 }
 
                 // Local branch deletion
