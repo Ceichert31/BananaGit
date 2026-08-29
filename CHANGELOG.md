@@ -1,3 +1,15 @@
+## [1.5.2](https://github.com/Ceichert31/BananaGit/compare/v1.5.1...v1.5.2) (2026-08-29)
+
+
+### Bug Fixes
+
+* **branches:** Deleting a local branch while checked out in it resets branch to main ([573fa8c](https://github.com/Ceichert31/BananaGit/commit/573fa8cb280d6bc2df324d1815766fe4e76bed82))
+
+
+### Performance Improvements
+
+* **branch-view:** Sped up pull and branch checkout times by caching default repo name per repository ([0693859](https://github.com/Ceichert31/BananaGit/commit/0693859cb961f5403976e1807e02c76354d43d50))
+
 ## [1.5.1](https://github.com/Ceichert31/BananaGit/compare/v1.5.0...v1.5.1) (2026-07-21)
 
 
