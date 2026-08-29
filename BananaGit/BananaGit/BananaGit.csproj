@@ -13,6 +13,15 @@
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
+    <PropertyGroup>
+        <StartupObject>BananaGit.App</StartupObject>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <ApplicationDefinition Remove="App.xaml"/>
+        <Page Include="App.xaml"/>
+    </ItemGroup>
+
     <ItemGroup>
         <Resource Include="Assets\**\*.png"/>
         <Resource Include="Assets\**\*.ico"/>
@@ -24,6 +33,7 @@
         <PackageReference Include="LibGit2Sharp" Version="0.31.0"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
         <PackageReference Include="Octokit" Version="14.0.0"/>
+        <PackageReference Include="Velopack" Version="1.2.110-ge826545"/>
     </ItemGroup>
 
     <ItemGroup>
