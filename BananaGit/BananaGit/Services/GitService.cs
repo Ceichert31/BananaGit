@@ -21,6 +21,8 @@ namespace BananaGit.Services
         public EventHandler<EventArgs>? OnRepositoryChanged;
         public EventHandler<EventArgs>? OnChangesPulled;
 
+        private string? _defaultBranchName;
+
 
         /// <summary>
         /// The currently selected branch that Git operations will be executed on
@@ -42,9 +44,13 @@ namespace BananaGit.Services
             _gitInfo = gitInfo;
             JsonDataManager.OnUserInfoChanged += OnUserDataChange;
 
-            // Attach this service to the current branch after its been loaded
+            // Attach this service to the current branch after it's been loaded
             _gitInfo?.CurrentBranch?.AttachService(this);
+
+            _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
         }
+
+        private bool _hasUserInfoReloaded;
 
         /// <summary>
         /// Updates the current user info
@@ -53,8 +59,26 @@ namespace BananaGit.Services
         /// <param name="e"></param>
         private void OnUserDataChange(object? sender, EventArgs e)
         {
+            if (_hasUserInfoReloaded) return;
+
             JsonDataManager.LoadUserInfo(ref _gitInfo);
             _gitInfo?.CurrentBranch?.AttachService(this);
+        }
+
+        /// <summary>
+        ///  Saves user info locally and prevents recursive save call
+        /// </summary>
+        private void SaveUserInfo()
+        {
+            _hasUserInfoReloaded = true;
+            try
+            {
+                JsonDataManager.SaveUserInfo(_gitInfo);
+            }
+            finally
+            {
+                _hasUserInfoReloaded = false;
+            }
         }
 
         /// <summary>
@@ -277,54 +301,130 @@ namespace BananaGit.Services
         /// Verifies repository path and returns a list of local branches
         /// </summary>
         /// <returns>A list of local branches</returns>
-        public List<GitBranch> GetLocalBranches()
+        public Task<List<GitBranch>> GetLocalBranchesAsync()
         {
-            VerifyPath();
-
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            List<GitBranch> localBranches = new();
-
-            foreach (var branch in repo.Branches)
+            return Task.Run(() =>
             {
-                if (branch.IsRemote)
-                {
-                    continue;
-                }
+                VerifyPath();
 
-                localBranches.Add(new GitBranch(branch, this));
-            }
+                using var repo = new Repository(_gitInfo?.GetPath());
 
-            return localBranches;
+                var visibleBranches = GetVisibleBranchNames(repo);
+
+                // Only return branches that are local and in the visible branch list
+                return repo.Branches.Where(x => !x.IsRemote && visibleBranches.Contains(x.FriendlyName))
+                    .Select(x => new GitBranch(x, this)).ToList();
+            });
         }
 
         /// <summary>
         /// Verifies repository path and returns a list of remote branches
         /// </summary>
         /// <returns>A list of remote branches</returns>
-        public List<GitBranch> GetRemoteBranches()
+        public Task<List<GitBranch>> GetRemoteBranchesAsync()
         {
-            VerifyPath();
-
-            using var repo = new Repository(_gitInfo?.GetPath());
-
-            List<GitBranch> remoteBranches = new();
-
-            foreach (var branch in repo.Branches)
+            return Task.Run(() =>
             {
-                if (!branch.IsRemote)
-                {
-                    continue;
-                }
+                VerifyPath();
 
-                remoteBranches.Add(new GitBranch(branch, this));
-            }
+                using var repo = new Repository(_gitInfo?.GetPath());
 
-            return remoteBranches;
+                var visible = GetVisibleBranchNames(repo);
+
+                // Filter remote branches
+                return repo.Branches.Where(x => x.IsRemote)
+                    .Where(x => !x.FriendlyName.EndsWith("/HEAD", StringComparison.Ordinal))
+                    .Where(x => !visible.Contains(x.FriendlyName.GetName())).Select(x => new GitBranch(x, this))
+                    .ToList();
+            });
         }
 
         #endregion
 
+        #region Branch Visibility
+
+        /// <summary>
+        /// Gets all the local branches that the user has checked out
+        /// </summary>
+        /// <param name="repo">The local repository</param>
+        /// <returns>A hashset of branch names</returns>
+        private HashSet<string> GetVisibleBranchNames(Repository repo)
+        {
+            var visible = new HashSet<string>(_gitInfo?.VisibleBranches ?? [], StringComparer.Ordinal);
+
+            // Add current branch is user is not on the head of the branch
+            if (!repo.Info.IsHeadDetached)
+                visible.Add(repo.Head.FriendlyName);
+
+            var defaultBranch = _defaultBranchName;
+            if (!string.IsNullOrWhiteSpace(defaultBranch))
+                visible.Add(defaultBranch);
+
+            return visible;
+        }
+
+        /// <summary>
+        /// Resolves the repository's default branch without touching the network.
+        /// </summary>
+        /// <param name="repo">The local repository</param>
+        /// <returns>The friendly name of the default branch, or null</returns>
+        private string? ResolveDefaultBranchName(Repository repo)
+        {
+            // Cached from a previous lookup
+            if (!string.IsNullOrWhiteSpace(_gitInfo?.DefaultBranchName))
+                return _gitInfo.DefaultBranchName;
+
+            string? name = null;
+
+            // origin/HEAD is a symbolic ref pointing at refs/remotes/origin/<default>
+            if (repo.Refs["refs/remotes/origin/HEAD"] is SymbolicReference symbolic)
+            {
+                var target = symbolic.Target?.CanonicalName;
+
+                if (!string.IsNullOrEmpty(target))
+                    name = target["refs/remotes/origin/".Length..];
+            }
+
+            // Fall back to the conventional names if origin/HEAD is missing
+            name ??= repo.Branches["main"] != null ? "main"
+                : repo.Branches["master"] != null ? "master"
+                : null;
+
+            if (_gitInfo != null && !string.IsNullOrWhiteSpace(name))
+            {
+                _gitInfo.DefaultBranchName = name;
+                SaveUserInfo();
+            }
+
+            return name;
+        }
+
+        /// <summary>
+        /// Adds a branch to the list of locally checked out branches
+        /// </summary>
+        /// <param name="branchName">Friendly name of the target branch</param>
+        private void MarkBranchVisible(string branchName)
+        {
+            if (_gitInfo == null || string.IsNullOrWhiteSpace(branchName)) return;
+            if (_gitInfo.VisibleBranches.Contains(branchName)) return;
+
+            _gitInfo.VisibleBranches.Add(branchName);
+            SaveUserInfo();
+        }
+
+        /// <summary>
+        /// Removes a branch from the list of locally checked out branches
+        /// </summary>
+        /// <param name="branchName">Friendly name of the target branch</param>
+        private void MarkBranchHidden(string branchName)
+        {
+            if (_gitInfo == null) return;
+            if (!_gitInfo.VisibleBranches.Remove(branchName)) return;
+
+            SaveUserInfo();
+        }
+
+        #endregion
 
         /// <summary>
         /// Initializes the default main branch
@@ -334,7 +434,7 @@ namespace BananaGit.Services
         private GitBranch InitializeMainBranch()
         {
             //Get the name of the HEAD branch
-            string? branchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+            string? branchName = _defaultBranchName;
 
             if (branchName == null)
             {
@@ -375,6 +475,9 @@ namespace BananaGit.Services
 
             // Checkout the new branch right after creation
             Commands.Checkout(repo, newBranch);
+
+            // Cache branch as a locally checked out branch
+            MarkBranchVisible(branchName);
 
             await PushBranchAsync(branchName);
         }
@@ -444,17 +547,24 @@ namespace BananaGit.Services
                                    throw new InvalidBranchException(
                                        $"Couldn't find branch: {branch.Name}");
 
-                string localName = branch.Name.Replace("origin/", "");
+                string localName = branch.Name.GetName();
 
                 //Create a local tracking branch
-                Branch localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
+                Branch localTrackingBranch = repo.Branches[localName];
 
-                //Update local branch
-                repo.Branches.Update(localTrackingBranch, x => x.TrackedBranch = branch.CanonicalName);
+                if (localTrackingBranch == null)
+                {
+                    localTrackingBranch = repo.Branches.Add(localName, remoteBranch.Tip);
+                    repo.Branches.Update(localTrackingBranch,
+                        x => x.TrackedBranch = branch.CanonicalName);
+                }
 
                 //Checkout branch
                 Commands.Checkout(repo, localTrackingBranch);
+                MarkBranchVisible(localName);
             });
+            OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
+            _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
         }
 
         /// <summary>
@@ -468,20 +578,22 @@ namespace BananaGit.Services
                 using var repo = new Repository(_gitInfo?.GetPath());
 
                 // Switch branches if we are on the branch we want to delete
-                if (string.Equals(repo.Head.FriendlyName, branchName))
+                if (string.Equals(CurrentBranch?.Name, branchName))
                 {
-                    var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+                    var mainBranch = _defaultBranchName;
 
                     if (mainBranch == null)
                         throw new InvalidBranchException($"Failed to find default branch");
 
                     Commands.Checkout(repo, mainBranch);
+                    CurrentBranch = InitializeMainBranch();
                 }
 
                 // Local branch deletion
                 if (repo.Branches[branchName] == null) return;
 
                 repo.Branches.Remove(branchName);
+                MarkBranchHidden(branchName);
                 OutputToConsole(this, new($"Successfully deleted local branch: {branchName}"));
             });
         }
@@ -497,7 +609,7 @@ namespace BananaGit.Services
             {
                 using var repo = new Repository(_gitInfo?.GetPath());
 
-                var mainBranch = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+                var mainBranch = _defaultBranchName;
 
                 if (mainBranch == null)
                     throw new InvalidBranchException($"Failed to find default branch");
@@ -664,6 +776,8 @@ namespace BananaGit.Services
                 VerifyPath();
 
                 using var repo = new Repository(_gitInfo?.GetPath());
+
+                MarkBranchVisible(repo.Head.FriendlyName);
 
                 //Set author for commiting
                 Signature author = new(_gitInfo?.Username, _gitInfo?.Email, DateTime.Now);
@@ -1054,13 +1168,16 @@ namespace BananaGit.Services
                         throw new NullReferenceException("Couldn't find any remotes!");
                     }
 
+                    MarkBranchVisible(repo.Head.FriendlyName);
+
                     //Save to user info
                     _gitInfo?.SetPath(filePath);
-                    JsonDataManager.SaveUserInfo(_gitInfo);
+                    SaveUserInfo();
                 });
 
                 //Notify view models that the repository data has changed
                 OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
+                _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
             }
             catch (Exception ex)
             {

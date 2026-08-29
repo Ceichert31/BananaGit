@@ -18,6 +18,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="25" />
             <RowDefinition Height="*" />
+            <RowDefinition Height="25" />
+            <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
         <Label
@@ -34,32 +36,26 @@
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <controls:BranchControl DataContext="{Binding}" />
-                        <!--<Border BorderBrush="{StaticResource BananaPrimary}" BorderThickness="2">
-                            <DockPanel Background="{StaticResource BananaGradient}">
-                                <Button
-                                    Width="20"
-                                    HorizontalAlignment="Left"
-                                    Background="{StaticResource BananaDark}"
-                                    Command="{Binding CheckoutBranchCommand}"
-                                    Content="+"
-                                    Foreground="White" />
-                                <Label Content="{Binding Name}" Foreground="Black" />
-                                <Button
-                                    Width="20"
-                                    HorizontalAlignment="Right"
-                                    Background="Red"
-                                    Command="{Binding DeleteLocalBranchCommand}"
-                                    Content="-"
-                                    Foreground="White" />
-                                <Button
-                                    Width="20"
-                                    HorizontalAlignment="Right"
-                                    Background="DarkRed"
-                                    Command="{Binding DeleteRemoteBranchCommand}"
-                                    Content="-"
-                                    Foreground="White" />
-                            </DockPanel>
-                        </Border>-->
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
+
+        <Label
+            Grid.Row="2"
+            Background="{StaticResource BananaAccent}"
+            Content="Manage Local Branches"
+            FontWeight="Bold"
+            Foreground="Black" />
+
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto">
+            <ItemsControl
+                HorizontalAlignment="Stretch"
+                VerticalAlignment="Stretch"
+                ItemsSource="{Binding LocalBranches}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <controls:BranchControl DataContext="{Binding}" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

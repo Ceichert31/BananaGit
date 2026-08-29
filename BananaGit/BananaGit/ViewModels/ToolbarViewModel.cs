@@ -111,39 +111,36 @@ partial class ToolbarViewModel : ObservableObject
     /// <summary>
     /// Checks if any new branches were added and adds them to list
     /// </summary>
-    private void UpdateBranches(object? sender, EventArgs e)
+    private async void UpdateBranches(object? sender, EventArgs e)
     {
         try
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            //Cache current branch name
+            string? currentBranchName = CurrentBranch?.Name;
+
+            LocalBranches.Clear();
+
+            var branches = await _gitService.GetLocalBranchesAsync();
+
+            //Re-add all branches
+            foreach (var branch in branches)
             {
-                //Cache current branch name
-                string? currentBranchName = CurrentBranch?.Name;
+                LocalBranches.Add(branch);
+            }
 
-                LocalBranches.Clear();
+            //Find the current branch and cache it
+            if (!string.IsNullOrEmpty(currentBranchName))
+            {
+                CurrentBranch = LocalBranches.FirstOrDefault(n => n.Name == currentBranchName);
+            }
 
-                var branches = _gitService.GetLocalBranches();
+            //If current branch couldn't be found, set current branch to first branch
+            if (CurrentBranch == null && LocalBranches.Any())
+            {
+                CurrentBranch = LocalBranches.First();
+            }
 
-                //Re-add all branches
-                foreach (var branch in branches)
-                {
-                    LocalBranches.Add(branch);
-                }
-
-                //Find the current branch and cache it
-                if (!string.IsNullOrEmpty(currentBranchName))
-                {
-                    CurrentBranch = LocalBranches.FirstOrDefault(n => n.Name == currentBranchName);
-                }
-
-                //If current branch couldn't be found, set current branch to first branch
-                if (CurrentBranch == null && LocalBranches.Any())
-                {
-                    CurrentBranch = LocalBranches.First();
-                }
-
-                OnPropertyChanged(nameof(CurrentBranch));
-            });
+            OnPropertyChanged(nameof(CurrentBranch));
         }
         catch (Exception ex)
         {

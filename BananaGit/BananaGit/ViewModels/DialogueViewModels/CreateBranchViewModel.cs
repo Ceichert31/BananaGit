@@ -31,13 +31,28 @@ partial class CreateBranchViewModel : ObservableObject
         _dialogService = dialogService;
         gitService.OnChangesPulled += OnChangesPulled;
 
+        UpdateLocalBranches();
+    }
+
+    /// <summary>
+    /// Gets the local branches and updates them
+    /// </summary>
+    private async void UpdateLocalBranches()
+    {
         try
         {
-            LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranches());
+            List<GitBranch>? branches = null;
+
+            await Task.Run(async () => { branches = await _gitService.GetLocalBranchesAsync(); });
+
+            if (branches == null)
+                throw new NullReferenceException("No local branches found!");
+
+            LocalBranches = new ObservableCollection<GitBranch>(branches);
         }
-        catch (RepoLocationException)
+        catch (Exception ex)
         {
-            LocalBranches = null;
+            GitService.OutputToConsole(this, new MessageEventArgs(ex.Message));
         }
     }
 
@@ -86,7 +101,7 @@ partial class CreateBranchViewModel : ObservableObject
     private void OnChangesPulled(object? sender, EventArgs e)
     {
         var selectedName = SelectedBranch?.Name;
-        LocalBranches = new ObservableCollection<GitBranch>(_gitService.GetLocalBranches());
-        SelectedBranch = LocalBranches.FirstOrDefault(x => string.Equals(x.Name, selectedName));
+        UpdateLocalBranches();
+        SelectedBranch = LocalBranches?.FirstOrDefault(x => string.Equals(x.Name, selectedName));
     }
 }

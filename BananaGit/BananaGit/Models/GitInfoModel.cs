@@ -5,12 +5,42 @@
     /// </summary>
     public class GitInfoModel
     {
+        /// <summary>
+        /// The users username
+        /// </summary>
         public string? Username { get; set; }
+
+        /// <summary>
+        /// The users primary email address
+        /// </summary>
         public string? Email { get; set; }
+
+        /// <summary>
+        /// The users personal access token for Git permissions
+        /// </summary>
         public string? PersonalToken { get; set; }
+
+        /// <summary>
+        /// The locally saved repository that was last opened
+        /// </summary>
         public SavableRepository? SavedRepository { get; set; }
+
+        /// <summary>
+        /// The current branch git operations are being performed on
+        /// </summary>
         public GitBranch? CurrentBranch { get; set; }
 
+        /// <summary>
+        /// All branches that the user has checked out
+        /// </summary>
+        public List<string> VisibleBranches { get; set; } = [];
+
+        public string? DefaultBranchName { get; set; }
+
+        /// <summary>
+        /// Gets the cached local repositories path
+        /// </summary>
+        /// <returns>Either a string or null if no local repository is cached</returns>
         public string? GetPath()
         {
             return SavedRepository?.FilePath;
@@ -33,11 +63,19 @@
             return false;
         }
 
+        /// <summary>
+        /// Gets the cached local repositories URL
+        /// </summary>
+        /// <returns>Either a string or null if no local repository is cached</returns>
         public string? GetUrl()
         {
             return SavedRepository?.Url;
         }
 
+        /// <summary>
+        /// Sets the local repository path
+        /// </summary>
+        /// <param name="path">File path to the local repository</param>
         public void SetPath(string path)
         {
             SavedRepository ??= new("", "");
@@ -45,6 +83,10 @@
             SavedRepository.FilePath = path;
         }
 
+        /// <summary>
+        /// Sets the local repository URL
+        /// </summary>
+        /// <param name="url">URL to access the remote repository </param>
         public void SetUrl(string url)
         {
             SavedRepository ??= new("", "");
