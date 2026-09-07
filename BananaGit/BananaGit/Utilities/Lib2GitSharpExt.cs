@@ -12,8 +12,9 @@ public static class Lib2GitSharpExt
     /// Finds the default head branch of a repository
     /// </summary>
     /// <param name="repoUrl">The repositories URL</param>
+    /// <param name="token">The PAT</param>
     /// <returns>The name of the default branch head</returns>
-    public static string? GetDefaultRepoName(string? repoUrl)
+    public static string? GetDefaultRepoName(string? repoUrl, string? token)
     {
         try
         {
@@ -23,10 +24,16 @@ public static class Lib2GitSharpExt
                 return null;
             }
 
+            string effectiveUrl = repoUrl;
+            if (!string.IsNullOrEmpty(token) && repoUrl.StartsWith("https://"))
+            {
+                effectiveUrl = repoUrl.Replace("https://", $"https://{token}@");
+            }
+
             var gitProcessInfo = new ProcessStartInfo
             {
                 FileName = "git",
-                Arguments = $"ls-remote --symref \"{repoUrl}\" HEAD",
+                Arguments = $"ls-remote --symref \"{effectiveUrl}\" HEAD",
                 RedirectStandardOutput = true,
                 RedirectStandardError = true,
                 UseShellExecute = false,

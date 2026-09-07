@@ -2,7 +2,6 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
-using System.Windows.Threading;
 using BananaGit.EventArgExtensions;
 using BananaGit.Exceptions;
 using BananaGit.Models;
@@ -48,7 +47,7 @@ namespace BananaGit.Services
             // Attach this service to the current branch after it's been loaded
             _gitInfo?.CurrentBranch?.AttachService(this);
 
-            _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+            _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl(), _gitInfo?.PersonalToken);
         }
 
         private bool _hasUserInfoReloaded;
@@ -570,7 +569,7 @@ namespace BananaGit.Services
                 MarkBranchVisible(localName);
             });
             OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
-            _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+            _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl(), _gitInfo?.PersonalToken);
         }
 
         /// <summary>
@@ -1183,7 +1182,7 @@ namespace BananaGit.Services
 
                 //Notify view models that the repository data has changed
                 OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
-                _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl());
+                _defaultBranchName = Lib2GitSharpExt.GetDefaultRepoName(_gitInfo?.GetUrl(), _gitInfo?.PersonalToken);
             }
             catch (Exception ex)
             {
