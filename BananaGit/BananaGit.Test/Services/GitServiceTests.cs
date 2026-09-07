@@ -50,6 +50,9 @@ public class GitServiceTests
             PersonalToken = config["GIT_TEST_TOKEN"],
             SavedRepository = new SavableRepository("", TEST_REPO)
         };
+
+        if (string.IsNullOrEmpty(_userInfo?.PersonalToken))
+            throw new NullReferenceException("The personal token was not set");
     }
 
     /// <summary>
