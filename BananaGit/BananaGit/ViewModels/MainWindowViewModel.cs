@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.IO;
+using System.Windows;
 using BananaGit.Exceptions;
 using BananaGit.Models;
 using BananaGit.Services;
@@ -18,6 +19,8 @@ namespace BananaGit.ViewModels
 
         [ObservableProperty] private GitChangesViewModel? _gitChangesViewModel;
 
+        private readonly UpdateService _updateService = new();
+
         private readonly DialogService _dialogService = new();
 
 
@@ -28,6 +31,12 @@ namespace BananaGit.ViewModels
             JsonDataManager.OnUserInfoChanged += Initialize;
 
             Initialize(this, EventArgs.Empty);
+
+            _uiThread = SynchronizationContext.Current;
+            _updateService.Initialize();
+            Task.Run(CheckForUpdates);
+#if RELEASE
+#endif
         }
 
         /// <summary>
@@ -79,6 +88,82 @@ namespace BananaGit.ViewModels
             GitChangesViewModel = new GitChangesViewModel(gitService, gitDialogService);
 
             gitService.OnRepositoryChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        /// <summary>
+        /// Service that checks for new updates
+        /// </summary>
+        private static readonly UpdateService UpdateService = new();
+
+        private static SynchronizationContext? _uiThread;
+
+        /// <summary>
+        /// Checks for new updates and prompts user to update version
+        /// </summary>
+        private static async void CheckForUpdates()
+        {
+            try
+            {
+                // Check for new updates
+
+                var hasUpdate = await UpdateService.CheckForUpdateAsync();
+
+                if (!hasUpdate)
+                    return;
+
+                var info = UpdateService.GetUpdateInfo();
+
+                if (info == null)
+                    return;
+
+                /*MessageBox.Show(
+                    info.TargetFullRelease.NotesHTML,
+                    "Update Checker",
+                    MessageBoxButton.OK,
+                    MessageBoxImage.Information
+                );*/
+
+                /*_uiThread?.Post(
+                    x =>
+                    {
+                        //ReleaseNotesDialog.Instance.OpenDialog(info.TargetFullRelease.NotesHTML);
+                    },
+                    null
+                );*/
+
+                var result = MessageBox.Show(
+                    "Would you like to update?",
+                    "Update Available",
+                    MessageBoxButton.YesNo
+                );
+
+                if (result != MessageBoxResult.Yes)
+                    return;
+
+                var canRestart = await UpdateService.DownloadLatest();
+
+                if (!canRestart)
+                    throw new TimeoutException("Couldn't download  the latest update!");
+
+                var confirmRestart = MessageBox.Show(
+                    "Restart to apply changes?",
+                    "Restart Required",
+                    MessageBoxButton.YesNo
+                );
+
+                if (confirmRestart != MessageBoxResult.Yes)
+                    return;
+
+                // Shutdown application when update is ready to be installed
+                _uiThread?.Post(
+                    x => { Application.Current.Shutdown(); },
+                    null
+                );
+            }
+            catch (Exception e)
+            {
+                MessageBox.Show(e.Message, "Error", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
         }
     }
 }

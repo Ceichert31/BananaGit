@@ -31,6 +31,7 @@
     <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
         <PackageReference Include="LibGit2Sharp" Version="0.31.0"/>
+        <PackageReference Include="Microsoft.Extensions.Configuration" Version="10.0.1"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
         <PackageReference Include="Octokit" Version="14.0.0"/>
         <PackageReference Include="Velopack" Version="1.2.110-ge826545"/>

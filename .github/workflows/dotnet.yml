@@ -94,6 +94,7 @@ jobs:
           name: BananaGit-v${{ needs.version.outputs.version }}-win-x64
           path: ${{ env.DEPLOY_PATH }}
   
+  
   # Releases new build
   release:
     runs-on: [ windows-latest ] # Migrate to ubuntu-latest eventually
@@ -111,13 +112,34 @@ jobs:
           name: BananaGit-v${{ needs.version.outputs.version }}-win-x64
           path: ${{ env.DEPLOY_PATH }}
 
-      - name: Zip release
-        run: Compress-Archive -Path ${{ env.DEPLOY_PATH }}* -DestinationPath BananaGit-v${{ needs.version.outputs.version }}-win-x64.zip
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+
+      - name: Install Velopack
+        run: dotnet tool install -g vpk
+
+      - name: Write release notes
+        run: |
+          Set-Content -Path release-notes.md -Value @'
+          ${{ needs.version.outputs.release_notes }}
+          '@
+
+      - name: Pack release
+        run: |
+          vpk pack -u BananaGit -v ${{ needs.version.outputs.version }} -p ${{ env.DEPLOY_PATH }} -e BananaGit.exe --releaseNotes release-notes.md
 
       - name: Upload release asset
         uses: softprops/action-gh-release@v1
         with:
-          files: BananaGit-v${{ needs.version.outputs.version }}-win-x64.zip
+          files: |-
+            Releases/assets.win.json
+            Releases/releases.win.json
+            Releases/BananaGit-${{ needs.version.outputs.version }}-full.nupkg
+            Releases/BananaGit-win-Portable.zip
+            Releases/BananaGit-win-Setup.exe
+            Releases/RELEASES
           tag_name: v${{ needs.version.outputs.version }}
           body: ${{ needs.version.outputs.release_notes }}
         env:
