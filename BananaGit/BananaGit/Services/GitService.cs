@@ -2,6 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
+using System.Windows.Threading;
 using BananaGit.EventArgExtensions;
 using BananaGit.Exceptions;
 using BananaGit.Models;
@@ -88,16 +89,21 @@ namespace BananaGit.Services
         /// <param name="e">The message</param>
         public static void OutputToConsole(object? sender, MessageEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                if (sender == null)
-                {
-                    Trace.WriteLine($"Unknown origin: {e.Message}");
-                    return;
-                }
+            if (Application.Current?.Dispatcher is { } dispatcher)
+                dispatcher.Invoke(() => WriteLog(sender, e.Message));
+            else
+                WriteLog(sender, e.Message);
+        }
 
-                Trace.WriteLine($"{sender.GetType().ToString().Split('.').Last()}: {e.Message}");
-            });
+        private static void WriteLog(object? sender, string? message)
+        {
+            if (sender == null)
+            {
+                Trace.WriteLine($"Unknown origin: {message}");
+                return;
+            }
+
+            Trace.WriteLine($"{sender.GetType().ToString().Split('.').Last()}: {message}");
         }
 
         #region Repository Status Methods

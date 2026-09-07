@@ -25,7 +25,7 @@ namespace BananaGit.Test.Services;
 [TestClass]
 public class GitServiceTests
 {
-    private const string TEST_REPO = "https://github.com/Ceichert31/test-repo.git";
+    private const string TEST_REPO = "https://github.com/Ceichert31/test-repo";
     private const string TEST_PATH_BASE = "C:/UnitTestRepositories/";
 
     private static GitInfoModel? _userInfo;
