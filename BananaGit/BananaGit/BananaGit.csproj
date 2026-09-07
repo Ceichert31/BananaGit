@@ -7,20 +7,11 @@
         <UseWPF>true</UseWPF>
         <PublishSingleFile>true</PublishSingleFile>
         <EnableWindowsTargeting>true</EnableWindowsTargeting>
-        <StartupObject>BananaGit.App</StartupObject>
         <ApplicationIcon>Assets/Banana.ico</ApplicationIcon>
         <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     </PropertyGroup>
 
-    <PropertyGroup>
-        <StartupObject>BananaGit.App</StartupObject>
-    </PropertyGroup>
-
-    <ItemGroup>
-        <ApplicationDefinition Remove="App.xaml"/>
-        <Page Include="App.xaml"/>
-    </ItemGroup>
 
     <ItemGroup>
         <Resource Include="Assets\**\*.png"/>
@@ -29,14 +20,19 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ApplicationDefinition Remove="App.xaml"/>
+        <Page Include="App.xaml"/>
+    </ItemGroup>
+
+    <PropertyGroup>
+        <StartupObject>BananaGit.App</StartupObject>
+    </PropertyGroup>
+
+    <ItemGroup>
         <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0"/>
         <PackageReference Include="LibGit2Sharp" Version="0.31.0"/>
         <PackageReference Include="Newtonsoft.Json" Version="13.0.4"/>
         <PackageReference Include="Octokit" Version="14.0.0"/>
         <PackageReference Include="Velopack" Version="1.2.110-ge826545"/>
-    </ItemGroup>
-
-    <ItemGroup>
-        <Page Include="App.xaml"/>
     </ItemGroup>
 </Project>
