@@ -126,6 +126,7 @@ jobs:
           ${{ needs.version.outputs.release_notes }}
           '@
 
+      # Use Velopack to pack release
       - name: Pack release
         run: |
           vpk pack -u BananaGit -v ${{ needs.version.outputs.version }} -p ${{ env.DEPLOY_PATH }} -e BananaGit.exe --releaseNotes release-notes.md
