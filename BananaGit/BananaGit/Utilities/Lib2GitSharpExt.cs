@@ -37,9 +37,11 @@ public static class Lib2GitSharpExt
             if (process == null) throw new NullReferenceException("Git info process couldn't start!");
 
             var output = process.StandardOutput.ReadToEnd();
+            var error = process.StandardError.ReadToEnd();
             process.WaitForExit();
 
-            if (process.ExitCode != 0) throw new NullReferenceException("Process didn't return anything!");
+            if (process.ExitCode != 0)
+                throw new InvalidOperationException($"git ls-remote failed (exit code {process.ExitCode}): {error}");
 
             if (output.StartsWith($"refs/remotes/origin/"))
             {
